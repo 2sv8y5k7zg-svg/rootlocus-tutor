@@ -1,0 +1,9 @@
+node_modules/
+__pycache__/
+*.pyc
+.wrangler/
+.dev.vars
+.env
+*.zip
+.DS_Store
+Thumbs.db

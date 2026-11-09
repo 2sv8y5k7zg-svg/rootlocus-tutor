@@ -1,0 +1,74 @@
+[
+ {
+  "id": "T01",
+  "title": "K/(s(s+2))",
+  "pointsChecked": 6012,
+  "maxGapPctOfView": 0.292
+ },
+ {
+  "id": "T02",
+  "title": "K/(s(s+1)(s+2))",
+  "pointsChecked": 9852,
+  "maxGapPctOfView": 0.294
+ },
+ {
+  "id": "T03",
+  "title": "K(s+2)/(s(s+1))",
+  "pointsChecked": 9141,
+  "maxGapPctOfView": 0.294
+ },
+ {
+  "id": "T04",
+  "title": "K(s+2)/((s+3)(s^2+2s+2))",
+  "pointsChecked": 12189,
+  "maxGapPctOfView": 0.292
+ },
+ {
+  "id": "T05",
+  "title": "K/(s(s^2+4s+8))",
+  "pointsChecked": 11064,
+  "maxGapPctOfView": 0.283
+ },
+ {
+  "id": "T06",
+  "title": "K/(s(s+4)(s^2+4s+20))",
+  "pointsChecked": 17808,
+  "maxGapPctOfView": 0.29
+ },
+ {
+  "id": "T07",
+  "title": "K(s+1)/(s^2(s+9))",
+  "pointsChecked": 13245,
+  "maxGapPctOfView": 0.297
+ },
+ {
+  "id": "T08",
+  "title": "K(s-3)(s-5)/((s+1)(s+2))",
+  "pointsChecked": 12002,
+  "maxGapPctOfView": 0.295
+ },
+ {
+  "id": "T09",
+  "title": "K/(s(s+1)(s^2+2))",
+  "pointsChecked": 14448,
+  "maxGapPctOfView": 0.294
+ },
+ {
+  "id": "T10",
+  "title": "K(s^2+2s+2)/(s(s+1)(s+3))",
+  "pointsChecked": 14752,
+  "maxGapPctOfView": 0.282
+ },
+ {
+  "id": "T11",
+  "title": "K(s+6)(s+8)/((s+2)(s+4))",
+  "pointsChecked": 12002,
+  "maxGapPctOfView": 0.295
+ },
+ {
+  "id": "T12",
+  "title": "K(s+1)/(s^2(s+10))",
+  "pointsChecked": 13327,
+  "maxGapPctOfView": 0.277
+ }
+]
