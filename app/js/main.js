@@ -9,7 +9,7 @@
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
-  var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: 0, paused: false, tfText: '', thread: {} };
+  var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: null, paused: false, tfText: '', thread: {} };
   var graph, previewGraph, exGraph;
   var EXAMPLE_INPUTS = [
     { label: '노트 예제', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
@@ -98,6 +98,8 @@
 
   // ── 학습 시작 ───────────────────────────────
   function startLesson(fromStep) {
+    // 시작 시 현재 입력을 다시 검증해 이전 식으로 시작하지 않도록 한다.
+    onInput();
     if (!S.parsed) return;
     var res = RL.locus.analyze(S.parsed.N, S.parsed.D);
     if (!res.ok) return;
@@ -106,7 +108,7 @@
     S.tfText = tfText(res);
     S.recId = recIdOf(res);
     S.thread = {};
-    S.K = 0;
+    S.K = null;
     S.allNums = CT.allNumbers(res);
     $('#screen-start').hidden = true;
     $('#screen-lesson').hidden = false;
@@ -141,7 +143,7 @@
     renderCoach(step);
     $('#stage-note').textContent = step.graphNote;
     graph.show(step.num, animate);
-    if (step.num === 9) setK(S.K || defaultK());
+    if (step.num === 9) setK(S.K === null ? defaultK() : S.K);
     ST.upsert({ id: S.recId, input: $('#tf-input').value, tf: S.tfText, date: nowText(), lastStep: i + 1, done: i === S.steps.length - 1 });
     var rail = $('#rail');
     if (rail.scrollTop) rail.scrollTop = 0;
@@ -212,13 +214,13 @@
   }
   function bindSlider() {
     var sl = $('#k-slider');
-    sl.value = tFromK(S.K || defaultK());
+    sl.value = tFromK(S.K === null ? defaultK() : S.K);
     sl.oninput = function () { setK(kFromT(+sl.value)); };
-    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K); }; });
+    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K, true); }; });
   }
-  function setK(K) {
+  function setK(K, resetTrail) {
     S.K = K;
-    var out = graph.setK(K);
+    var out = graph.setK(K, resetTrail);
     if (!out) return;
     var st = RL.routh.classify(out.poles);
     var v = $('#k-val'); if (v) v.textContent = kText(K);
@@ -407,7 +409,12 @@
     $('#examples').innerHTML = EXAMPLE_INPUTS.map(function (e) { return '<button class="chip ex" data-in="' + M.esc(e.input) + '">' + e.label + '</button>'; }).join('');
     $$('#examples .ex').forEach(function (b) { b.onclick = function () { setExample(b.getAttribute('data-in')); }; });
     var inp = $('#tf-input'), timer = 0;
-    inp.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(onInput, 140); });
+    inp.addEventListener('input', function () {
+      clearTimeout(timer);
+      S.parsed = null;
+      $('#btn-start').disabled = true;
+      timer = setTimeout(onInput, 140);
+    });
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !$('#btn-start').disabled) startLesson(0); });
     $('#btn-start').onclick = function () { startLesson(0); };
     $('#btn-prev').onclick = function () { go(S.cur - 1, true); };
@@ -457,3 +464,4 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })(window.RL = window.RL || {});
+
