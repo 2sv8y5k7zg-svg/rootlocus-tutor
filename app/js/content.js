@@ -96,19 +96,19 @@
     var Nh = M.polyH(res.N), Dh = M.polyH(res.D), ch = M.charPolyH(res.charCoef);
     var blocks = [
       blk('goal', '폐루프 극점이 만족해야 하는 식(특성방정식)을 세웁니다.'),
-      blk('formula', '1 + ' + M.mv('K') + '·' + M.mv('G') + '(' + M.mv('s') + ')' + M.mv('H') + '(' + M.mv('s') + ') = 0'),
+      blk('formula', '1 + ' + M.mv('G') + '(' + M.mv('s') + ')' + M.mv('H') + '(' + M.mv('s') + ') = 0'),
       blk('text', '개루프 전달함수를 ' + M.mv('K') + '·' + M.frac(M.mv('N') + '(' + M.mv('s') + ')', M.mv('D') + '(' + M.mv('s') + ')') + '로 나눠 씁니다.'),
       blk('calc', M.mv('N') + '(' + M.mv('s') + ') = ' + Nh + ',&ensp; ' + M.mv('D') + '(' + M.mv('s') + ') = ' + Dh),
       blk('calc', '1 + ' + M.mv('K') + '·' + M.frac(M.mv('N'), M.mv('D')) + ' = 0 &ensp;→&ensp; 양변에 ' + M.mv('D') + ' 곱하기 &ensp;→&ensp; ' + M.mv('D') + ' + ' + M.mv('K') + '·' + M.mv('N') + ' = 0'),
       blk('calc', '(' + Dh + ') + ' + M.mv('K') + '(' + Nh + ') = 0'),
       blk('result', ch + ' = 0'),
-      blk('why', '음의 피드백 폐루프 전달함수의 분모가 1 + KG(s)H(s)입니다. 분모가 0이 되는 s가 폐루프 극점이고, K를 0부터 키울 때 이 근들이 움직인 자취가 근궤적입니다.')
+      blk('why', '이 화면에서 G(s)H(s)는 이득 K를 포함한 K·N(s)/D(s)입니다. 음의 피드백 특성방정식은 1 + G(s)H(s) = 0입니다. 분모가 0이 되는 s가 폐루프 극점이고, K를 0부터 키울 때 이 근들이 움직인 자취가 근궤적입니다.')
     ];
     return {
       num: 1, key: 'char', title: '특성방정식', short: '특성식', blocks: blocks,
       graphNote: 's평면을 준비합니다. 가로축은 실수부 σ, 세로축은 허수부 jω입니다.',
       questions: [
-        { q: '왜 1 + KG(s)H(s) = 0을 쓰나요?', a: '음의 피드백 폐루프 전달함수는 T(s) = KG(s) / (1 + KG(s)H(s))입니다. 폐루프 극점은 분모가 0이 되는 s라서 1 + KG(s)H(s) = 0을 풉니다.' },
+        { q: '왜 1 + G(s)H(s) = 0을 쓰나요?', a: '음의 피드백 폐루프 전달함수는 T(s) = G(s) / (1 + G(s)H(s))입니다. 폐루프 극점은 분모가 0이 되는 s라서 1 + G(s)H(s) = 0을 풉니다.' },
         { q: 'K = 0이면 이 식의 근은 무엇인가요?', a: 'K = 0이면 D(s) = 0만 남습니다. 그래서 근이 개루프 극점과 같고, 근궤적은 개루프 극점에서 출발합니다.' }
       ],
       ladder: [
@@ -236,8 +236,8 @@
       blk('why', '|s|가 아주 크면 G(s)H(s)가 1/(s − σ)^(n−m)처럼 보여서, 무한대로 가는 가지가 σ에서 뻗은 직선을 따라갑니다. 점근선은 먼 곳의 방향만 정하는 보조선이라, 가까운 곳에서는 가지가 점근선을 가로지를 수도 있습니다.')
     ];
     return {
-      num: 4, key: 'asym', title: '점근선', short: '점근선', blocks: blocks,
-      graphNote: '중심 σ가 찍힌 뒤 각도대로 점근선이 하나씩 뻗습니다.',
+      num: 4, key: 'asym', title: '점근선', short: '점근선', blocks: A.q === 1 ? blocks.concat([blk('note', '점근선이 하나이면 180° 방향으로 실수축과 겹칩니다. 중심값은 계산할 수 있지만 실제 가지의 출발점이 아니므로 그래프에서는 중심 점을 숨깁니다.')]) : blocks,
+      graphNote: A.q === 1 ? '점근선은 180° 방향 하나입니다. 실수축과 겹치므로 중심 점은 표시하지 않습니다.' : '중심 σ가 찍힌 뒤 각도대로 점근선이 하나씩 뻗습니다.',
       questions: [
         { q: '점근선 중심은 왜 극점 합에서 영점 합을 빼나요?', a: '아주 먼 곳에서 보면 극점 n개와 영점 m개가 한 점 σ에 모여 있는 것처럼 보입니다. 특성방정식의 sⁿ⁻¹ 계수를 비교하면 그 점이 (Σ극점 − Σ영점)/(n − m)으로 나옵니다.' },
         { q: '점근선은 근궤적이 반드시 지나는 선인가요?', a: '아닙니다. 아주 먼 곳에서의 방향만 정해 줍니다. 가까운 곳에서는 가지가 점근선 한쪽에 있거나 한 번 가로지를 수 있어서, 그림에서는 계산으로 구한 점을 정확히 지나게 그리는 것이 우선입니다.' },
@@ -286,7 +286,7 @@
     if (vb.length) result = vb.map(function (v, k) { return breakLabel(v.c) + ' ' + M.ref('b' + k, 'key', F.cnum(v.c.s)) + ' (' + M.mv('K') + ' = ' + F.num(v.c.K) + ')'; }).join(',&ensp; ');
     else result = '<b>이 문제에서는 해당하지 않음</b> — K ≥ 0 근궤적 위의 이탈점·진입점이 없습니다.';
     var blocks = [
-      blk('goal', '가지가 실수축에서 갈라지거나(이탈점) 합쳐지는(진입점) 점을 찾습니다.'),
+      blk('goal', '가지가 실수축에서 갈라지거나(이탈점) 합쳐지는(진입점·인입점) 점을 찾습니다.'),
       blk('formula', M.mv('K') + ' = ' + MI + M.frac(M.mv('D') + '(' + M.mv('s') + ')', M.mv('N') + '(' + M.mv('s') + ')') + ' &ensp;→&ensp; ' + M.frac('d' + M.mv('K'), 'd' + M.mv('s')) + ' = 0 &ensp;⇔&ensp; ' + M.mv('D') + '′' + M.mv('N') + ' ' + MI + ' ' + M.mv('D') + M.mv('N') + '′ = 0'),
       blk('calc', M.mv('D') + '′(' + M.mv('s') + ') = ' + M.polyH(Dp) + ',&ensp; ' + M.mv('N') + '′(' + M.mv('s') + ') = ' + M.polyH(Np)),
       blk('calc', (P.degree(B) < 1 ? '식이 상수라 해가 없습니다.' : M.polyH(Bn) + ' = 0' + (g > 1 ? ' &ensp;<span class="sm">(공약수 ' + g + '로 나눔)</span>' : '')))
@@ -520,3 +520,4 @@
 
   RL.content = { build: build, setText: setText, notableK: notableK, validBreaks: validBreaks, crossingsPos: crossingsPos, onSegments: onSegments, segText: segText, EXAMPLES: EXAMPLES, allNumbers: allNumbers, strip: strip, breakLabel: breakLabel };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+

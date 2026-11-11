@@ -37,10 +37,7 @@ def launch_browser(p):
 def on_console(m):
     if m.type != 'error':
         return
-    if 'Failed to load resource' in m.text:  # 인터넷이 없으면 글꼴(Google Fonts)만 못 불러옴 — 동작에는 영향 없음
-        notes.append(m.text)
-    else:
-        errors.append('console: ' + m.text)
+    errors.append('console: ' + m.text)  # 외부 글꼴 요청이 없으므로 리소스 오류도 실패 처리
 
 
 with sync_playwright() as p:
@@ -79,6 +76,7 @@ with sync_playwright() as p:
     # 힌트 사다리, 질문, 내 답 확인, 예시 열고 돌아오기
     pg.click('#stepper .st >> nth=3')
     pg.wait_for_timeout(400)
+    pg.click('#tab-coach')
     pg.locator('.lv').nth(2).click()
     pg.locator('.q').first.click()
     pg.fill('#check-in', '-3/2')
@@ -123,4 +121,5 @@ if notes:
 print('오류:', len(errors))
 for e in errors[:20]:
     print('  ', e)
-sys.exit(1 if errors else 0)
+sys.exit(1 if errors or overflow > 0 or any(not m[2] for m in msgs) or '맞습니다' not in ok_text else 0)
+

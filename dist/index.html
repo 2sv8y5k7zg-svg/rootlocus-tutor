@@ -1,0 +1,3155 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f8f7">
+<title>근궤적 스튜디오 · 수식에서 이해로</title>
+<meta name="description" content="전달함수부터 K 변화까지, 수식과 그래프를 연결하는 9단계 근궤적 학습 공간">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%230d7565'/%3E%3Cpath d='M14 44Q30 44 49 14M14 20Q30 20 49 50' stroke='white' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<style>/* 근궤적 스튜디오: 여백과 일관된 의미 색상으로 계산 과정을 읽습니다. */
+:root {
+  --bg:#f6f8f7; --surface:#fff; --surface2:#f2f6f4; --line:#e1e8e4; --grid:#edf1ee;
+  --fg:#243e37; --muted:#65766f; --faint:#75837d;
+  --pole:#c55c68; --zero:#397eac; --locus:#148574; --asym:#9280b8; --key:#b27a25; --rej:#828d89;
+  --rhp:rgba(197,92,104,.045); --glass:rgba(246,248,247,.93);
+  --ok:#147c64; --warn:#9a681c; --bad:#b54152; --accent:#127766; --accent-ink:#fff;
+  --font-body:'Pretendard','Apple SD Gothic Neo','Noto Sans CJK KR','Malgun Gothic',system-ui,sans-serif;
+  --font-display:var(--font-body); --font-math:'STIX Two Text','Cambria Math','Times New Roman',serif;
+  --font-mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+  --r:20px; --r-sm:12px; --ease:cubic-bezier(.22,.8,.24,1); color-scheme:light;
+}
+:root[data-theme="dark"] {
+  --bg:#111c1a; --surface:#192824; --surface2:#20322d; --line:#30443d; --grid:#263a32;
+  --fg:#e2ede7; --muted:#afbeb6; --faint:#91a69b;
+  --pole:#f198a2; --zero:#86c2e9; --locus:#6fd2b7; --asym:#b9a8dc; --key:#e3b76d; --rej:#97a29c;
+  --rhp:rgba(241,152,162,.05); --glass:rgba(17,28,26,.94);
+  --ok:#6fd2b7; --warn:#e3b76d; --bad:#f198a2; --accent:#81d6bd; --accent-ink:#142c24; color-scheme:dark;
+}
+* {box-sizing:border-box} html,body {margin:0; min-height:100%;} [hidden] {display:none!important}
+body {background:var(--bg);color:var(--fg);font:15px/1.65 var(--font-body);-webkit-font-smoothing:antialiased}
+button,input,textarea {font:inherit;color:inherit} button,a,input { -webkit-tap-highlight-color:transparent }
+button {border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface);cursor:pointer;transition:background .2s,border-color .2s,transform .2s,box-shadow .2s;line-height:1.4}
+button:hover:not(:disabled) {background:var(--surface2);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+button:active:not(:disabled) {transform:translateY(1px)} button:disabled {opacity:.42;cursor:default}
+button.primary {background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:650}
+button.primary:hover:not(:disabled) {background:color-mix(in srgb,var(--accent) 88%,#16392d);box-shadow:0 4px 14px #153d2a18}
+button.ghost {background:transparent} button.sm {font-size:12px;padding:8px 12px} button.lg {padding:14px 20px;font-size:14px}
+button.wide {width:100%;text-align:left} .icon {width:38px;height:38px;display:grid;place-items:center;padding:0;font-size:20px}
+:focus-visible {outline:3px solid color-mix(in srgb,var(--accent) 65%,transparent);outline-offset:4px}
+.mv {font-family:var(--font-math);font-style:italic;font-size:1.1em;letter-spacing:.01em}.nm,code {font-family:var(--font-mono);font-size:.92em}
+.muted {color:var(--muted)}.sm {font-size:.85em} sup {font-size:.7em;line-height:0} .row {display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+kbd {font:10px var(--font-mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:3px 5px;color:var(--muted);background:var(--surface)}
+.app {max-width:1800px;margin:auto;padding:0 40px;min-height:100vh}
+.top {height:90px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--line)}
+.brand {display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--fg);flex-shrink:0}
+.logo {width:42px;height:42px;display:grid;place-items:center;background:var(--accent);border-radius:13px;color:var(--accent-ink)}
+.logo svg {width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.brand-copy {display:flex;flex-direction:column;gap:1px}.name {font-size:17px;font-weight:750;letter-spacing:-.7px}.brand-sub {font-size:8px;letter-spacing:2px;color:var(--muted)}
+.top-nav {display:flex;align-items:center;gap:26px;margin-left:36px}.nav-link {border:0;padding:8px 0;background:none;color:var(--muted);font-size:13px;border-radius:0}.nav-link.active {color:var(--accent);font-weight:650}
+.nav-link:hover:not(:disabled) {background:none;color:var(--accent)}.top-actions {display:flex;align-items:center;gap:8px;margin-left:auto}.top-actions button {white-space:nowrap}.top-actions .ghost {border-color:transparent}.top-actions .icon {border-color:var(--line);margin-left:7px}
+.eyebrow {margin:0;color:var(--accent);font-size:10px;font-weight:600;letter-spacing:1.8px;display:flex;gap:8px;align-items:center}.status-dot {display:inline-block;width:6px;height:6px;background:var(--locus);border-radius:50%;box-shadow:0 0 0 4px color-mix(in srgb,var(--locus) 9%,transparent)}
+.micro {font-size:11px;color:var(--muted)}
+.screen.start {max-width:1370px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.04fr);gap:56px 64px;padding:56px 0 0;align-items:center}
+.start-left {min-width:0}.start-left>.eyebrow {letter-spacing:.5px;font-size:11px}
+h1 {font-size:clamp(28px,3vw,43px);font-weight:720;letter-spacing:-2px;line-height:1.48;margin:16px 0 14px;word-break:keep-all} h1 em {font-style:normal;color:var(--accent)}
+.lede {font-size:14px;line-height:1.85;color:var(--muted);margin:0 0 26px}
+.input-card {background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 8px 36px #183c2e04}
+.field-top {display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.field-label {font-size:13px;font-weight:650}
+.input-row {display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;background:var(--bg);padding-left:12px;transition:border-color .2s,box-shadow .2s}
+.input-row:focus-within {border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 9%,transparent)}.input-prefix {font:italic 14px var(--font-math);color:var(--muted);border-right:1px solid var(--line);padding-right:10px;white-space:nowrap}
+#tf-input {width:100%;min-width:0;border:0;background:transparent;outline:none;font:12px var(--font-mono);padding:15px 8px 15px 0} #tf-input:focus-visible {outline:none}
+.preview {padding:19px 8px 10px;overflow-x:auto;min-height:76px;text-align:center;font-size:17px}.pv-main {white-space:nowrap}.pv-sub {font-size:10px;color:var(--muted);margin-top:12px;white-space:nowrap;letter-spacing:.1px}
+.msg {font-size:11px;line-height:1.6;margin:10px 0 17px;color:var(--muted)}.msg.bad {color:var(--bad)}.msg.warn {color:var(--warn)}
+.start-actions {display:flex;gap:18px;align-items:center}.start-actions .primary {display:flex;align-items:center;justify-content:space-between;gap:42px;flex:1}.start-actions .primary span {font-size:20px;line-height:1}.start-shortcut {font-size:10px;white-space:nowrap;color:var(--muted)}
+.scope {margin:14px 4px 0;color:var(--muted);font-size:11px}.scope summary {cursor:pointer;display:flex;align-items:center;gap:10px;list-style:none}.scope summary::-webkit-details-marker{display:none}.scope summary span{margin-left:auto}.scope[open] summary span{transform:rotate(45deg)}.scope ul{padding-left:18px;line-height:1.9;margin-bottom:0}
+.start-right {min-width:0;align-self:center;padding-top:6px}.preview-heading {display:flex;align-items:center;justify-content:space-between;margin:0 4px 16px;font:9px var(--font-mono);letter-spacing:1.5px;color:var(--muted)}.preview-heading>span:first-child {display:flex;align-items:center;gap:9px}.preview-tag {letter-spacing:0;font:italic 13px var(--font-math)}
+.plane-card {background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;overflow:hidden}.plane-card .plane {width:100%;aspect-ratio:1;display:block}.hero-plane {padding:0;box-shadow:0 20px 60px #244b3620;transform:none}
+.plot-caption {display:flex;justify-content:space-between;align-items:center;padding:19px 23px 8px;font-size:12px;font-weight:600}.plot-caption .micro{font-weight:400;font-size:10px}.hero-plane .plane {height:360px;aspect-ratio:auto}
+.plot-legend {display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:19px;padding:15px 10px;border-top:1px solid var(--line);font-size:10px;color:var(--muted);background:var(--surface);flex-shrink:0}.plot-legend>span{display:flex;align-items:center;gap:6px;white-space:nowrap}.plot-legend i{font-style:normal;font-weight:650;display:inline-block}.legend-pole{color:var(--pole);font-size:17px;line-height:1}.legend-zero{color:var(--zero);font-size:17px;line-height:1}.legend-line{width:15px;border-top:2px solid var(--locus)}.legend-dash{width:15px;border-top:2px dashed var(--asym)}.legend-key{color:var(--key);font-size:10px}
+.preview-foot{display:flex;align-items:center;gap:14px;margin:24px 10px 0}.preview-foot-icon{font-size:30px;color:var(--accent);font-family:var(--font-math)}.preview-foot p{margin:0;font-size:11px;color:var(--muted);line-height:1.8}.preview-foot b{font-weight:550;color:var(--fg)}
+.example-section{grid-column:1/-1;padding-top:5px;scroll-margin-top:30px}.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:22px}.section-heading .eyebrow{font-size:8px;letter-spacing:1.7px}.section-heading h2{font-size:21px;letter-spacing:-.7px;margin:5px 0 0;font-weight:650}.section-heading>p{margin:0 0 3px;font-size:11px;color:var(--muted)}
+.example-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}.example-card{display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:17px;border-radius:13px;background:var(--surface);min-width:0;position:relative}.example-card:hover:not(:disabled){transform:translateY(-4px);box-shadow:0 10px 26px #1d4d3010}.example-card.selected{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 3%,var(--surface))}.example-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font:10px var(--font-mono)}.ex-level{font:9px var(--font-body);color:var(--muted);padding:3px 6px;background:var(--surface2);border-radius:4px}.example-card svg{height:34px;width:56px;margin:16px 0 11px;fill:none;stroke:var(--accent);stroke-width:1.4}.example-card strong{font-size:12px;font-weight:600}.example-card small{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6}.example-card .ex-arrow{position:absolute;right:14px;bottom:17px;color:var(--muted);font-size:13px}
+.start-footer{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:18px;border-top:1px solid var(--line);padding:21px 0;margin-top:-18px;font-size:9px;color:var(--muted)}.ai-status{font-size:9px}.ai-status.on{color:var(--accent)}
+.photo{display:flex;gap:12px;padding:12px;font-size:12px}.photo .thumb{width:80px;height:80px;object-fit:cover;border-radius:10px}.photo p{margin-top:0}
+/* 학습 공간: 순서 / 그래프 / 읽기 패널 */
+.screen.lesson{display:grid;grid-template-columns:176px minmax(0,1fr) 360px;gap:24px;min-height:0;padding:26px 0 24px;height:calc(100dvh - 90px);min-height:660px}
+.rail{display:contents}.lesson-sidebar{grid-column:1;grid-row:1;display:flex;flex-direction:column;min-height:0;padding-right:6px}.sidebar-heading{padding:5px 10px 23px;display:flex;flex-direction:column;align-items:flex-start}.sidebar-heading .eyebrow{font-size:8px;letter-spacing:1.6px}.sidebar-heading strong{font-size:14px;letter-spacing:-.3px;margin:5px 0 15px;font-weight:650}.sidebar-heading .micro{font:10px var(--font-mono)}.progress-track{width:100%;height:3px;background:var(--line);border-radius:4px;margin-top:9px}.progress-track>div{height:100%;background:var(--accent);border-radius:4px;transition:width .5s var(--ease)}
+.stepper{display:flex;flex-direction:column;gap:7px}.st{display:flex;align-items:center;gap:11px;text-align:left;padding:11px 10px;border:1px solid transparent;background:transparent;border-radius:10px}.st-n{width:24px;height:24px;display:grid;place-items:center;flex-shrink:0;font:10px var(--font-mono);color:var(--muted);border:1px solid var(--line);border-radius:7px}.st-t{font-size:12px;color:var(--muted)}.st.on{background:color-mix(in srgb,var(--accent) 9%,var(--bg))}.st.on .st-n{background:var(--accent);color:var(--accent-ink);border-color:transparent}.st.on .st-t{color:var(--accent);font-weight:650}.st.done .st-n{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
+.sidebar-foot{display:flex;flex-direction:column;gap:4px;margin:auto 0 0;padding:20px 8px 0;font-size:10px;color:var(--muted)}.sidebar-foot button{font-size:11px;margin:13px 0 10px;padding:10px}.keyboard-note{font-size:9px;display:flex;gap:4px;align-items:center}
+.stage{grid-column:2;grid-row:1;display:flex;flex-direction:column;min-width:0;min-height:0;gap:14px}.stage-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 2px}.stage-heading .eyebrow{font-size:8px;letter-spacing:1.7px}.stage-heading h2{margin:4px 0 0;font-size:21px;letter-spacing:-.7px;font-weight:650}.stage-heading button{font-size:10px}.graph-panel{border:1px solid var(--line);border-radius:18px;background:var(--surface);overflow:hidden;display:flex;flex:1;min-height:340px;flex-direction:column;box-shadow:0 8px 30px #21433304}.stage-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 20px;border-bottom:1px solid var(--line)}.stage-head .micro{font-size:9px}.stage-tf{font-size:15px;margin-top:6px;overflow-x:auto;padding-bottom:2px}.canvas-label{font:italic 12px var(--font-math);color:var(--muted)}.plane-wrap{position:relative;flex:1;min-height:180px;overflow:hidden}.plane-wrap .plane{position:absolute;width:100%;height:100%;display:block}.graph-empty{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);width:90%;text-align:center;pointer-events:none;background:color-mix(in srgb,var(--surface) 92%,transparent);padding:25px 10px;border-radius:14px}.empty-math{font:italic 27px var(--font-math);color:var(--accent)}.graph-empty p{font-size:12px;margin:13px 0 3px}.graph-empty>span:last-child{font-size:10px;color:var(--muted)}
+.stage-insight{display:flex;gap:10px;padding:0 6px;align-items:flex-start;min-height:38px}.insight-icon{color:var(--accent);font-size:22px;line-height:1.3}.stage-note{font-size:11px;margin:0;color:var(--muted);line-height:1.7}.controls{display:flex;justify-content:space-between;gap:8px;align-items:center}.controls button{font-size:11px;padding:10px 12px;white-space:nowrap}.play-controls{display:flex;gap:2px}.play-controls button{border-color:transparent;padding:10px 7px}.controls .primary{min-width:92px}
+.lesson-details{grid-column:3;grid-row:1;min-width:0;min-height:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}.panel-tabs{display:flex;gap:8px;padding:10px;border-bottom:1px solid var(--line);flex-shrink:0;background:var(--surface)}.panel-tabs button{flex:1;border:0;background:transparent;color:var(--muted);font-size:12px;padding:11px 6px}.panel-tabs button.selected{color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface));font-weight:600}.details-scroll{overflow-y:auto;overscroll-behavior:contain;padding:23px 20px;scrollbar-width:thin;scrollbar-color:var(--line) transparent;flex:1}
+/* 단계 본문 */
+.step-body { display: flex; flex-direction: column; gap: 10px; }
+.sh { display: flex; align-items: baseline; gap: 12px; }
+.sh-n { font-family: var(--font-display); font-size: 2.2rem; line-height: 1; color: var(--locus); }
+.sh-n small { font-size: .9rem; color: var(--faint); margin-left: 2px; }
+.sh h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.32rem; text-wrap: balance; }
+.b-goal { margin: 0; color: var(--muted); }
+.b-formula, .b-result { position: relative; padding: 12px 14px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--line); overflow-x: auto; }
+.b-result { border-color: color-mix(in srgb, var(--locus) 45%, var(--line)); background: color-mix(in srgb, var(--locus) 7%, var(--surface)); }
+.tag { display: inline-block; font-family: var(--font-mono); font-size: .7rem; letter-spacing: .08em; color: var(--faint); margin-bottom: 4px; }
+.b-result .tag { color: var(--locus); }
+.b-calc { padding: 2px 2px 2px 14px; border-left: 1px dashed var(--line); overflow-x: auto; }
+.b-text, .b-note { margin: 0; }
+.b-note { font-size: .88rem; color: var(--muted); }
+.b-sub { margin: 6px 0 0; font-size: .95rem; font-weight: 600; }
+.b-none { padding: 12px 14px; border-radius: var(--r-sm); border: 1px dashed var(--line); color: var(--muted); }
+.b-none b { color: var(--fg); }
+.b-why { font-size: .9rem; color: var(--muted); }
+.b-why summary { cursor: pointer; color: var(--fg); font-weight: 500; }
+.b-why p { margin: 6px 0 0; }
+.b-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 2px; line-height: 1.25; }
+.frac .ft { padding: 0 3px 1px; }
+.frac .fb { padding: 1px 3px 0; border-top: 1px solid currentColor; }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; font-size: .9rem; width: 100%; }
+.b-table th, .b-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.b-table thead th { font-size: .78rem; color: var(--faint); font-weight: 500; }
+.b-table tr.on th, .b-table tr.on td { color: var(--locus); }
+.b-routh { width: auto; min-width: 60%; font-variant-numeric: tabular-nums; }
+.b-routh caption { text-align: left; font-size: .8rem; color: var(--faint); margin-bottom: 4px; }
+.b-routh th { padding: 6px 12px 6px 4px; border-right: 1px solid var(--line); font-weight: 400; color: var(--muted); }
+.b-routh td { padding: 6px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.b-routh td.c1 { background: color-mix(in srgb, var(--key) 11%, transparent); color: var(--fg); }
+.b-kchart svg { width: 100%; height: auto; display: block; }
+
+/* 글자-그래프 연결 */
+.ref { cursor: help; border-bottom: 1px dotted currentColor; border-radius: 3px; transition: background .2s; }
+.ref.pole { color: var(--pole); }
+.ref.zero { color: var(--zero); }
+.ref.seg { color: var(--locus); }
+.ref.asym { color: var(--asym); }
+.ref.key { color: var(--key); }
+.ref.angle { color: var(--key); }
+.ref.lit, tr.lit th, tr.lit td { background: color-mix(in srgb, currentColor 16%, transparent); }
+
+/* 코치 */
+.coach { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); margin-bottom: 8px; }
+.coach-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.coach h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+.badge { font-size: .74rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--faint); }
+.badge.on { color: var(--locus); border-color: color-mix(in srgb, var(--locus) 50%, var(--line)); }
+.ladder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.lv { border-radius: 10px; padding: 7px 4px; font-size: .82rem; display: flex; flex-direction: column; align-items: center; gap: 1px; background: transparent; }
+.lv span { font-family: var(--font-display); font-size: .95rem; }
+.lv.on { border-color: var(--accent); color: var(--accent); }
+.ladder-out { display: flex; flex-direction: column; gap: 8px; }
+.lad-card { padding: 10px 12px; border-radius: var(--r-sm); background: var(--surface2); border: 1px solid var(--line); }
+.lad-card p { margin: 2px 0 0; }
+.lad-card.back { border-color: color-mix(in srgb, var(--locus) 45%, var(--line)); }
+.qs-title { margin: 4px 0 0; font-size: .85rem; color: var(--faint); }
+.check, .ask { display: flex; flex-direction: column; gap: 6px; }
+.check label, .ask label { font-size: .9rem; font-weight: 500; }
+.check input, .ask textarea, .check textarea { flex: 1; min-width: 0; padding: 8px 12px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--bg); }
+.check .row input { min-width: 120px; }
+.check-out { font-size: .9rem; display: flex; flex-direction: column; gap: 6px; }
+.check-out.ok { color: var(--ok); }
+.check-out.bad { color: var(--bad); }
+.check-out.warn { color: var(--warn); }
+.check-out textarea { color: var(--fg); }
+.thread { display: flex; flex-direction: column; gap: 10px; }
+.ai-msg { border-radius: var(--r-sm); border: 1px solid var(--line); overflow: hidden; }
+.ai-q { padding: 8px 12px; font-size: .86rem; color: var(--muted); background: var(--surface2); }
+.ai-a { padding: 10px 12px; white-space: pre-wrap; }
+.ai-meta { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 12px 10px; font-size: .76rem; }
+.by { color: var(--faint); }
+.numck.ok { color: var(--ok); }
+.numck.bad { color: var(--warn); }
+
+/* 9단계 슬라이더 */
+.b-slider { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--line); }
+.k-lab { font-family: var(--font-mono); display: flex; align-items: center; gap: 10px; }
+.k-lab b { font-size: 1.25rem; color: var(--locus); font-weight: 500; }
+#k-slider { width: 100%; accent-color: var(--accent); }
+.k-scale { display: flex; justify-content: space-between; font-size: .74rem; color: var(--faint); }
+.k-poles, .k-zeta { font-size: .88rem; }
+.pill { font-family: var(--font-body); font-size: .76rem; padding: 2px 10px; border-radius: 999px; border: 1px solid currentColor; }
+.pill.stable { color: var(--ok); }
+.pill.marginal { color: var(--warn); }
+.pill.unstable { color: var(--bad); }
+
+/* 그래프 */
+.plane text { font-family: var(--font-body); }
+.plane .grid { stroke: var(--grid); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.plane .axis { stroke: var(--faint); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.plane .tick { fill: var(--faint); font-family: var(--font-mono); }
+.plane .axlabel { fill: var(--muted); }
+.plane .hit { fill: transparent; }
+.plane .pop { transform-box: fill-box; transform-origin: center; transition: transform .25s; }
+.plane .mk.pole path { stroke: var(--pole); stroke-linecap: round; fill: none; }
+.plane .mk.zero .ring { stroke: var(--zero); fill: var(--surface); }
+.plane .mult { fill: var(--muted); font-family: var(--font-mono); }
+.plane .mk.lit .pop, .plane .mk.counted .pop { transform: scale(1.45); }
+.plane .mk.counted path, .plane .mk.counted .ring { filter: drop-shadow(0 0 6px var(--key)); }
+.plane .seg { stroke: var(--locus); stroke-linecap: round; opacity: .55; }
+.plane .seg.lit { opacity: 1; stroke: var(--key); }
+.plane .asym { stroke: var(--asym); opacity: .85; fill: none; }
+.plane .branch { stroke: var(--locus); fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.plane .branch.dim { opacity: .4; }
+.plane .chev { fill: var(--locus); }
+.plane .mk.cen .core { fill: var(--asym); }
+.plane .mk.brk .core, .plane .mk.crs .core { fill: var(--key); }
+.plane .mk.brk .core { stroke: var(--surface); stroke-width: 1.5; }
+.plane .mk.rej .core { fill: none; stroke: var(--rej); stroke-width: 1.5; }
+.plane .mk.lit .core { filter: drop-shadow(0 0 6px var(--key)); }
+.plane .rhp { fill: var(--rhp); }
+.plane .rhplbl { fill: var(--bad); opacity: .75; }
+.plane .lbl { fill: var(--muted); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+.plane .lbl.pole { fill: var(--pole); }
+.plane .lbl.zero { fill: var(--zero); }
+.plane .lbl.asym { fill: var(--asym); }
+.plane .lbl.key, .plane .lbl.angle { fill: var(--key); }
+.plane .lbl.rej { fill: var(--rej); }
+.plane .vec { opacity: .85; }
+.plane .vec.pole, .plane .arc.pole { stroke: var(--pole); fill: none; }
+.plane .vec.zero, .plane .arc.zero { stroke: var(--zero); fill: none; }
+.plane .dep { stroke: var(--key); stroke-linecap: round; }
+.plane .dep.lit { filter: drop-shadow(0 0 5px var(--key)); }
+.plane .ah { fill: none; }
+.plane .ah-pole { stroke: var(--pole); }
+.plane .ah-zero { stroke: var(--zero); }
+.plane .ah-dep { stroke: var(--key); }
+.plane .probe line { stroke: var(--fg); opacity: .6; }
+.plane .probe .pc { fill: var(--fg); }
+.plane .probe .pt { fill: var(--muted); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; font-weight: 600; }
+.plane .probe .pt.yes { fill: var(--locus); }
+.plane .clp .core { fill: var(--fg); stroke: var(--locus); stroke-width: 2; }
+.plane .clp .glow { fill: var(--locus); opacity: .22; }
+.plane .clp { transition: transform .12s linear; }
+.plane .trail { fill: none; stroke: var(--fg); opacity: .25; stroke-linecap: round; stroke-linejoin: round; }
+.plane .wn { stroke: var(--muted); fill: none; opacity: .7; }
+.kchart .axis { stroke: var(--faint); }
+.kchart .kc { stroke: var(--locus); stroke-width: 2.4; fill: none; }
+.kchart .kseg { stroke: var(--locus); stroke-width: 5; opacity: .35; stroke-linecap: round; }
+.kchart .kguide { stroke: var(--key); stroke-dasharray: 3 4; }
+.kchart .kpt { fill: var(--key); }
+.kchart .klbl { fill: var(--key); font-size: 13px; font-family: var(--font-body); }
+.kchart .ktick { fill: var(--faint); font-size: 12px; font-family: var(--font-mono); }
+
+/* 겹창 */
+.overlay { position: fixed; inset: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 62%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; justify-content: flex-end; }
+.drawer { width: min(440px, 100%); height: 100%; background: var(--surface); border-left: 1px solid var(--line); padding: calc(16px + env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.drawer-head { display: flex; justify-content: space-between; align-items: center; }
+.drawer h3 { margin: 0; font-family: var(--font-display); font-weight: 400; }
+.records-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.rec { padding: 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface2); display: flex; flex-direction: column; gap: 6px; }
+.rec-tf { font-family: var(--font-mono); font-size: .9rem; overflow-wrap: anywhere; }
+.rec-meta { display: flex; gap: 10px; font-size: .8rem; color: var(--muted); align-items: center; flex-wrap: wrap; }
+#example { justify-content: center; align-items: center; padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+.sheet { width: min(980px, 100%); max-height: 100%; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.sheet-head h3 { margin: 2px 0 0; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; }
+.ex-tf { margin: 4px 0 0; }
+.sheet-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.ex-body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+body.sheet-open { overflow: hidden; }
+
+/* 등장 움직임 */
+.enter { animation: rise .55s cubic-bezier(.22, .8, .24, 1) var(--d, 0ms) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.still .enter { animation: none; }
+
+/* 설명 본문: 작은 패널에서도 읽을 수 있는 수식과 명확한 위계 */
+.step-body{gap:16px;font-size:13px;line-height:1.8}.sh{gap:10px;margin:2px 0 3px;align-items:center}.sh-n{font:22px var(--font-mono)}.sh-n small{display:none}.sh h2{font-size:17px;font-weight:650;letter-spacing:-.5px}.b-goal{font-size:12px}.b-formula,.b-result{padding:15px 13px;border-radius:10px;font-size:14px}.b-formula{background:var(--surface2);border-color:transparent}.b-result{background:color-mix(in srgb,var(--accent) 5%,var(--surface));border-color:color-mix(in srgb,var(--accent) 22%,var(--line))}.tag{font:9px var(--font-body);letter-spacing:.5px;display:block;margin-bottom:8px}.b-calc{font-size:12px;padding:0 0 0 12px}.b-note{font-size:11px;line-height:1.8}.b-sub{font-size:12px}.b-table{font-size:11px}.b-table th,.b-table td{padding:8px 6px}.b-table thead th{font-size:10px}.b-routh{font-size:12px}.b-why{font-size:12px}.coach{padding:0;border:0;font-size:12px;gap:18px;background:transparent;margin:0}.coach h3{font-size:15px;font-weight:650;line-height:1.6}.badge{font-size:9px;padding:3px 7px}.coach-head{gap:10px;flex-direction:column;align-items:flex-start}.ladder{gap:6px}.lv{font-size:10px;padding:10px 2px;gap:6px}.lv span{font:12px var(--font-mono)}.lv.on{background:color-mix(in srgb,var(--accent) 6%,var(--surface))}.lad-card{font-size:12px;padding:13px}.chip{font-size:11px;padding:7px 10px;border-radius:8px}.chips{display:flex;gap:6px;flex-wrap:wrap}.check label,.ask label{font-size:12px}.check .row{flex-wrap:nowrap}.check .row input{width:100%;min-width:0}.b-slider{padding:16px 13px;gap:15px;background:var(--surface2);border:0}.k-lab b{font:24px var(--font-mono)}.k-lab{flex-wrap:wrap;font-size:13px}.pill{font-size:10px;padding:3px 8px}.k-poles,.k-zeta{font-size:11px;line-height:1.8}#k-slider{height:24px;cursor:pointer;touch-action:pan-y}.plane .clp{transition:none}.plane .axis{stroke:color-mix(in srgb,var(--faint) 65%,var(--grid))}.plane .grid{stroke-width:.7}.plane .seg{opacity:.32}.plane .lbl{stroke-width:4px}.plane .branch.dim{opacity:.5}.drawer{max-width:100vw;padding:28px;gap:24px}.drawer h3{font-weight:650;margin-top:5px}.rec{padding:17px;gap:12px}.rec-tf{font-size:12px}.rec-meta{font-size:10px}.drawer,.sheet{animation:rise .3s var(--ease)}.sheet-body{align-items:start}.plane-card .plane{min-width:0}.cap{font-size:12px;color:var(--muted)}.k-pole{color:var(--pole)}.k-zero{color:var(--zero)}
+/* 모션은 짧고 목적에 맞게. OS 설정과 화면의 토글을 모두 존중합니다. */
+.screen.start{animation:rise .7s var(--ease)}.enter{animation-duration:.4s}.still .enter{animation:none}
+:root[data-motion="off"] *, :root[data-motion="off"] *::before,:root[data-motion="off"] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@media(min-width:1600px){.screen.lesson{grid-template-columns:190px minmax(0,1fr) 400px;gap:32px}.details-scroll{padding:26px}.hero-plane .plane{height:400px}}
+@media(max-width:1250px){.app{padding:0 26px}.screen.start{gap:40px;padding-top:38px}h1{font-size:33px}.screen.lesson{grid-template-columns:150px minmax(0,1fr) 320px;gap:16px}.st{gap:8px;padding:10px 7px}.st-t{font-size:11px}.details-scroll{padding:20px 16px}.controls button{padding:10px 8px;font-size:10px}.controls .primary{min-width:74px}.hero-plane .plane{height:330px}.example-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.example-card{padding:17px 18px}.example-card svg{height:28px;margin:8px 0}.example-card small{font-size:11px}.top-nav{margin-left:10px;gap:20px}}
+@media(max-width:1080px){.screen.lesson{grid-template-columns:minmax(0,1fr) 335px;grid-template-rows:auto minmax(0,1fr);height:calc(100dvh - 90px);min-height:760px;padding-top:16px;gap:18px}.lesson-sidebar{grid-row:1;grid-column:1/-1;display:block;padding:0}.sidebar-heading,.sidebar-foot{display:none}.stepper{flex-direction:row;gap:5px;justify-content:space-between}.st{flex:1;flex-direction:column;gap:6px;padding:9px 4px}.st-t{font-size:10px;white-space:nowrap}.st-n{width:23px;height:23px}.stage{grid-column:1;grid-row:2}.lesson-details{grid-column:2;grid-row:2}.top-nav{display:none}.hero-plane .plane{height:300px}.screen.start{gap:32px}.input-card{padding:18px}.field-top .micro{display:none}h1{font-size:30px;letter-spacing:-1.5px}.lede{font-size:13px}.start-shortcut{display:none}.stage-head{padding:13px 16px}.controls .play-controls{gap:0}.controls button{font-size:10px;padding:10px 6px}.controls .primary{min-width:65px}.graph-panel .plot-legend{gap:12px;font-size:9px}.start-footer{flex-wrap:wrap;justify-content:flex-start;gap:10px 24px}}
+@media(max-width:760px){.app{padding:0 18px}.top{height:76px;gap:8px}.logo{width:34px;height:34px;border-radius:10px}.logo svg{width:25px;height:25px}.brand{gap:8px}.name{font-size:14px}.brand-sub{font-size:6px;letter-spacing:1.3px}.top-actions{gap:0}.top-actions button.sm{font-size:10px;padding:7px}.top-actions .icon{width:30px;height:30px;font-size:17px;margin-left:3px}#btn-home{font-size:0}#btn-home::after{content:'＋';font-size:20px}.screen.start{grid-template-columns:minmax(0,1fr);gap:35px;padding-top:32px}.start-left>.eyebrow{font-size:10px}h1{font-size:32px;letter-spacing:-1.4px;margin-top:14px}.lede{font-size:13px;margin-bottom:24px}.input-card{padding:19px}.field-top .micro{display:block;font-size:9px}#tf-input{font-size:12px}.start-right{padding-top:3px}.hero-plane{transform:none;border-radius:15px;box-shadow:0 12px 32px #244b3612}.hero-plane .plane{height:300px}.plot-caption{padding:17px 17px 8px}.preview-heading{margin-bottom:13px}.preview-foot{margin-top:16px}.section-heading>p{display:none}.section-heading h2{font-size:20px}.example-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.example-card{padding:15px}.example-card strong{font-size:12px}.example-card small{font-size:10px}.start-footer{font-size:9px;display:flex;flex-direction:column;align-items:flex-start;padding:22px 0;gap:8px;margin-top:0}.screen.lesson{display:flex;flex-direction:column;height:auto;min-height:0;gap:17px;padding:12px 0 calc(95px + env(safe-area-inset-bottom))}.rail{display:contents}.lesson-sidebar{order:0}.stage{order:1;gap:11px}.lesson-details{order:2;overflow:visible;border-radius:14px}.details-scroll{overflow:visible;padding:22px 20px}.stepper{gap:3px}.st{padding:7px 0;gap:4px;border-radius:8px}.st-t{font-size:8px}.st-n{width:24px;height:24px;font-size:9px}.stage-heading h2{font-size:19px}.stage-heading .eyebrow{font-size:7px}.graph-panel{border-radius:14px;flex:none;min-height:0}.stage-head{padding:11px 16px}.stage-tf{font-size:14px}.plane-wrap{height:310px;min-height:0;flex:none}.plot-legend{gap:14px;padding:11px 8px}.stage-insight{min-height:0}.stage-note{font-size:11px}.controls{position:fixed;bottom:0;left:0;right:0;z-index:25;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);gap:5px}.controls button{font-size:10px;padding:11px 8px;min-height:38px}.controls .primary{min-width:66px}.controls .play-controls button{padding:11px 5px}#btn-pause{display:none}.panel-tabs{border-radius:14px 14px 0 0}.step-body{font-size:14px}.b-goal{font-size:13px}.b-calc{font-size:13px}.b-note{font-size:12px}.sheet-body{grid-template-columns:minmax(0,1fr)}.sheet{padding:15px}.drawer{padding:22px}.preview .pv-main{font-size:16px}.sh h2{font-size:18px}.coach{font-size:13px}.coach .chip{font-size:12px}.check label,.ask label{font-size:13px}.check input{font-size:16px}.lv{font-size:11px}.graph-empty{padding:20px 5px}}
+@media(max-width:380px){.app{padding:0 12px}h1{font-size:29px}.name{font-size:13px}.brand-sub{font-size:5px}.logo{width:30px;height:30px}.top-actions button.sm{font-size:9px;padding:5px}.preview .pv-main{font-size:14px}.input-card{padding:15px}.input-prefix{display:none}.input-row{padding-left:10px}.st-t{font-size:7px}.stage-tf{font-size:12px}.plot-legend{gap:11px}.controls{padding-left:10px;padding-right:10px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* 정보 글자는 장식보다 가독성을 우선합니다. */
+.msg{font-size:12px}.pv-sub{font-size:11px}.start-footer,.ai-status{font-size:10px}.stage-note{font-size:12px}.insight-icon{flex-shrink:0}.st-t{font-size:12px}
+@media(max-width:1080px){.st-t{font-size:10px}}
+@media(max-width:760px){.st-t{font-size:8px}.msg{font-size:11px}.stage-note{font-size:11px}}
+
+.mobile-k-slot{display:none}
+@media(max-width:760px){.mobile-k-slot:not(:empty){display:block}.mobile-k-slot .b-slider{background:var(--surface);border:1px solid var(--line);border-radius:14px;animation:none}.mobile-k-slot .k-poles,.mobile-k-slot .k-zeta{font-size:12px}.mobile-k-slot .chips{gap:6px}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <a class="brand" href="#" id="brand" aria-label="근궤적 스튜디오 처음 화면">
+      <span class="logo" aria-hidden="true"><svg viewBox="0 0 36 36"><path d="M7 27C18 27 19 18 29 7M7 9C18 9 19 18 29 29"/><path d="M7 5v8M3 9h8"/><circle cx="29" cy="7" r="3"/></svg></span>
+      <span class="brand-copy"><span class="name">근궤적 스튜디오</span><span class="brand-sub">ROOT LOCUS STUDIO</span></span>
+    </a>
+    <nav class="top-nav" aria-label="주 메뉴"><button id="nav-learn" class="nav-link active">학습 공간</button><button id="nav-examples" class="nav-link">예제 둘러보기</button></nav>
+    <div class="top-actions">
+      <button id="btn-home" class="ghost sm" hidden>＋ 새 문제</button>
+      <button id="btn-records" class="ghost sm"><span aria-hidden="true">◷</span> 학습 기록</button>
+      <button id="btn-theme" class="ghost icon" aria-label="어두운 화면으로 전환" title="화면 테마 변경">◐</button>
+    </div>
+  </header>
+
+  <main id="screen-start" class="screen start">
+    <section class="start-left">
+      <p class="eyebrow"><span class="status-dot"></span> 눈으로 이해하는 제어공학</p>
+      <h1>수식이 궤적이 되는 순간,<br><em>이해가 시작됩니다.</em></h1>
+      <p class="lede">복잡했던 근궤적을 한 단계씩, 내 속도로.<br>직접 움직여 보고 수식과 그래프의 연결을 발견하세요.</p>
+      <section class="input-card" aria-label="전달함수 입력">
+        <div class="field-top"><label for="tf-input" class="field-label">어떤 시스템을 살펴볼까요?</label><span class="micro">개루프 전달함수</span></div>
+        <div class="input-row"><span class="input-prefix" aria-hidden="true">G(s)H(s)</span><input id="tf-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="tf-msg" placeholder="K/(s(s+1)(s+2))"><button id="btn-photo" class="ghost" type="button" hidden>사진 입력</button></div>
+        <input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp" hidden>
+        <div id="photo-panel" class="photo" hidden></div>
+        <div id="tf-preview" class="preview" aria-live="polite"></div>
+        <p id="tf-msg" class="msg" aria-live="polite"></p>
+        <div class="start-actions"><button id="btn-start" class="primary lg">이 시스템 학습하기 <span aria-hidden="true">↗</span></button><span class="start-shortcut"><kbd>Enter</kbd> 로 시작</span></div>
+      </section>
+      <details class="scope"><summary>입력 방법과 지원 범위 <span aria-hidden="true">＋</span></summary><ul><li>연속시간, 음의 피드백, K ≥ 0, 실수 계수를 지원합니다.</li><li>분모는 4차 이하, 분자 차수는 분모 차수 이하입니다.</li><li>분모 전체를 괄호로 묶어 주세요. 예: <code>K/(s(s+1)(s+2))</code></li><li><code>s</code>, <code>K</code>, 숫자, <code>+ − * / ^</code>, 괄호를 쓸 수 있습니다. K를 생략하면 전체에 곱한 것으로 봅니다.</li><li>극점·영점 상쇄, 시간 지연, 음의 K, 양의 피드백은 지원하지 않습니다.</li></ul></details>
+    </section>
+    <section class="start-right" aria-label="입력한 시스템의 근궤적 미리보기">
+      <div class="preview-heading"><span><span class="status-dot"></span> LIVE PREVIEW</span><span class="preview-tag">s-plane</span></div>
+      <div class="plane-card hero-plane"><div class="plot-caption"><span>근궤적 미리보기</span><span class="micro">입력한 식으로 계산됩니다</span></div><svg id="preview-graph" class="plane" role="img" aria-label="입력한 시스템의 근궤적 미리보기"></svg><div class="plot-legend"><span><i class="legend-pole">×</i> 극점</span><span><i class="legend-zero">○</i> 영점</span><span><i class="legend-line"></i> 근궤적</span><span><i class="legend-dash"></i> 점근선</span></div></div>
+      <div class="preview-foot"><span class="preview-foot-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 4v9a4 4 0 0 0 4 4h10m-5-5 5 5-5 5"/></svg></span><p><b>작은 변화, 새로운 궤적.</b><br>식을 바꿔 보세요. 오른쪽 그래프가 함께 달라집니다.</p></div>
+    </section>
+    <section class="example-section" id="example-section" aria-labelledby="examples-title">
+      <div class="section-heading"><div><p class="eyebrow">EXPLORE THE EXAMPLES</p><h2 id="examples-title">예제로 가볍게 시작하세요</h2></div><p>익숙한 시스템부터 새로운 발견까지</p></div>
+      <div id="examples" class="example-grid"></div>
+    </section>
+    <footer class="start-footer"><span>근궤적 AI 튜터 · 제어공학 학습 프로젝트</span><span id="ai-status" class="ai-status">학습 기능 준비 중…</span><span>내 브라우저에 학습 기록 저장</span></footer>
+  </main>
+
+  <main id="screen-lesson" class="screen lesson" hidden>
+    <aside class="rail" id="rail" aria-label="단계별 풀이">
+      <div class="lesson-sidebar"><div class="sidebar-heading"><span class="eyebrow">LEARNING PATH</span><strong>이해를 향한 9단계</strong><span id="progress-label" class="micro">1 / 9 단계</span><div class="progress-track" aria-hidden="true"><div id="progress-fill"></div></div></div><nav class="stepper" id="stepper" aria-label="단계 이동"></nav><div class="sidebar-foot"><span>서두르지 않아도 괜찮아요.</span><span>각 단계를 내 속도로 살펴보세요.</span><button id="btn-all" class="ghost wide">완성된 궤적 보기 ↗</button><span class="keyboard-note"><kbd>←</kbd> <kbd>→</kbd> 단계 이동</span></div></div>
+      <div class="lesson-details" id="lesson-details"><div class="panel-tabs" role="tablist" aria-label="학습 도구"><button id="tab-solution" role="tab" aria-controls="step-body" aria-selected="true" class="selected">단계별 풀이</button><button id="tab-coach" role="tab" aria-controls="coach" aria-selected="false">힌트 & 연습</button></div><div class="details-scroll" id="details-scroll"><article id="step-body" class="step-body" role="tabpanel" aria-labelledby="tab-solution"></article><section id="coach" class="coach" role="tabpanel" aria-labelledby="tab-coach" hidden></section></div></div>
+    </aside>
+    <section class="stage" aria-label="s평면 그래프">
+      <div class="stage-heading"><div><p class="eyebrow">ROOT LOCUS</p><h2 id="current-title">특성방정식</h2></div><button id="btn-motion" class="ghost sm" aria-pressed="false">모션 켜짐</button></div>
+      <div class="graph-panel"><div class="stage-head"><div><span class="micro">분석 중인 시스템</span><div id="stage-tf" class="stage-tf"></div></div><span class="canvas-label">s-plane</span></div><div class="plane-wrap"><svg id="main-graph" class="plane" role="img" aria-label="s평면 근궤적"></svg><div id="graph-empty" class="graph-empty"><span class="empty-math">1 + G(s)H(s) = 0</span><p>먼저 특성방정식을 정리합니다.</p><span>다음 단계에서 극점과 영점이 나타나요.</span></div></div><div class="plot-legend"><span><i class="legend-pole">×</i> 극점</span><span><i class="legend-zero">○</i> 영점</span><span><i class="legend-line"></i> 근궤적</span><span><i class="legend-dash"></i> 점근선</span><span><i class="legend-key">●</i> 핵심 점</span></div></div>
+      <div id="mobile-k-slot" class="mobile-k-slot"></div>
+      <div class="stage-insight"><span class="insight-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 4v9a4 4 0 0 0 4 4h10m-5-5 5 5-5 5"/></svg></span><p id="stage-note" class="stage-note"></p></div>
+      <div class="controls" role="toolbar" aria-label="재생 조절"><button id="btn-prev" class="ghost" aria-label="이전 단계">← 이전</button><div class="play-controls"><button id="btn-replay" class="ghost" title="현재 단계 다시 재생">↻ 다시 보기</button><button id="btn-pause" class="ghost">일시정지</button><button id="btn-skip" class="ghost" title="현재 단계의 움직임을 건너뛰고 결과 보기">건너뛰기</button></div><button id="btn-next" class="primary">다음 →</button></div>
+    </section>
+  </main>
+
+  <div id="records" class="overlay" hidden><div class="drawer" role="dialog" aria-modal="true" aria-labelledby="records-title"><div class="drawer-head"><div><p class="eyebrow">YOUR LEARNING</p><h3 id="records-title">학습 기록</h3></div><button id="records-close" class="ghost sm">닫기 ✕</button></div><ul id="records-list" class="records-list"></ul><p class="muted sm">기록은 이 기기의 브라우저에 저장됩니다. 다른 기기와 자동으로 동기화되지 않으며, 브라우저 데이터를 지우면 사라집니다.</p></div></div>
+  <div id="example" class="overlay" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ex-title"><div class="sheet-head"><div><p class="eyebrow">간단한 예시</p><h3 id="ex-title"></h3><p id="ex-tf" class="ex-tf"></p></div><button id="ex-back" class="primary sm">원래 문제로 돌아가기</button></div><div class="sheet-body"><div class="plane-card"><svg id="ex-graph" class="plane" role="img" aria-label="예시 그래프"></svg></div><div id="ex-body" class="ex-body"></div></div></div></div>
+</div>
+<script>/* ===== js/complex.js ===== */
+/*
+ * complex.js — 복소수 계산
+ * 복소수 하나를 {re: 실수부, im: 허수부} 객체로 나타냅니다.
+ * 근궤적의 극점·영점·폐루프 극점은 모두 복소수라서 가장 밑바탕이 되는 파일입니다.
+ */
+(function (RL) {
+  'use strict';
+
+  function c(re, im) { return { re: re, im: im || 0 }; }
+  function add(a, b) { return c(a.re + b.re, a.im + b.im); }
+  function sub(a, b) { return c(a.re - b.re, a.im - b.im); }
+  function mul(a, b) { return c(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re); }
+  function scale(a, k) { return c(a.re * k, a.im * k); }
+  function div(a, b) {
+    // (a / b) = a * conj(b) / |b|^2
+    var d = b.re * b.re + b.im * b.im;
+    return c((a.re * b.re + a.im * b.im) / d, (a.im * b.re - a.re * b.im) / d);
+  }
+  function abs(a) { return Math.hypot(a.re, a.im); }
+  // 각도(라디안). atan2를 써서 사분면까지 정확히 구합니다. 결과 범위는 (-π, π].
+  function arg(a) { return Math.atan2(a.im, a.re); }
+  function conj(a) { return c(a.re, -a.im); }
+  function dist(a, b) { return Math.hypot(a.re - b.re, a.im - b.im); }
+
+  RL.complex = { c: c, add: add, sub: sub, mul: mul, scale: scale, div: div, abs: abs, arg: arg, conj: conj, dist: dist };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== js/poly.js ===== */
+/*
+ * poly.js — 다항식 계산과 근 찾기
+ * 다항식은 '내림차순 계수 배열'로 나타냅니다 (MATLAB과 같은 방식).
+ *   [1, 3, 2]  →  s² + 3s + 2
+ * 근궤적에서 특성방정식 D(s) + K·N(s) = 0의 근(= 폐루프 극점)을 구하는 핵심 도구입니다.
+ */
+(function (RL) {
+  'use strict';
+  var C = RL.complex;
+
+  // 맨 앞의 0 계수를 지웁니다. [0, 0, 1, 2] → [1, 2]
+  function trim(p) {
+    var max = 0, i;
+    for (i = 0; i < p.length; i++) max = Math.max(max, Math.abs(p[i]));
+    if (max === 0) return [0];
+    i = 0;
+    while (i < p.length - 1 && Math.abs(p[i]) <= 1e-13 * max) i++;
+    return p.slice(i);
+  }
+  function degree(p) { return trim(p).length - 1; }
+
+  // 모든 계수가 (기준 크기 대비) 0이면 '항등적으로 0'인 다항식으로 봅니다.
+  function isZero(p, ref) {
+    var r = ref || 1, i;
+    for (i = 0; i < p.length; i++) if (Math.abs(p[i]) > 1e-10 * r) return false;
+    return true;
+  }
+
+  function pad(p, len) { var out = p.slice(); while (out.length < len) out.unshift(0); return out; }
+  function add(p, q) {
+    var n = Math.max(p.length, q.length), a = pad(p, n), b = pad(q, n), out = [], i;
+    for (i = 0; i < n; i++) out.push(a[i] + b[i]);
+    return trim(out);
+  }
+  function scale(p, k) { return trim(p.map(function (v) { return v * k; })); }
+  function sub(p, q) { return add(p, scale(q, -1)); }
+  function mul(p, q) {
+    var out = new Array(p.length + q.length - 1).fill(0), i, j;
+    for (i = 0; i < p.length; i++) for (j = 0; j < q.length; j++) out[i + j] += p[i] * q[j];
+    return trim(out);
+  }
+  function deriv(p) {
+    var n = p.length - 1, out = [], i;
+    if (n < 1) return [0];
+    for (i = 0; i < n; i++) out.push(p[i] * (n - i));
+    return trim(out);
+  }
+  function evalReal(p, x) { var v = 0, i; for (i = 0; i < p.length; i++) v = v * x + p[i]; return v; }
+  function evalC(p, z) {
+    var v = C.c(0, 0), i;
+    for (i = 0; i < p.length; i++) v = C.add(C.mul(v, z), C.c(p[i], 0));
+    return v;
+  }
+  function fromFactors(factors) {
+    var p = [1], i;
+    for (i = 0; i < factors.length; i++) p = mul(p, factors[i]);
+    return p;
+  }
+
+  // 다항식 나눗셈: p = q·d + r
+  function divmod(p, d) {
+    p = trim(p); d = trim(d);
+    var out = [], rem = p.slice(), i, k, coef;
+    if (d.length > p.length) return { q: [0], r: p };
+    for (i = 0; i <= p.length - d.length; i++) {
+      coef = rem[i] / d[0];
+      out.push(coef);
+      for (k = 0; k < d.length; k++) rem[i + k] -= coef * d[k];
+    }
+    return { q: trim(out), r: trim(rem.slice(p.length - d.length + 1)) };
+  }
+
+  // ── 근 찾기 ──────────────────────────────────────────────
+  // 1·2차는 근의 공식으로 정확하게, 3차 이상은 Aberth 반복법으로 모든 근을 동시에 구합니다.
+  function quadRoots(b, c0) { // s² + b·s + c0 = 0
+    var disc = b * b - 4 * c0, q, r;
+    if (disc >= 0) {
+      q = -(b + (b >= 0 ? 1 : -1) * Math.sqrt(disc)) / 2; // 상쇄 오차를 피하는 형태
+      if (q === 0) return [C.c(0, 0), C.c(0, 0)];
+      return [C.c(q, 0), C.c(c0 / q, 0)];
+    }
+    r = Math.sqrt(-disc) / 2;
+    return [C.c(-b / 2, r), C.c(-b / 2, -r)];
+  }
+
+  function aberth(a) { // a는 최고차 계수가 1인 다항식, 차수 3 이상
+    var n = a.length - 1, dp = deriv(a), z = [], r = 0, i, k, j, iter;
+    for (i = 1; i <= n; i++) r = Math.max(r, Math.pow(Math.abs(a[i]), 1 / i));
+    r = Math.max(2 * r, 1e-3);
+    for (k = 0; k < n; k++) {
+      var ang = 2 * Math.PI * k / n + 0.4;
+      z.push(C.c(r * Math.cos(ang), r * Math.sin(ang)));
+    }
+    for (iter = 0; iter < 800; iter++) {
+      var maxCorr = 0;
+      for (k = 0; k < n; k++) {
+        var pz = evalC(a, z[k]);
+        if (pz.re === 0 && pz.im === 0) continue;
+        var ratio = C.div(pz, evalC(dp, z[k])), sum = C.c(0, 0);
+        for (j = 0; j < n; j++) if (j !== k) sum = C.add(sum, C.div(C.c(1, 0), C.sub(z[k], z[j])));
+        var w = C.div(ratio, C.sub(C.c(1, 0), C.mul(ratio, sum)));
+        if (!isFinite(w.re) || !isFinite(w.im)) continue;
+        z[k] = C.sub(z[k], w);
+        maxCorr = Math.max(maxCorr, C.abs(w) / Math.max(1, C.abs(z[k])));
+      }
+      if (maxCorr < 1e-15) break;
+    }
+    return z;
+  }
+
+  // 실수 계수 다항식이므로 복소근은 켤레쌍으로 나와야 합니다. 작은 수치 오차를 정리합니다.
+  function tidyRoots(rs) {
+    var out = rs.map(function (z) {
+      return Math.abs(z.im) < 1e-11 * Math.max(1, Math.abs(z.re)) ? C.c(z.re, 0) : C.c(z.re, z.im);
+    });
+    var used = new Array(out.length).fill(false), i, j;
+    for (i = 0; i < out.length; i++) {
+      if (used[i] || out[i].im <= 0) continue;
+      var best = -1, bd = Infinity;
+      for (j = 0; j < out.length; j++) {
+        if (j === i || used[j] || out[j].im >= 0) continue;
+        var d = C.dist(out[j], C.conj(out[i]));
+        if (d < bd) { bd = d; best = j; }
+      }
+      if (best >= 0) {
+        var re = (out[i].re + out[best].re) / 2, im = (out[i].im - out[best].im) / 2;
+        out[i] = C.c(re, im); out[best] = C.c(re, -im);
+        used[i] = used[best] = true;
+      }
+    }
+    return out;
+  }
+
+  function roots(p) {
+    p = trim(p);
+    var n = p.length - 1, res = [], a;
+    if (n < 1) return [];
+    while (n > 0 && p[n] === 0) { res.push(C.c(0, 0)); p = p.slice(0, n); n--; } // 원점 근은 정확히 0으로
+    if (n === 0) return res;
+    a = p.map(function (v) { return v / p[0]; });
+    if (n === 1) res.push(C.c(-a[1], 0));
+    else if (n === 2) res = res.concat(quadRoots(a[1], a[2]));
+    else res = res.concat(aberth(a));
+    return tidyRoots(res);
+  }
+
+  // k번 미분한 다항식
+  function derivN(p, k) { var q = p, i; for (i = 0; i < k; i++) q = deriv(q); return q; }
+  // 값의 크기 대비 잔차(상대 오차)
+  function relResidual(p, z) {
+    var v = C.abs(evalC(p, z)), ref = 0, az = Math.max(1, C.abs(z)), i, n = p.length - 1;
+    for (i = 0; i <= n; i++) ref += Math.abs(p[i]) * Math.pow(az, n - i);
+    return ref === 0 ? 0 : v / ref;
+  }
+
+  // 겹친 근(중근)을 하나로 묶어 {s, mult}로 돌려줍니다.
+  // 가까운 근 무리의 평균을 구하고, 그 점에서 p, p′, … p^(k-1)이 모두 0인지 확인해야 중근으로 인정합니다.
+  function groupedRoots(p) {
+    p = trim(p);
+    var rs = roots(p), used = new Array(rs.length).fill(false), out = [], i, j;
+    for (i = 0; i < rs.length; i++) {
+      if (used[i]) continue;
+      var cluster = [i], rad = 1e-4 * Math.max(1, C.abs(rs[i]));
+      for (j = i + 1; j < rs.length; j++) if (!used[j] && C.dist(rs[i], rs[j]) < rad) cluster.push(j);
+      var accepted = false;
+      if (cluster.length > 1) {
+        var m = C.c(0, 0);
+        cluster.forEach(function (idx) { m = C.add(m, rs[idx]); });
+        m = C.scale(m, 1 / cluster.length);
+        if (Math.abs(m.im) < 1e-9 * Math.max(1, Math.abs(m.re))) m = C.c(m.re, 0);
+        var ok = true;
+        for (var k = 0; k < cluster.length; k++) if (relResidual(derivN(p, k), m) > 1e-8) { ok = false; break; }
+        if (ok) {
+          cluster.forEach(function (idx) { used[idx] = true; });
+          out.push({ s: m, mult: cluster.length });
+          accepted = true;
+        }
+      }
+      if (!accepted) { used[i] = true; out.push({ s: rs[i], mult: 1 }); }
+    }
+    // 실수부 큰 순(오른쪽부터), 같으면 허수부 큰 순
+    out.sort(function (x, y) { return (y.s.re - x.s.re) || (y.s.im - x.s.im); });
+    return out;
+  }
+
+  RL.poly = {
+    trim: trim, degree: degree, isZero: isZero, add: add, sub: sub, scale: scale, mul: mul,
+    deriv: deriv, derivN: derivN, evalReal: evalReal, evalC: evalC, fromFactors: fromFactors,
+    divmod: divmod, roots: roots, groupedRoots: groupedRoots, relResidual: relResidual
+  };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== js/format.js ===== */
+/*
+ * format.js — 숫자·수식을 사람이 읽기 좋은 글자로 바꿉니다.
+ * 정확한 값(정수, 분수, 제곱근)으로 쓸 수 있으면 그렇게 쓰고, 아니면 소수로 씁니다.
+ *   -1.5 → "−3/2",  1.4142135… → "√2",  2.8284… → "2√2"
+ */
+(function (RL) {
+  'use strict';
+  var MINUS = '−';
+  var SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+
+  function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a; }
+
+  // 연분수로 분수 찾기. 오차가 아주 작을 때만 분수로 인정합니다.
+  function toFraction(x, maxDen) {
+    maxDen = maxDen || 1000;
+    if (!isFinite(x)) return null;
+    var sign = x < 0 ? -1 : 1, v = Math.abs(x), h1 = 1, h0 = 0, k1 = 0, k0 = 1, b = v, i;
+    for (i = 0; i < 40; i++) {
+      var a = Math.floor(b), h2 = a * h1 + h0, k2 = a * k1 + k0;
+      if (k2 > maxDen) break;
+      h0 = h1; h1 = h2; k0 = k1; k1 = k2;
+      if (Math.abs(v - h1 / k1) <= 1e-9 * Math.max(1, v)) return { num: sign * h1, den: k1 };
+      if (b - a < 1e-15) break;
+      b = 1 / (b - a);
+    }
+    return null;
+  }
+
+  function trimZeros(str) { return str.indexOf('.') >= 0 ? str.replace(/0+$/, '').replace(/\.$/, '') : str; }
+  // 소수 표기(기본 유효숫자 4자리 수준), 음수는 수학 기호 '−'
+  function dec(x, digits) {
+    digits = digits === undefined ? 3 : digits;
+    if (Math.abs(x) < 0.5 * Math.pow(10, -digits)) x = 0;
+    var s = trimZeros(x.toFixed(digits));
+    return s.charAt(0) === '-' ? MINUS + s.slice(1) : s;
+  }
+
+  // √n 을 a√b 꼴로 정리
+  function sqrtSimplify(n) {
+    var a = 1, b = n, f;
+    for (f = 2; f * f <= b; f++) while (b % (f * f) === 0) { b /= f * f; a *= f; }
+    if (b === 1) return String(a);
+    return (a === 1 ? '' : a) + '√' + b;
+  }
+
+  // 정확한 꼴(정수·분수·제곱근)로 쓸 수 있으면 문자열, 아니면 null
+  function exact(x) {
+    var f = toFraction(x, 1000);
+    if (f) {
+      var s = (f.num < 0 ? MINUS : '') + Math.abs(f.num) + (f.den === 1 ? '' : '/' + f.den);
+      return s;
+    }
+    var ax = Math.abs(x);
+    if (ax > 0) {
+      var g = toFraction(ax * ax, 100), sgn = x < 0 ? MINUS : '';
+      if (g && g.den === 1 && g.num < 100000) return sgn + sqrtSimplify(g.num);
+      if (g && g.num * g.den < 100000) {
+        // √(p/q) = √(pq)/q 를 a√b/c 꼴로 정리 (예: √(4/27) → 2√3/9)
+        var a = 1, b = g.num * g.den, f;
+        for (f = 2; f * f <= b; f++) while (b % (f * f) === 0) { b /= f * f; a *= f; }
+        var c = g.den, d = gcd(a, c);
+        a /= d; c /= d;
+        var top = (a === 1 ? '' : a) + (b === 1 ? (a === 1 ? '1' : '') : '√' + b);
+        return sgn + top + (c === 1 ? '' : '/' + c);
+      }
+    }
+    return null;
+  }
+
+  // 화면용 숫자: 정확한 꼴이 있으면 그것, 소수와 다르면 "≈ 소수"도 붙임
+  function num(x, digits) {
+    var e = exact(x), d = dec(x, digits);
+    if (e === null) return d;
+    if (e === d) return e;
+    if (/^[−]?\d+$/.test(e) || /^[−]?\d+\/\d+$/.test(e)) return e.length <= 7 ? e : d;
+    return e + ' ≈ ' + d;
+  }
+
+  // 복소수 안에서는 '≈ 소수'를 붙이지 않고 정확한 꼴이 짧으면 그것, 아니면 소수
+  function numShort(x, digits) { var e = exact(x); return e !== null && e.length <= 7 ? e : dec(x, digits); }
+
+  function cnum(z, digits) {
+    var re = Math.abs(z.re) < 1e-12 ? 0 : z.re, im = Math.abs(z.im) < 1e-12 ? 0 : z.im;
+    if (im === 0) return numShort(re, digits);
+    var imS = Math.abs(Math.abs(im) - 1) < 1e-12 ? 'j' : 'j' + numShort(Math.abs(im), digits);
+    if (re === 0) return (im < 0 ? MINUS : '') + imS;
+    return numShort(re, digits) + (im < 0 ? ' ' + MINUS + ' ' : ' + ') + imS;
+  }
+
+  function sup(n) { return String(n).split('').map(function (ch) { return SUP[ch]; }).join(''); }
+
+  // 다항식 → "s³ + 9s² + 27s + 27" (내림차순 계수 배열)
+  function poly(p, v) {
+    v = v || 's';
+    var n = p.length - 1, out = '', i;
+    for (i = 0; i <= n; i++) {
+      var a = p[i], pw = n - i;
+      if (Math.abs(a) < 1e-12) continue;
+      var mag = Math.abs(a), coef = (mag === 1 && pw > 0) ? '' : num(mag);
+      var term = coef + (pw > 0 ? v + (pw > 1 ? sup(pw) : '') : '');
+      if (out === '') out = (a < 0 ? MINUS : '') + term;
+      else out += (a < 0 ? ' ' + MINUS + ' ' : ' + ') + term;
+    }
+    return out === '' ? '0' : out;
+  }
+
+  // K 다항식은 상수항부터: [−1, 6] (= −K + 6) → "6 − K"
+  function kpoly(p) {
+    var n = p.length - 1, out = '', i;
+    for (i = n; i >= 0; i--) {
+      var a = p[i], pw = n - i;
+      if (Math.abs(a) < 1e-12) continue;
+      var mag = Math.abs(a), coef = (mag === 1 && pw > 0) ? '' : num(mag);
+      var term = coef + (pw > 0 ? 'K' + (pw > 1 ? sup(pw) : '') : '');
+      if (out === '') out = (a < 0 ? MINUS : '') + term;
+      else out += (a < 0 ? ' ' + MINUS + ' ' : ' + ') + term;
+    }
+    return out === '' ? '0' : out;
+  }
+
+  function deg(x) { return dec(x, 1) + '°'; }
+
+  RL.format = { gcd: gcd, toFraction: toFraction, dec: dec, exact: exact, num: num, numShort: numShort, cnum: cnum, poly: poly, kpoly: kpoly, deg: deg, MINUS: MINUS };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== js/routh.js ===== */
+/*
+ * routh.js — Routh 표, 허수축 교차점, 안정한 K 범위
+ *
+ * 특성방정식 D(s) + K·N(s) = 0의 계수는 K에 대한 식입니다(예: 8 + K).
+ * 그래서 Routh 표의 칸을 'K에 대한 분수식'으로 계산합니다.
+ *   한 칸 = n(K) / d(K)   (n, d는 K에 대한 다항식)
+ *
+ * 안정 범위는 두 가지 방법으로 구해 서로 대조합니다.
+ *   ① Routh 표 첫 열의 부호
+ *   ② 각 구간의 대표 K에서 폐루프 극점을 직접 계산
+ * 둘이 다르면 결과에 '불일치'를 표시합니다 (정상이라면 일어나지 않아야 함).
+ */
+(function (RL) {
+  'use strict';
+  var P = RL.poly, C = RL.complex, F = RL.format;
+
+  // ── K에 대한 분수식 ─────────────────────────────────
+  function maxAbs(p) { return p.reduce(function (m, v) { return Math.max(m, Math.abs(v)); }, 0); }
+  function rk(n, d) { return { n: P.trim(n), d: P.trim(d || [1]) }; }
+  function isZeroRk(r) { return P.isZero(r.n, Math.max(1, maxAbs(r.d))); }
+  function nearInt(v) { return Math.abs(v - Math.round(v)) < 1e-9 * Math.max(1, Math.abs(v)); }
+
+  function normalize(r) {
+    var n = r.n.slice(), d = r.d.slice();
+    if (d[0] < 0) { n = n.map(function (v) { return -v; }); d = d.map(function (v) { return -v; }); }
+    var all = n.concat(d);
+    if (all.every(nearInt)) { // 정수 계수면 최대공약수로 약분해 보기 좋게
+      n = n.map(Math.round); d = d.map(Math.round);
+      var g = 0;
+      all.forEach(function (v) { g = F.gcd(g, Math.round(Math.abs(v))); });
+      if (g > 1) { n = n.map(function (v) { return v / g; }); d = d.map(function (v) { return v / g; }); }
+    }
+    if (d.length === 1 && d[0] !== 1 && n.every(function (v) { return nearInt(v / d[0]); })) {
+      n = n.map(function (v) { return Math.round(v / d[0]); }); d = [1];
+    }
+    return rk(n, d);
+  }
+
+  function simplify(r) {
+    var n = P.trim(r.n), d = P.trim(r.d);
+    if (P.isZero(n, Math.max(1, maxAbs(d)))) return rk([0], [1]);
+    if (d.length > 1) {
+      var dm = P.divmod(n, d);
+      if (P.isZero(dm.r, Math.max(1, maxAbs(n)))) return normalize(rk(dm.q, [1]));
+      // 분모의 근이 분자의 근이기도 하면 그 인수로 약분
+      P.groupedRoots(d).forEach(function (g) {
+        if (g.s.im < 0) return;
+        var f = g.s.im === 0 ? [1, -g.s.re] : [1, -2 * g.s.re, g.s.re * g.s.re + g.s.im * g.s.im];
+        for (var t = 0; t < g.mult; t++) {
+          var a = P.divmod(n, f), b = P.divmod(d, f);
+          if (P.isZero(a.r, Math.max(1, maxAbs(n))) && P.isZero(b.r, Math.max(1, maxAbs(d)))) { n = a.q; d = b.q; }
+        }
+      });
+    }
+    return normalize(rk(n, d));
+  }
+  function mulRk(a, b) { return simplify(rk(P.mul(a.n, b.n), P.mul(a.d, b.d))); }
+  function subRk(a, b) { return simplify(rk(P.sub(P.mul(a.n, b.d), P.mul(b.n, a.d)), P.mul(a.d, b.d))); }
+  function divRk(a, b) { return simplify(rk(P.mul(a.n, b.d), P.mul(a.d, b.n))); }
+  function evalRk(r, K) { return P.evalReal(r.n, K) / P.evalReal(r.d, K); }
+  function fmtRk(r) {
+    var top = F.kpoly(r.n);
+    if (r.d.length === 1 && r.d[0] === 1) return top;
+    var bot = F.kpoly(r.d), topWrap = r.n.length > 1 ? '(' + top + ')' : top, botWrap = r.d.length > 1 ? '(' + bot + ')' : bot;
+    return topWrap + '/' + botWrap;
+  }
+
+  // 특성방정식 계수: s의 각 차수마다 (D계수 + K·N계수)를 K 다항식 [N_i, D_i]로
+  function charCoefficients(N, D) {
+    var n = D.length - 1, Np = N.slice();
+    while (Np.length < D.length) Np.unshift(0);
+    var out = [], i;
+    for (i = 0; i <= n; i++) out.push(P.trim([Np[i], D[i]]));
+    return out; // out[i]는 s^(n−i)의 계수
+  }
+
+  // ── Routh 표 (K를 문자로 둔 채) ───────────────────────
+  function routhTable(N, D) {
+    var coef = charCoefficients(N, D), n = coef.length - 1, width = Math.floor(n / 2) + 1;
+    var rows = [[], []], special = [], i, j;
+    for (j = 0; j < width; j++) {
+      rows[0].push(rk(coef[2 * j] || [0]));
+      rows[1].push(rk(coef[2 * j + 1] || [0]));
+    }
+    for (i = 2; i <= n; i++) {
+      var prev = rows[i - 1], prev2 = rows[i - 2], row = [];
+      for (j = 0; j < width; j++) {
+        var B = prev2[j + 1] || rk([0]), Dd = prev[j + 1] || rk([0]);
+        // (A·B − C·D)/A 에서 D가 0이면 그대로 B
+        row.push(isZeroRk(Dd) ? B : subRk(B, divRk(mulRk(prev2[0], Dd), prev[0])));
+      }
+      if (row.every(isZeroRk)) { // 한 행 전체가 항상 0 → 보조방정식의 미분으로 대체
+        var pw = n - (i - 1);
+        row = prev.map(function (e, k) { return mulRk(e, rk([pw - 2 * k])); });
+        special.push({ row: i, type: 'zeroRow' });
+      } else if (isZeroRk(row[0])) { // 첫 열만 항상 0 → ε 방법 (이후 칸은 구간별 수치 계산)
+        rows.push(row);
+        special.push({ row: i, type: 'firstColZero' });
+        break;
+      }
+      rows.push(row);
+    }
+    var powers = rows.map(function (_, k) { return n - k; });
+    return { powers: powers, rows: rows, special: special, degree: n };
+  }
+
+  // 특정 K 값에서 숫자로 계산한 Routh 첫 열 (ε 처리 포함)
+  function routhNumericFirstColumn(coeffs) {
+    var n = coeffs.length - 1, width = Math.floor(n / 2) + 1, scale = maxAbs(coeffs) || 1, eps = 1e-9 * scale;
+    var r0 = [], r1 = [], rows, i, j;
+    for (j = 0; j < width; j++) { r0.push(coeffs[2 * j] || 0); r1.push(coeffs[2 * j + 1] || 0); }
+    rows = [r0, r1];
+    for (i = 2; i <= n; i++) {
+      var prev = rows[i - 1], prev2 = rows[i - 2], row = [];
+      if (prev.every(function (v) { return Math.abs(v) < 1e-12 * scale; })) break;
+      if (Math.abs(prev[0]) < 1e-12 * scale) prev[0] = eps;
+      for (j = 0; j < width; j++) row.push(((prev[0] * (prev2[j + 1] || 0)) - (prev2[0] * (prev[j + 1] || 0))) / prev[0]);
+      if (row.every(function (v) { return Math.abs(v) < 1e-12 * scale; })) {
+        var pw = n - (i - 1);
+        row = prev.map(function (e, k) { return e * (pw - 2 * k); });
+      }
+      rows.push(row);
+    }
+    var col = rows.map(function (r) { return Math.abs(r[0]) < 1e-12 * scale ? eps : r[0]; });
+    var changes = 0;
+    for (i = 1; i < col.length; i++) if (col[i] * col[i - 1] < 0) changes++;
+    return { column: col, signChanges: changes };
+  }
+
+  // ── 허수축 교차: s = jω를 대입해 실수부·허수부가 모두 0이 되는 (ω, K) ──
+  function splitJw(p) { // p(jω) = R(ω) + j·I(ω)
+    var n = p.length - 1, R = new Array(n + 1).fill(0), I = new Array(n + 1).fill(0), i;
+    for (i = 0; i <= n; i++) {
+      var pw = n - i, a = p[i], m = pw % 4;
+      if (m === 0) R[i] = a; else if (m === 1) I[i] = a; else if (m === 2) R[i] = -a; else I[i] = -a;
+    }
+    return { R: P.trim(R), I: P.trim(I) };
+  }
+
+  function jwCrossings(N, D) {
+    var d = splitJw(D), nn = splitJw(N), out = [];
+    var E = P.sub(P.mul(d.R, nn.I), P.mul(d.I, nn.R)); // K를 소거한 식
+    if (!P.isZero(E, maxAbs(D) * maxAbs(N))) {
+      P.groupedRoots(E).forEach(function (g) {
+        var w = g.s.re;
+        if (g.s.im !== 0 || w <= 1e-9) return;
+        var nr = P.evalReal(nn.R, w), ni = P.evalReal(nn.I, w), K;
+        K = Math.abs(nr) > Math.abs(ni) ? -P.evalReal(d.R, w) / nr : -P.evalReal(d.I, w) / ni;
+        if (!(K > 1e-9)) return;
+        var chk = C.abs(C.add(P.evalC(D, C.c(0, w)), C.scale(P.evalC(N, C.c(0, w)), K)));
+        if (chk > 1e-7 * Math.max(1, C.abs(P.evalC(D, C.c(0, w))))) return;
+        out.push({ omega: w, K: K });
+      });
+    }
+    // ω = 0: 실수 근이 원점을 지나는 경우
+    var N0 = P.evalReal(N, 0), D0 = P.evalReal(D, 0);
+    if (Math.abs(N0) > 1e-12) {
+      var K0 = -D0 / N0;
+      if (K0 > 1e-9) out.push({ omega: 0, K: K0 });
+    }
+    out.sort(function (a, b) { return a.K - b.K || a.omega - b.omega; });
+    return out;
+  }
+
+  // 교차 K에서 보조방정식: 다음 행 첫 칸이 0이 되는 행을 그 K로 계산
+  function auxEquation(table, K) {
+    for (var i = 1; i < table.rows.length; i++) {
+      var v = evalRk(table.rows[i][0], K), ref = Math.max(1, Math.abs(evalRk(table.rows[i - 1][0], K)));
+      if (Math.abs(v) < 1e-7 * ref && i - 1 >= 0) {
+        var row = table.rows[i - 1], pw = table.powers[i - 1], coef = [];
+        for (var k = 0; k < row.length && pw - 2 * k >= 0; k++) {
+          coef.push(evalRk(row[k], K));
+          if (pw - 2 * k > 0) coef.push(0);
+        }
+        return { fromRow: i - 1, power: pw, poly: P.trim(coef) };
+      }
+    }
+    return null;
+  }
+
+  // ── 안정한 K 범위 ───────────────────────────────────
+  function closedLoopPoles(N, D, K) { return P.roots(P.add(D, P.scale(N, K))); }
+  function maxRe(rs) { return rs.reduce(function (m, z) { return Math.max(m, z.re); }, -Infinity); }
+  function scaleOf(rs) { return rs.reduce(function (m, z) { return Math.max(m, C.abs(z)); }, 1); }
+  function classify(rs) {
+    var tol = 1e-7 * scaleOf(rs), mr = maxRe(rs);
+    if (mr > tol) return 'unstable';
+    if (mr >= -tol) return 'marginal';
+    return 'stable';
+  }
+  function countRHP(rs) { var tol = 1e-7 * scaleOf(rs); return rs.filter(function (z) { return z.re > tol; }).length; }
+
+  function stability(N, D) {
+    var table = routhTable(N, D), cross = jwCrossings(N, D), crit = [];
+    cross.forEach(function (c) { if (c.K > 0) crit.push(c.K); });
+    if (!table.special.length) {
+      table.rows.forEach(function (row) {
+        [row[0].n, row[0].d].forEach(function (p) {
+          if (p.length > 1) P.groupedRoots(p).forEach(function (g) { if (g.s.im === 0 && g.s.re > 1e-9) crit.push(g.s.re); });
+        });
+      });
+    }
+    crit.sort(function (a, b) { return a - b; });
+    var uniq = [];
+    crit.forEach(function (k) { if (!uniq.length || Math.abs(k - uniq[uniq.length - 1]) > 1e-7 * Math.max(1, k)) uniq.push(k); });
+
+    var bounds = [0].concat(uniq), intervals = [], points = [], disagree = false, i;
+    for (i = 0; i < bounds.length; i++) {
+      var lo = bounds[i], hi = i + 1 < bounds.length ? bounds[i + 1] : Infinity;
+      var sample = hi === Infinity ? (lo === 0 ? 1 : lo * 2 + 1) : (lo + hi) / 2;
+      var rs = closedLoopPoles(N, D, sample), status = classify(rs), rhp = countRHP(rs);
+      var coeffs = P.add(D, P.scale(N, sample)), rn = routhNumericFirstColumn(coeffs);
+      var agree = rn.signChanges === rhp;
+      if (!agree) disagree = true;
+      var routhSigns = table.special.length ? null : table.rows.map(function (row) { return Math.sign(evalRk(row[0], sample)); });
+      intervals.push({ lo: lo, hi: hi, sampleK: sample, status: status, rhpCount: rhp, routhSignChanges: rn.signChanges, routhSigns: routhSigns, agree: agree });
+    }
+    bounds.forEach(function (k) {
+      var rs = closedLoopPoles(N, D, k);
+      points.push({ K: k, status: classify(rs), roots: rs });
+    });
+
+    // 안정한 구간 모으기 (경계 포함 여부까지)
+    var stableSet = [];
+    intervals.forEach(function (iv, idx) {
+      if (iv.status !== 'stable') return;
+      var loPt = points[idx], hiPt = points[idx + 1];
+      var item = { lo: iv.lo, hi: iv.hi, loIncl: loPt.status === 'stable', hiIncl: hiPt ? hiPt.status === 'stable' : false };
+      var last = stableSet[stableSet.length - 1];
+      if (last && last.hi === item.lo && last.hiIncl) { last.hi = item.hi; last.hiIncl = item.hiIncl; }
+      else stableSet.push(item);
+    });
+
+    return {
+      table: table, crossings: cross, criticalK: uniq, intervals: intervals, points: points, stableSet: stableSet,
+      basis: table.special.length ? 'numeric' : 'routh', consistent: !disagree
+    };
+  }
+
+  RL.routh = {
+    rk: rk, fmtRk: fmtRk, evalRk: evalRk, isZeroRk: isZeroRk, charCoefficients: charCoefficients, routhTable: routhTable,
+    routhNumericFirstColumn: routhNumericFirstColumn, jwCrossings: jwCrossings, auxEquation: auxEquation,
+    closedLoopPoles: closedLoopPoles, classify: classify, stability: stability
+  };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== js/locus.js ===== */
+/*
+ * locus.js — 근궤적 분석의 중심
+ *
+ * 입력: 개루프 전달함수 G(s)H(s) = K · N(s) / D(s)   (N, D는 내림차순 계수 배열)
+ * 조건: 연속시간, 음의 피드백, K ≥ 0
+ *
+ * 수업에서 푼 순서 그대로 결과를 만듭니다.
+ *   1 특성방정식 → 2 극점·영점·가지 수 → 3 실수축 구간 → 4 점근선
+ *   → 5 이탈점·진입점 → 6 출발각·도착각 → 7 Routh 표·허수축 교차 → 8 근궤적 완성 → 9 K 변화
+ *
+ * 모든 숫자는 여기서 계산하고, AI는 이 결과만 참고합니다.
+ */
+(function (RL) {
+  'use strict';
+  var P = RL.poly, C = RL.complex, F = RL.format, R = RL.routh;
+  var MAX_ORDER = 4;
+  var RAD = 180 / Math.PI;
+
+  function fail(code, message) { return { ok: false, error: { code: code, message: message } }; }
+  function normDeg(a) { a = ((a % 360) + 360) % 360; return a > 180 + 1e-9 ? a - 360 : a; } // (−180°, 180°]
+  function angDeg(z) { return Math.atan2(z.im, z.re) * RAD; }
+
+  // ── 3 실수축 구간: 시험점 오른쪽의 실수 극점·영점 개수가 홀수면 근궤적 ──
+  function realAxis(poles, zeros) {
+    var pts = [];
+    poles.forEach(function (p) { if (p.s.im === 0) pts.push({ x: p.s.re, mult: p.mult, type: 'pole' }); });
+    zeros.forEach(function (z) { if (z.s.im === 0) pts.push({ x: z.s.re, mult: z.mult, type: 'zero' }); });
+    pts.sort(function (a, b) { return b.x - a.x; });
+    var intervals = [], count = 0, i;
+    for (i = 0; i <= pts.length; i++) {
+      var hi = i === 0 ? null : pts[i - 1], lo = i < pts.length ? pts[i] : null;
+      intervals.push({
+        hi: hi ? hi.x : Infinity, lo: lo ? lo.x : -Infinity,
+        hiType: hi ? hi.type : 'inf', loType: lo ? lo.type : 'inf',
+        rightCount: count, onLocus: count % 2 === 1
+      });
+      if (i < pts.length) count += pts[i].mult;
+    }
+    return { points: pts, intervals: intervals };
+  }
+  function onRealLocus(ra, x) {
+    return ra.intervals.some(function (iv) { return iv.onLocus && x <= iv.hi + 1e-9 && x >= iv.lo - 1e-9; });
+  }
+
+  // ── 4 점근선 ──
+  function asymptotes(N, D) {
+    var n = D.length - 1, m = N.length - 1, q = n - m;
+    if (q <= 0) return null;
+    var sumP = -D[1] / D[0], sumZ = m >= 1 ? -N[1] / N[0] : 0, angles = [], k;
+    for (k = 0; k < q; k++) angles.push((2 * k + 1) * 180 / q);
+    return { q: q, sumPoles: sumP, sumZeros: sumZ, centroid: (sumP - sumZ) / q, angles: angles };
+  }
+
+  // ── 5 이탈점·진입점: D′N − DN′ = 0의 근 중 K = −D/N 이 0보다 큰 것 ──
+  function breakPoints(N, D, ra) {
+    var B = P.sub(P.mul(P.deriv(D), N), P.mul(D, P.deriv(N))), out = [];
+    if (P.degree(B) < 1) return { B: B, candidates: out };
+    var dB = P.deriv(B);
+    P.groupedRoots(B).forEach(function (g) {
+      if (g.s.im < 0) return; // 켤레쌍은 위쪽 하나로 대표
+      var Ns = P.evalC(N, g.s);
+      if (C.abs(Ns) < 1e-12) return;
+      var Kc = C.scale(C.div(P.evalC(D, g.s), Ns), -1), mag = Math.max(1, C.abs(Kc));
+      var cand = { s: g.s, mult: g.mult, K: Kc, conjugate: g.s.im !== 0 };
+      if (Math.abs(Kc.im) > 1e-7 * mag) cand.status = 'complexK';
+      else {
+        var K0 = Kc.re;
+        cand.K = K0;
+        if (Math.abs(K0) < 1e-9 * mag) cand.status = 'start';
+        else if (K0 < 0) cand.status = 'negativeK';
+        else if (g.s.im !== 0) cand.status = 'complexBreak';
+        else if (g.mult >= 2) { cand.status = 'multiple'; cand.meeting = g.mult + 1; }
+        else {
+          // K(σ)의 굽은 방향: K″ = −B′/N². 음수면 언덕 꼭대기(이탈점), 양수면 골짜기 바닥(진입점)
+          var Kpp = -P.evalReal(dB, g.s.re) / Math.pow(P.evalReal(N, g.s.re), 2);
+          cand.status = Kpp < 0 ? 'breakaway' : 'breakin';
+          cand.Kpp = Kpp;
+        }
+        if (g.s.im === 0 && K0 > 0) cand.onRealLocus = onRealLocus(ra, g.s.re);
+      }
+      out.push(cand);
+    });
+    out.sort(function (a, b) { return b.s.re - a.s.re; });
+    return { B: B, candidates: out };
+  }
+
+  // ── 6 출발각·도착각: θ = 180° + Σ(영점에서 온 각) − Σ(다른 극점에서 온 각) ──
+  function angleItems(poles, zeros) {
+    var items = [];
+    function build(kind, at, mult, plusSet, minusSet) {
+      var plus = [], minus = [];
+      plusSet.forEach(function (e) {
+        var v = C.sub(at.s, e.s); plus.push({ from: e.s, mult: e.mult, dx: v.re, dy: v.im, angle: angDeg(v) });
+      });
+      minusSet.forEach(function (e) {
+        if (e === at) return;
+        var v = C.sub(at.s, e.s); minus.push({ from: e.s, mult: e.mult, dx: v.re, dy: v.im, angle: angDeg(v) });
+      });
+      var sp = plus.reduce(function (s, t) { return s + t.angle * t.mult; }, 0);
+      var sm = minus.reduce(function (s, t) { return s + t.angle * t.mult; }, 0);
+      var base = 180 + sp - sm, angs = [], k;
+      for (k = 0; k < mult; k++) angs.push(normDeg((base + 360 * k) / mult));
+      angs.sort(function (a, b) { return b - a; });
+      items.push({ kind: kind, at: at.s, mult: mult, plus: plus, minus: minus, sumPlus: sp, sumMinus: sm, base: base, angles: angs });
+    }
+    poles.forEach(function (p) {
+      if (p.s.im > 0 || (p.s.im === 0 && p.mult >= 2)) build('departure', p, p.mult, zeros, poles);
+    });
+    zeros.forEach(function (z) {
+      if (z.s.im > 0 || (z.s.im === 0 && z.mult >= 2)) build('arrival', z, z.mult, poles, zeros);
+    });
+    return items;
+  }
+
+  // ── 그래프 범위: 극점·영점·점근선 중심·이탈점·교차점이 모두 보이게 ──
+  function viewBox(res) {
+    var xs = [0], ys = [0];
+    function addPt(z) { xs.push(z.re); ys.push(z.im); ys.push(-z.im); }
+    res.poles.forEach(function (p) { addPt(p.s); });
+    res.zeros.forEach(function (z) { addPt(z.s); });
+    if (res.asymptotes) xs.push(res.asymptotes.centroid);
+    res.breaks.candidates.forEach(function (b) { if (b.status === 'breakaway' || b.status === 'breakin' || b.status === 'multiple' || b.status === 'complexBreak') addPt(b.s); });
+    res.stability.crossings.forEach(function (c) { ys.push(c.omega); ys.push(-c.omega); });
+    var xmin = Math.min.apply(null, xs), xmax = Math.max.apply(null, xs), ymax = Math.max.apply(null, ys.map(Math.abs));
+    var span = Math.max(xmax - xmin, 2 * ymax, 2), cx = (xmin + xmax) / 2;
+    span *= 1.5;
+    return { xmin: cx - span / 2, xmax: cx + span / 2, ymin: -span / 2, ymax: span / 2 };
+  }
+
+  // ── 8·9 가지 계산: K를 0부터 키우며 폐루프 극점을 구하고, 가까운 것끼리 이어 가지를 만듭니다 ──
+  var permCache = {};
+  function perms(n) {
+    if (permCache[n]) return permCache[n];
+    var out = [];
+    (function rec(arr, k) {
+      if (k === arr.length) { out.push(arr.slice()); return; }
+      for (var i = k; i < arr.length; i++) {
+        var t = arr[k]; arr[k] = arr[i]; arr[i] = t;
+        rec(arr, k + 1);
+        t = arr[k]; arr[k] = arr[i]; arr[i] = t;
+      }
+    })(Array.from({ length: n }, function (_, i) { return i; }), 0);
+    permCache[n] = out;
+    return out;
+  }
+  // 이전 근들과 새 근들의 짝을, 이동 거리 합이 가장 작게 되도록 정합니다 (4차면 24가지 모두 비교)
+  function match(prev, next) {
+    var best = null, bestCost = Infinity;
+    perms(prev.length).forEach(function (pm) {
+      var cost = 0;
+      for (var i = 0; i < pm.length && cost < bestCost; i++) cost += C.dist(prev[i], next[pm[i]]);
+      if (cost < bestCost) { bestCost = cost; best = pm; }
+    });
+    return best.map(function (j) { return next[j]; });
+  }
+
+  function computeBranches(N, D, view, notableK, q) {
+    var n = D.length - 1, span = Math.hypot(view.xmax - view.xmin, view.ymax - view.ymin), maxStep = 0.006 * span;
+    var center = C.c((view.xmin + view.xmax) / 2, 0), farR = 1.2 * span;
+    var pos = notableK.filter(function (k) { return k > 0 && isFinite(k); }).sort(function (a, b) { return a - b; });
+    var Kref = pos.length ? Math.sqrt(pos[0] * pos[pos.length - 1]) : Math.max(1e-3, C.abs(P.evalC(D, C.c(span, 0))) / Math.max(1e-9, C.abs(P.evalC(N, C.c(span, 0)))));
+    var Kmax = Kref * 1e4, i, guard = 0;
+    function poles(K) { return P.roots(P.add(D, P.scale(N, K))); }
+    while (q > 0 && guard++ < 40) { // 무한대로 가는 가지가 화면 밖으로 충분히 나갈 때까지 K를 키움
+      var far = poles(Kmax).filter(function (z) { return C.dist(z, center) > farR; }).length;
+      if (far >= q) break;
+      Kmax *= 10;
+    }
+    var grid = [0], M = 160;
+    for (i = 0; i <= M; i++) grid.push(Kref * Math.pow(10, -6 + (Math.log10(Kmax / Kref) + 6) * i / M));
+    pos.forEach(function (k) { if (k < Kmax) grid.push(k); });
+    grid.sort(function (a, b) { return a - b; });
+
+    var branches = [], cur = P.roots(D);
+    for (i = 0; i < n; i++) branches.push([{ K: 0, re: cur[i].re, im: cur[i].im }]);
+    function push(K, rs) { rs.forEach(function (z, b) { branches[b].push({ K: K, re: z.re, im: z.im }); }); }
+    var budget = 30000; // 점 개수 상한 (휴대폰에서도 부드럽게 그리기 위해)
+    function step(K0, r0, K1, depth) {
+      var r1 = match(r0, poles(K1)), md = 0;
+      // 화면 근처에 있는 가지만 따져서 간격을 좁힙니다 (멀리 간 가지는 화면에 안 보이므로)
+      for (var b = 0; b < n; b++) {
+        if (C.dist(r0[b], center) < farR || C.dist(r1[b], center) < farR) md = Math.max(md, C.dist(r0[b], r1[b]));
+      }
+      if (md > maxStep && depth < 18 && budget > 0) {
+        budget--;
+        var Km = K0 > 0 ? Math.sqrt(K0 * K1) : K1 / 2;
+        var rm = step(K0, r0, Km, depth + 1);
+        return step(Km, rm, K1, depth + 1);
+      }
+      push(K1, r1);
+      return r1;
+    }
+    for (i = 1; i < grid.length; i++) if (grid[i] > grid[i - 1] * (1 + 1e-12)) cur = step(grid[i - 1], cur, grid[i], 0);
+    return { branches: branches, Kmax: Kmax };
+  }
+
+  // ── 전체 분석 ──
+  function analyze(Nin, Din, opts) {
+    opts = opts || {};
+    var N = P.trim(Nin), D = P.trim(Din);
+    if (P.isZero(D)) return fail('zeroDen', '분모가 0입니다. 식을 다시 확인해 주세요.');
+    if (P.isZero(N)) return fail('zeroNum', '분자가 0이라 근궤적이 생기지 않습니다.');
+    var n = D.length - 1, m = N.length - 1;
+    if (n < 1) return fail('noPole', '분모에 s가 없어 극점이 없습니다. 근궤적을 그릴 수 없습니다.');
+    if (m > n) return fail('improper', '분자 차수(' + m + '차)가 분모 차수(' + n + '차)보다 높습니다. 이런 식은 지원하지 않습니다.');
+    if (n > MAX_ORDER) return fail('order', '분모가 ' + n + '차입니다. 1차 버전은 분모 ' + MAX_ORDER + '차까지만 지원합니다.');
+    if (N[0] * D[0] < 0) return fail('negativeGain', '분자와 분모의 최고차항 부호가 달라서, K ≥ 0으로 두면 실제로는 음의 이득이 됩니다. 이 경우(K ≤ 0 근궤적)는 아직 지원하지 않습니다.');
+
+    var poles = P.groupedRoots(D), zeros = m > 0 ? P.groupedRoots(N) : [], i, j;
+    for (i = 0; i < poles.length; i++) for (j = 0; j < zeros.length; j++) {
+      if (C.dist(poles[i].s, zeros[j].s) < 1e-6 * Math.max(1, C.abs(poles[i].s))) {
+        return fail('cancel', '극점과 영점이 s = ' + F.cnum(poles[i].s) + '에서 겹쳐 서로 지워집니다(상쇄). 상쇄된 극점은 폐루프에도 남을 수 있어서, 지금 버전에서는 계산하지 않습니다. 약분한 식으로 다시 입력하거나 문제 조건을 확인해 주세요.');
+      }
+    }
+
+    var res = { ok: true, N: N, D: D, n: n, m: m, poles: poles, zeros: zeros };
+    res.charCoef = R.charCoefficients(N, D);                // 1 특성방정식
+    res.branchCount = n;                                     // 2 가지 수
+    res.toZeros = m; res.toInfinity = n - m;
+    res.realAxis = realAxis(poles, zeros);                   // 3
+    res.asymptotes = asymptotes(N, D);                       // 4
+    res.breaks = breakPoints(N, D, res.realAxis);            // 5
+    res.angles = angleItems(poles, zeros);                   // 6
+    res.stability = R.stability(N, D);                       // 7
+    res.view = viewBox(res);
+    if (opts.branches !== false) {                            // 8·9
+      var notable = res.breaks.candidates.filter(function (b) { return typeof b.K === 'number' && b.K > 0; }).map(function (b) { return b.K; })
+        .concat(res.stability.crossings.map(function (c) { return c.K; }));
+      var br = computeBranches(N, D, res.view, notable, n - m);
+      res.branches = br.branches; res.Kmax = br.Kmax;
+    }
+    return res;
+  }
+
+  RL.locus = { analyze: analyze, realAxis: realAxis, asymptotes: asymptotes, breakPoints: breakPoints, angleItems: angleItems, computeBranches: computeBranches, MAX_ORDER: MAX_ORDER };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== app/js/parser.js ===== */
+/*
+ * parser.js — 사용자가 입력한 전달함수 글자를 다항식 N(s), D(s)로 바꿉니다.
+ *
+ *   "K(s+2)/((s+3)(s^2+2s+2))"  →  N = [1, 2],  D = [1, 5, 8, 6]
+ *
+ * 문법(위가 우선순위 낮음):
+ *   식   := 항 (('+' | '-') 항)*
+ *   항   := 부호 (('*' | '/' | 생략된 곱) 부호)*
+ *   부호 := ('-' | '+') 부호 | 거듭
+ *   거듭 := 기본 ('^' 정수)?
+ *   기본 := 숫자 | s | K | '(' 식 ')'
+ *
+ * K는 '식 전체에 한 번 곱해진 꼴'만 받습니다. 식에 K가 없으면 전체에 K를 곱한 것으로 봅니다.
+ */
+(function (RL) {
+  'use strict';
+  var P = RL.poly;
+
+  function ParseError(message, pos) { this.message = message; this.pos = pos; }
+
+  // 입력을 계산하기 쉬운 글자로 정리
+  function clean(src) {
+    var s = String(src || '');
+    var eq = s.lastIndexOf('=');
+    if (eq >= 0) s = s.slice(eq + 1);                    // "G(s)H(s) = ..." 앞부분 제거
+    s = s.replace(/[−–—]/g, '-');          // 여러 가지 빼기 기호
+    s = s.replace(/[×·∙⋅]/g, '*');    // 곱하기 기호
+    s = s.replace(/\*\*/g, '^');
+    s = s.replace(/²/g, '^2').replace(/³/g, '^3').replace(/⁴/g, '^4');
+    s = s.replace(/[\[{]/g, '(').replace(/[\]}]/g, ')');
+    return s;
+  }
+
+  function tokenize(s) {
+    var tokens = [], i = 0, ch, m;
+    while (i < s.length) {
+      ch = s.charAt(i);
+      if (ch === ' ' || ch === '\t' || ch === '\n') { i++; continue; }
+      m = /^(\d+\.?\d*|\.\d+)/.exec(s.slice(i));
+      if (m) { tokens.push({ t: 'num', v: parseFloat(m[1]), pos: i }); i += m[1].length; continue; }
+      if (ch === 's' || ch === 'S') { tokens.push({ t: 's', pos: i }); i++; continue; }
+      if (ch === 'K' || ch === 'k') { tokens.push({ t: 'K', pos: i }); i++; continue; }
+      if ('+-*/^()'.indexOf(ch) >= 0) { tokens.push({ t: ch, pos: i }); i++; continue; }
+      throw new ParseError('알 수 없는 글자 "' + ch + '"가 있습니다. s, K, 숫자, + − × / ^ 괄호만 쓸 수 있습니다.', i);
+    }
+    return tokens;
+  }
+
+  // 값 = { n: 분자 다항식, d: 분모 다항식, k: K의 거듭제곱 }
+  function val(n, d, k) { return { n: n, d: d || [1], k: k || 0 }; }
+  function isZeroVal(a) { return P.isZero(a.n); }
+  function add(a, b, sign, pos) {
+    if (isZeroVal(a)) return sign > 0 ? b : val(P.scale(b.n, -1), b.d, b.k);
+    if (isZeroVal(b)) return a;
+    if (a.k !== b.k) throw new ParseError('K는 식 전체에 한 번만 곱해진 꼴이어야 합니다. 예: K(s+2)/(s(s+1))', pos);
+    var n = sign > 0 ? P.add(P.mul(a.n, b.d), P.mul(b.n, a.d)) : P.sub(P.mul(a.n, b.d), P.mul(b.n, a.d));
+    return val(n, P.mul(a.d, b.d), a.k);
+  }
+  function mul(a, b) { return val(P.mul(a.n, b.n), P.mul(a.d, b.d), a.k + b.k); }
+  function div(a, b, pos) {
+    if (isZeroVal(b)) throw new ParseError('0으로 나누는 부분이 있습니다.', pos);
+    return val(P.mul(a.n, b.d), P.mul(a.d, b.n), a.k - b.k);
+  }
+
+  function Parser(tokens) { this.tk = tokens; this.i = 0; }
+  Parser.prototype.peek = function () { return this.tk[this.i]; };
+  Parser.prototype.next = function () { return this.tk[this.i++]; };
+  Parser.prototype.expr = function () {
+    var left = this.term(), t;
+    while ((t = this.peek()) && (t.t === '+' || t.t === '-')) {
+      this.next();
+      left = add(left, this.term(), t.t === '+' ? 1 : -1, t.pos);
+    }
+    return left;
+  };
+  Parser.prototype.term = function () {
+    var left = this.unary(), t;
+    while ((t = this.peek())) {
+      if (t.t === '*') { this.next(); left = mul(left, this.unary()); }
+      else if (t.t === '/') { this.next(); left = div(left, this.unary(), t.pos); }
+      else if (t.t === 'num' || t.t === 's' || t.t === 'K' || t.t === '(') { left = mul(left, this.unary()); } // 생략된 곱: 2s, (s+1)(s+2)
+      else break;
+    }
+    return left;
+  };
+  Parser.prototype.unary = function () {
+    var t = this.peek();
+    if (t && (t.t === '-' || t.t === '+')) {
+      this.next();
+      var v = this.unary();
+      return t.t === '-' ? val(P.scale(v.n, -1), v.d, v.k) : v;
+    }
+    return this.power();
+  };
+  Parser.prototype.power = function () {
+    var base = this.primary(), t = this.peek();
+    if (t && t.t === '^') {
+      this.next();
+      var e = this.next();
+      if (!e || e.t !== 'num' || e.v !== Math.floor(e.v) || e.v > 12) throw new ParseError('거듭제곱(^)에는 0~12의 정수만 쓸 수 있습니다.', t.pos);
+      var out = val([1], [1], 0), i;
+      for (i = 0; i < e.v; i++) out = mul(out, base);
+      return out;
+    }
+    return base;
+  };
+  Parser.prototype.primary = function () {
+    var t = this.next();
+    if (!t) throw new ParseError('식이 중간에 끝났습니다. 괄호나 연산자를 확인해 주세요.', -1);
+    if (t.t === 'num') return val([t.v]);
+    if (t.t === 's') return val([1, 0]);
+    if (t.t === 'K') return val([1], [1], 1);
+    if (t.t === '(') {
+      var v = this.expr(), c = this.next();
+      if (!c || c.t !== ')') throw new ParseError('닫는 괄호 ")"가 빠졌습니다.', t.pos);
+      return v;
+    }
+    throw new ParseError('"' + t.t + '" 자리에 숫자나 s, 괄호가 와야 합니다.', t.pos);
+  };
+
+  // 반환: { ok, N, D, kMode: 'explicit' | 'implicit', note } 또는 { ok: false, message, pos }
+  function parse(src) {
+    var s = clean(src);
+    if (!/\S/.test(s)) return { ok: false, message: '전달함수를 입력해 주세요.', pos: -1 };
+    try {
+      var p = new Parser(tokenize(s));
+      var v = p.expr();
+      if (p.i < p.tk.length) throw new ParseError('"' + p.tk[p.i].t + '" 근처를 해석하지 못했습니다. 괄호 짝을 확인해 주세요.', p.tk[p.i].pos);
+      if (v.k > 1) return { ok: false, message: 'K가 두 번 이상 곱해져 있습니다. K는 식 전체에 한 번만 곱해 주세요.', pos: -1 };
+      if (v.k < 0) return { ok: false, message: 'K가 분모에 있습니다. 이 프로그램은 K가 분자 쪽에 곱해진 꼴만 다룹니다.', pos: -1 };
+      var N = P.trim(v.n), D = P.trim(v.d);
+      if (P.isZero(D)) return { ok: false, message: '분모가 0입니다.', pos: -1 };
+      // 분모 최고차항을 1로 맞춥니다 (그 상수는 분자로 옮겨 K와 함께 곱해짐)
+      var lead = D[0], i;
+      if (lead !== 1) {
+        for (i = 0; i < D.length; i++) D[i] = D[i] / lead;
+        for (i = 0; i < N.length; i++) N[i] = N[i] / lead;
+      }
+      return {
+        ok: true, N: N, D: D, kMode: v.k === 1 ? 'explicit' : 'implicit',
+        note: v.k === 1 ? '식에 있는 K를 이득 K로 보고, 나머지를 N(s)/D(s)로 나눴습니다.' : '식에 K가 없어서, 식 전체에 K를 곱한 것으로 봅니다.'
+      };
+    } catch (e) {
+      if (e instanceof ParseError) return { ok: false, message: e.message, pos: e.pos };
+      throw e;
+    }
+  }
+
+  RL.parser = { parse: parse, clean: clean };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== app/js/mathview.js ===== */
+/*
+ * mathview.js — 수식을 화면용 HTML로 만듭니다.
+ * 변수 s, K는 교과서처럼 기울인 세리프 글꼴로, 거듭제곱은 위첨자로 씁니다.
+ * data-ref가 붙은 글자는 그래프의 같은 점과 연결되어, 가리키면 둘 다 빛납니다.
+ */
+(function (RL) {
+  'use strict';
+  var F = RL.format, P = RL.poly;
+  var MINUS = '−';
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function mv(name) { return '<i class="mv">' + name + '</i>'; }
+  function sup(n) { return n > 1 ? '<sup>' + n + '</sup>' : ''; }
+  function n(x) { return F.numShort(x); }
+
+  // 다항식 (내림차순 계수) → s³ + 5s² + 8s + 6
+  function polyH(p, v) {
+    v = v || 's';
+    var deg = p.length - 1, out = '', i;
+    for (i = 0; i <= deg; i++) {
+      var a = p[i], pw = deg - i;
+      if (Math.abs(a) < 1e-12) continue;
+      var mag = Math.abs(a), coef = (Math.abs(mag - 1) < 1e-12 && pw > 0) ? '' : n(mag);
+      var term = coef + (pw > 0 ? mv(v) + sup(pw) : '');
+      if (out === '') out = (a < 0 ? MINUS : '') + term;
+      else out += (a < 0 ? ' ' + MINUS + ' ' : ' + ') + term;
+    }
+    return out === '' ? '0' : out;
+  }
+
+  // K 다항식 (내림차순 계수, 표시는 상수항부터) → 8 + K
+  function kpolyH(p) {
+    var deg = p.length - 1, out = '', i;
+    for (i = deg; i >= 0; i--) {
+      var a = p[i], pw = deg - i;
+      if (Math.abs(a) < 1e-12) continue;
+      var mag = Math.abs(a), coef = (Math.abs(mag - 1) < 1e-12 && pw > 0) ? '' : n(mag);
+      var term = coef + (pw > 0 ? mv('K') + sup(pw) : '');
+      if (out === '') out = (a < 0 ? MINUS : '') + term;
+      else out += (a < 0 ? ' ' + MINUS + ' ' : ' + ') + term;
+    }
+    return out === '' ? '0' : out;
+  }
+
+  function frac(top, bot) { return '<span class="frac"><span class="ft">' + top + '</span><span class="fb">' + bot + '</span></span>'; }
+
+  // Routh 표 한 칸 (K에 대한 분수식)
+  function rkH(r) {
+    if (r.d.length === 1 && Math.abs(r.d[0] - 1) < 1e-12) return kpolyH(r.n);
+    return frac(kpolyH(r.n), kpolyH(r.d));
+  }
+
+  function cnumH(z) { return '<span class="nm">' + F.cnum(z) + '</span>'; }
+
+  // 그래프와 연결되는 글자
+  function ref(id, cls, html) {
+    return '<span class="ref ' + cls + '" data-ref="' + id + '" tabindex="0">' + html + '</span>';
+  }
+
+  // 근 목록으로 인수분해 꼴 만들기: (s + 3)(s² + 2s + 2)
+  function factorsH(groups, lead) {
+    var origin = [], linear = [], quad = [], used = [], i, j;
+    var parts = { push: function (s) { if (s.indexOf('(') !== 0) origin.push(s); else if (s.indexOf('<sup>2</sup>') > 0 && s.indexOf(mv('s') + '<sup>2</sup>') === 1) quad.push(s); else linear.push(s); } };
+    for (i = 0; i < groups.length; i++) used.push(false);
+    for (i = 0; i < groups.length; i++) {
+      if (used[i]) continue;
+      var g = groups[i], z = g.s;
+      if (z.im < 0) { used[i] = true; continue; }          // 켤레쌍은 위쪽에서 한 번에
+      if (z.im > 0) {
+        var b = -2 * z.re, c = z.re * z.re + z.im * z.im;
+        parts.push('(' + polyH([1, b, c]) + ')' + sup(g.mult));
+        used[i] = true;
+        continue;
+      }
+      if (z.re === 0) { parts.push(mv('s') + sup(g.mult)); used[i] = true; continue; }
+      if (F.exact(z.re) === null) {                         // 무리수 실근이면 짝을 찾아 2차식으로
+        var paired = -1;
+        for (j = i + 1; j < groups.length; j++) {
+          if (used[j] || groups[j].s.im !== 0 || groups[j].mult !== g.mult) continue;
+          var sm = z.re + groups[j].s.re, pr = z.re * groups[j].s.re;
+          if (F.toFraction(sm, 100) && F.toFraction(pr, 100)) { paired = j; break; }
+        }
+        if (paired >= 0) {
+          var q = [1, -(z.re + groups[paired].s.re), z.re * groups[paired].s.re];
+          parts.push('(' + polyH(q) + ')' + sup(g.mult));
+          used[i] = used[paired] = true;
+          continue;
+        }
+      }
+      parts.push('(' + polyH([1, -z.re]) + ')' + sup(g.mult));
+      used[i] = true;
+    }
+    var head = (lead !== undefined && Math.abs(lead - 1) > 1e-12) ? n(lead) : '';
+    var body = origin.join('') + linear.join('') + quad.join(''); // s → (s + a) → (s² + bs + c) 순서
+    if (body === '') return head || '1';
+    return head + body;
+  }
+
+  // 특성방정식 D(s) + K·N(s)을 s의 차수별로 묶어서: s³ + 5s² + (8 + K)s + (6 + 2K)
+  function charPolyH(coef) {
+    var deg = coef.length - 1, out = '', i;
+    for (i = 0; i <= deg; i++) {
+      var kp = P.trim(coef[i]), pw = deg - i;
+      if (P.isZero(kp)) continue;
+      var single = kp.length === 1, body, neg = false;
+      if (single) {
+        var a = kp[0];
+        neg = a < 0;
+        body = (Math.abs(Math.abs(a) - 1) < 1e-12 && pw > 0) ? '' : n(Math.abs(a));
+      } else if (Math.abs(kp[1]) < 1e-12) { // a·K 하나만
+        neg = kp[0] < 0;
+        body = (Math.abs(Math.abs(kp[0]) - 1) < 1e-12 ? '' : n(Math.abs(kp[0]))) + mv('K');
+      } else {
+        body = '(' + kpolyH(kp) + ')';
+      }
+      var term = body + (pw > 0 ? mv('s') + sup(pw) : '');
+      if (term === '') term = '1';
+      if (out === '') out = (neg ? MINUS : '') + term;
+      else out += (neg ? ' ' + MINUS + ' ' : ' + ') + term;
+    }
+    return out;
+  }
+
+  function deg(x) { return '<span class="nm">' + F.deg(x) + '</span>'; }
+
+  RL.mv = { esc: esc, mv: mv, sup: sup, n: n, polyH: polyH, kpolyH: kpolyH, frac: frac, rkH: rkH, cnumH: cnumH, ref: ref, factorsH: factorsH, charPolyH: charPolyH, deg: deg };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== app/js/content.js ===== */
+/*
+ * content.js — 엔진 결과로 9단계 학습 내용을 만듭니다.
+ * 각 단계: 지금 구하는 것 → 공식 → 이 문제 대입 → 계산 → 결과 → 왜 그런지
+ * 그리고 힌트 사다리(개념 → 힌트 → 공식·대입 → 전체 풀이), 생각해 볼 질문, 내 답 확인을 붙입니다.
+ * 화면에 나오는 숫자는 전부 엔진(js/)이 계산한 값입니다.
+ */
+(function (RL) {
+  'use strict';
+  var M = RL.mv, F = RL.format, P = RL.poly, R = RL.routh;
+  var MI = '−';
+
+  function blk(t, h, extra) { var o = { t: t, h: h }; if (extra) { for (var k in extra) o[k] = extra[k]; } return o; }
+  function strip(html) { return String(html).replace(/<sup>(\d+)<\/sup>/g, '^$1').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&'); }
+
+  function poleRef(res, i) {
+    var p = res.poles[i];
+    return M.ref('p' + i, 'pole', F.cnum(p.s) + (p.mult > 1 ? ' (×' + p.mult + ')' : ''));
+  }
+  function zeroRef(res, i) {
+    var z = res.zeros[i];
+    return M.ref('z' + i, 'zero', F.cnum(z.s) + (z.mult > 1 ? ' (×' + z.mult + ')' : ''));
+  }
+  function joinRefs(res, kind) {
+    var out = [], i, list = kind === 'pole' ? res.poles : res.zeros;
+    for (i = 0; i < list.length; i++) out.push(kind === 'pole' ? poleRef(res, i) : zeroRef(res, i));
+    return out.join(', ');
+  }
+  function nStr(x) { return F.numShort(x); }
+
+  // 실수축 구간 이름
+  function ivLabel(iv) {
+    if (iv.hi === Infinity && iv.lo === -Infinity) return '실수축 전체';
+    if (iv.hi === Infinity) return M.mv('s') + ' &gt; ' + nStr(iv.lo);
+    if (iv.lo === -Infinity) return M.mv('s') + ' &lt; ' + nStr(iv.hi);
+    return nStr(iv.lo) + ' &lt; ' + M.mv('s') + ' &lt; ' + nStr(iv.hi);
+  }
+  function segText(iv) {
+    return iv.lo === -Infinity ? '(' + MI + '∞, ' + nStr(iv.hi) + ']' : '[' + nStr(iv.lo) + ', ' + nStr(iv.hi) + ']';
+  }
+  function onSegments(res) {
+    var out = [], i, ivs = res.realAxis.intervals;
+    for (i = 0; i < ivs.length; i++) if (ivs[i].onLocus) out.push(ivs[i]);
+    return out;
+  }
+
+  // K 집합을 부등식 글로: [0, 6) → "0 ≤ K < 6"
+  function setText(set) {
+    if (!set.length) return '만족하는 K 없음';
+    var parts = [], i;
+    for (i = 0; i < set.length; i++) {
+      var s = set[i], K = M.mv('K');
+      if (s.hi === Infinity) parts.push(s.lo === 0 ? (s.loIncl ? '모든 ' + K + ' ≥ 0' : K + ' &gt; 0') : K + (s.loIncl ? ' ≥ ' : ' &gt; ') + F.num(s.lo));
+      else parts.push(F.num(s.lo) + (s.loIncl ? ' ≤ ' : ' &lt; ') + K + (s.hiIncl ? ' ≤ ' : ' &lt; ') + F.num(s.hi));
+    }
+    return parts.join(', 또는 ');
+  }
+
+  // Routh 첫 열 한 칸이 양수인 K 범위 (안정 분석에서 나눈 구간마다 부호 확인)
+  function positiveSet(entry, st) {
+    var set = [], i, ivs = st.intervals;
+    for (i = 0; i < ivs.length; i++) {
+      var iv = ivs[i], pos = R.evalRk(entry, iv.sampleK) > 0;
+      if (!pos) continue;
+      var loVal = R.evalRk(entry, iv.lo), loIncl = isFinite(loVal) && loVal > 1e-12;
+      var last = set[set.length - 1];
+      if (last && last.hi === iv.lo && last.hiIncl) { last.hi = iv.hi; last.hiIncl = false; }
+      else set.push({ lo: iv.lo, hi: iv.hi, loIncl: loIncl, hiIncl: false });
+      if (iv.hi !== Infinity) { var hv = R.evalRk(entry, iv.hi); set[set.length - 1].hiIncl = isFinite(hv) && hv > 1e-12; }
+    }
+    return set;
+  }
+
+  function breakLabel(c) {
+    return { breakaway: '이탈점', breakin: '진입점', multiple: '여러 가지가 만나는 점', complexBreak: '복소 이탈점' }[c.status] || '';
+  }
+  function validBreaks(res) {
+    var out = [], i, c = res.breaks.candidates;
+    for (i = 0; i < c.length; i++) if (['breakaway', 'breakin', 'multiple', 'complexBreak'].indexOf(c[i].status) >= 0) out.push({ c: c[i], i: i });
+    return out;
+  }
+  function crossingsPos(res) {
+    var out = [], i, cr = res.stability.crossings;
+    for (i = 0; i < cr.length; i++) if (cr[i].omega > 0) out.push({ c: cr[i], i: i });
+    return out;
+  }
+  function notableK(res) {
+    var ks = [], i, vb = validBreaks(res), cp = res.stability.crossings;
+    for (i = 0; i < vb.length; i++) ks.push({ K: vb[i].c.K, label: breakLabel(vb[i].c) });
+    for (i = 0; i < cp.length; i++) ks.push({ K: cp[i].K, label: cp[i].omega > 0 ? '허수축 교차' : '원점 통과' });
+    ks.sort(function (a, b) { return a.K - b.K; });
+    return ks;
+  }
+
+  // ── 1 특성방정식 ─────────────────────────────
+  function step1(res) {
+    var Nh = M.polyH(res.N), Dh = M.polyH(res.D), ch = M.charPolyH(res.charCoef);
+    var blocks = [
+      blk('goal', '폐루프 극점이 만족해야 하는 식(특성방정식)을 세웁니다.'),
+      blk('formula', '1 + ' + M.mv('G') + '(' + M.mv('s') + ')' + M.mv('H') + '(' + M.mv('s') + ') = 0'),
+      blk('text', '개루프 전달함수를 ' + M.mv('K') + '·' + M.frac(M.mv('N') + '(' + M.mv('s') + ')', M.mv('D') + '(' + M.mv('s') + ')') + '로 나눠 씁니다.'),
+      blk('calc', M.mv('N') + '(' + M.mv('s') + ') = ' + Nh + ',&ensp; ' + M.mv('D') + '(' + M.mv('s') + ') = ' + Dh),
+      blk('calc', '1 + ' + M.mv('K') + '·' + M.frac(M.mv('N'), M.mv('D')) + ' = 0 &ensp;→&ensp; 양변에 ' + M.mv('D') + ' 곱하기 &ensp;→&ensp; ' + M.mv('D') + ' + ' + M.mv('K') + '·' + M.mv('N') + ' = 0'),
+      blk('calc', '(' + Dh + ') + ' + M.mv('K') + '(' + Nh + ') = 0'),
+      blk('result', ch + ' = 0'),
+      blk('why', '이 화면에서 G(s)H(s)는 이득 K를 포함한 K·N(s)/D(s)입니다. 음의 피드백 특성방정식은 1 + G(s)H(s) = 0입니다. 분모가 0이 되는 s가 폐루프 극점이고, K를 0부터 키울 때 이 근들이 움직인 자취가 근궤적입니다.')
+    ];
+    return {
+      num: 1, key: 'char', title: '특성방정식', short: '특성식', blocks: blocks,
+      graphNote: 's평면을 준비합니다. 가로축은 실수부 σ, 세로축은 허수부 jω입니다.',
+      questions: [
+        { q: '왜 1 + G(s)H(s) = 0을 쓰나요?', a: '음의 피드백 폐루프 전달함수는 T(s) = G(s) / (1 + G(s)H(s))입니다. 폐루프 극점은 분모가 0이 되는 s라서 1 + G(s)H(s) = 0을 풉니다.' },
+        { q: 'K = 0이면 이 식의 근은 무엇인가요?', a: 'K = 0이면 D(s) = 0만 남습니다. 그래서 근이 개루프 극점과 같고, 근궤적은 개루프 극점에서 출발합니다.' }
+      ],
+      ladder: [
+        '폐루프 전달함수의 분모가 0이 되는 s가 폐루프 극점입니다.',
+        '1 + K·N(s)/D(s) = 0의 양변에 D(s)를 곱해 보세요.',
+        'D(s) + K·N(s) = 0에 D(s) = ' + strip(Dh) + ', N(s) = ' + strip(Nh) + '를 넣습니다.',
+        '(' + strip(Dh) + ') + K(' + strip(Nh) + ') = 0을 s의 차수별로 묶으면 ' + strip(ch) + ' = 0입니다.'
+      ],
+      check: null, example: null,
+      facts: { 특성방정식: strip(ch) + ' = 0', 'N(s)': strip(Nh), 'D(s)': strip(Dh) }
+    };
+  }
+
+  // ── 2 극점·영점·가지 수 ──────────────────────
+  function step2(res) {
+    var pl = joinRefs(res, 'pole'), zl = res.zeros.length ? joinRefs(res, 'zero') : '없음';
+    var hasDouble = false, i;
+    for (i = 0; i < res.poles.length; i++) if (res.poles[i].mult > 1) hasDouble = true;
+    var blocks = [
+      blk('goal', '근궤적이 어디서 출발하고 어디로 가는지 정합니다.'),
+      blk('formula', '극점: ' + M.mv('D') + '(' + M.mv('s') + ') = 0 &ensp;→&ensp; ' + M.mv('K') + ' = 0일 때 출발점<br>영점: ' + M.mv('N') + '(' + M.mv('s') + ') = 0 &ensp;→&ensp; ' + M.mv('K') + ' → ∞일 때 도착점'),
+      blk('calc', M.factorsH(res.poles) + ' = 0 &ensp;→&ensp; 극점 ' + M.mv('s') + ' = ' + pl),
+      blk('calc', res.m > 0 ? M.factorsH(res.zeros, res.N[0]) + ' = 0 &ensp;→&ensp; 영점 ' + M.mv('s') + ' = ' + zl : '분자가 상수라 영점이 없습니다.'),
+      blk('result', '가지 수 = 분모 차수 ' + M.mv('n') + ' = ' + res.n + '개 &ensp;(영점으로 ' + res.m + '개, 무한대로 ' + (res.n - res.m) + '개)')
+    ];
+    if (hasDouble) blocks.push(blk('note', '겹친 극점은 그래프에 ×2로 표시하고, 개수도 겹친 만큼 셉니다.'));
+    blocks.push(blk('why', '특성방정식이 n차라서 근이 항상 n개입니다. 근 하나가 가지 하나를 그립니다. K가 아주 커지면 D(s)/K + N(s) = 0에서 N(s) = 0만 남아 근이 영점에 다가가고, 영점이 모자란 만큼은 무한대로 갑니다.'));
+    return {
+      num: 2, key: 'pz', title: '극점 · 영점 · 가지 수', short: '극·영점', blocks: blocks,
+      graphNote: '× 극점(출발점), ○ 영점(도착점)이 하나씩 나타납니다.',
+      questions: [
+        { q: '가지 수는 왜 분모 차수인가요?', a: '특성방정식 D(s) + K·N(s) = 0은 분모 차수 n과 같은 차수의 다항식이라, 어떤 K에서든 근이 n개 있습니다. 근 하나가 K를 따라 움직이며 가지 하나를 그립니다.' },
+        { q: 'K가 커지면 왜 영점으로 가나요?', a: '식을 K로 나누면 D(s)/K + N(s) = 0입니다. K → ∞이면 첫 항이 사라져 N(s) = 0, 즉 영점이 남습니다. 영점이 n개보다 적으면 나머지 가지는 무한대로 갑니다.' }
+      ],
+      ladder: [
+        '극점은 분모 D(s)의 근, 영점은 분자 N(s)의 근입니다.',
+        'D(s)와 N(s)를 인수분해해서 0이 되는 s를 찾아보세요.',
+        'D(s) = ' + strip(M.factorsH(res.poles)) + ', N(s) = ' + (res.m > 0 ? strip(M.factorsH(res.zeros, res.N[0])) : '상수') + '입니다.',
+        '극점 ' + strip(pl) + ', 영점 ' + strip(zl) + '. 가지는 ' + res.n + '개이고 영점으로 ' + res.m + '개, 무한대로 ' + (res.n - res.m) + '개 갑니다.'
+      ],
+      check: { prompt: '가지는 몇 개인가요?', values: [res.n], tol: 0 }, example: null,
+      facts: { 극점: strip(pl), 영점: strip(zl), '가지 수': res.n, '영점으로 가는 가지': res.m, '무한대로 가는 가지': res.n - res.m }
+    };
+  }
+
+  // ── 3 실수축 구간 ───────────────────────────
+  function step3(res) {
+    var ivs = res.realAxis.intervals, rows = [], i, segs = onSegments(res);
+    function endName(type) { return type === 'pole' ? '극점' : (type === 'zero' ? '영점' : '∞'); }
+    for (i = 0; i < ivs.length; i++) {
+      var iv = ivs[i], ends = '';
+      if (iv.onLocus) {
+        if (iv.hiType === 'pole' && iv.loType === 'pole') ends = '극점–극점 → 사이에 이탈점';
+        else if (iv.hiType === 'zero' && iv.loType === 'zero') ends = '영점–영점 → 사이에 진입점';
+        else if (iv.loType === 'inf') ends = endName(iv.hiType) + '–(' + MI + '∞)';
+        else ends = endName(iv.hiType) + '–' + endName(iv.loType);
+      }
+      rows.push({ ref: 'r' + i, cells: [ivLabel(iv), String(iv.rightCount), iv.rightCount % 2 ? '홀수 ✓' : '짝수 ✗', ends], on: iv.onLocus });
+    }
+    var segList = [];
+    for (i = 0; i < ivs.length; i++) if (ivs[i].onLocus) segList.push(M.ref('r' + i, 'seg', segText(ivs[i])));
+    var blocks = [
+      blk('goal', '실수축의 어느 구간이 근궤적인지 찾습니다.'),
+      blk('formula', '시험점 <b>오른쪽</b>에 있는 실수 극점·영점 개수가 <b>홀수</b>면 근궤적, 짝수면 아님<br><span class="sm">중근은 겹친 수만큼 세고, 복소 극점·영점은 세지 않습니다.</span>'),
+      blk('table', '', { head: ['구간', '오른쪽 개수', '판정', '양 끝'], rows: rows }),
+      blk('result', segList.length ? '근궤적인 실수축 구간: ' + segList.join(', ') : '실수축 위에는 근궤적이 없습니다.'),
+      blk('why', '실수축 위의 시험점에서 보면, 오른쪽 실수 극점·영점은 각각 180°, 왼쪽 것은 0°, 복소 쌍은 위아래 각이 서로 지워져 0°를 줍니다. 그래서 오른쪽 개수가 홀수일 때만 각 조건(180°의 홀수 배)을 만족합니다.')
+    ];
+    var check = null;
+    if (segs.length) check = { prompt: '가장 오른쪽 근궤적 구간에서, 그 구간 오른쪽에 있는 실수 극점·영점은 몇 개인가요?', values: [segs[0].rightCount], tol: 0 };
+    return {
+      num: 3, key: 'real', title: '실수축 구간', short: '실수축', blocks: blocks,
+      graphNote: '시험점이 오른쪽부터 구간을 하나씩 지나며, 오른쪽에 있는 극점·영점을 셉니다.',
+      questions: [
+        { q: '왜 오른쪽의 극점과 영점 개수를 세나요?', a: '실수축 위 시험점에서 왼쪽에 있는 실수 극점·영점은 각이 0°라 각 조건에 영향을 주지 않습니다. 오른쪽에 있는 것만 각각 180°를 더하므로 오른쪽 개수만 세면 됩니다.' },
+        { q: '홀수인 구간이 근궤적에 속하는 이유는 무엇인가요?', a: '근궤적 위의 점은 각의 합이 180°의 홀수 배여야 합니다(각 조건). 오른쪽 개수가 홀수면 합이 180° × 홀수가 되어 조건을 만족하고, 짝수면 360°의 배수가 되어 만족하지 않습니다.' },
+        { q: '이중 극점은 몇 개로 세나요?', a: '겹친 수만큼, 즉 2개로 셉니다. 같은 자리에서 180°가 두 번 들어가 360°(= 0°)가 되기 때문에, 이중 극점 바로 왼쪽 구간은 근궤적이 아닙니다.' }
+      ],
+      ladder: [
+        '근궤적 위의 점은 각의 합이 180°의 홀수 배여야 합니다. 실수축에서는 이것이 "오른쪽 개수 홀짝"으로 바뀝니다.',
+        '실수 극점·영점을 오른쪽부터 늘어놓고, 각 구간에서 오른쪽에 몇 개가 있는지 세어 보세요.',
+        '구간마다 오른쪽 개수: ' + rows.map(function (r) { return strip(r.cells[0]) + ' → ' + r.cells[1] + '개'; }).join(', ') + '.',
+        '홀수인 구간만 근궤적입니다: ' + (segList.length ? strip(segList.join(', ')) : '없음') + '.'
+      ],
+      check: check, example: 'ex-real',
+      facts: { 구간별_오른쪽_개수: rows.map(function (r) { return strip(r.cells[0]) + ': ' + r.cells[1]; }), 근궤적_구간: segList.length ? strip(segList.join(', ')) : '없음' }
+    };
+  }
+
+  // ── 4 점근선 ────────────────────────────────
+  function step4(res) {
+    var A = res.asymptotes;
+    if (!A) {
+      return {
+        num: 4, key: 'asym', title: '점근선', short: '점근선',
+        blocks: [
+          blk('goal', '무한대로 가는 가지가 따라가는 직선을 구합니다.'),
+          blk('none', M.mv('n') + ' = ' + M.mv('m') + ' = ' + res.n + '이라 무한대로 가는 가지가 없습니다.<br><b>이 문제에서는 해당하지 않음</b> — 모든 가지가 영점에 도착합니다.')
+        ],
+        graphNote: '점근선이 없습니다.',
+        questions: [{ q: '점근선이 없으면 가지는 어디로 가나요?', a: '분자와 분모 차수가 같으면 영점 수가 극점 수와 같아서, 모든 가지가 K → ∞일 때 영점에 도착합니다.' }],
+        ladder: ['점근선 개수는 n − m입니다.', 'n과 m을 비교해 보세요.', 'n = m = ' + res.n + '입니다.', 'n − m = 0이라 점근선이 없습니다.'],
+        check: null, example: 'ex-asym', facts: { 점근선: '없음 (n = m = ' + res.n + ')' }
+      };
+    }
+    var angs = [], k;
+    for (k = 0; k < A.q; k++) angs.push(M.mv('k') + ' = ' + k + ' → ' + F.deg(A.angles[k]) + (A.angles[k] > 180 ? ' (= ' + F.deg(A.angles[k] - 360) + ')' : ''));
+    var sp = [], sz = [], i, hasComplex = false;
+    for (i = 0; i < res.poles.length; i++) {
+      var p = res.poles[i];
+      if (p.s.im !== 0) hasComplex = true;
+      sp.push((p.mult > 1 ? p.mult + '×' : '') + '(' + F.cnum(p.s) + ')');
+    }
+    for (i = 0; i < res.zeros.length; i++) { var z = res.zeros[i]; if (z.s.im !== 0) hasComplex = true; sz.push((z.mult > 1 ? z.mult + '×' : '') + '(' + F.cnum(z.s) + ')'); }
+    var cen = M.ref('c', 'asym', F.num(A.centroid));
+    var blocks = [
+      blk('goal', '무한대로 가는 가지가 따라가는 직선(점근선)을 구합니다.'),
+      blk('formula', '개수 = ' + M.mv('n') + ' ' + MI + ' ' + M.mv('m') + '<br>각도 = ' + M.frac('(2' + M.mv('k') + ' + 1)·180°', M.mv('n') + ' ' + MI + ' ' + M.mv('m')) + ',&ensp; ' + M.mv('k') + ' = 0, 1, …, ' + M.mv('n') + ' ' + MI + ' ' + M.mv('m') + ' ' + MI + ' 1<br>중심 ' + M.mv('σ') + ' = ' + M.frac('Σ극점 ' + MI + ' Σ영점', M.mv('n') + ' ' + MI + ' ' + M.mv('m'))),
+      blk('calc', M.mv('n') + ' ' + MI + ' ' + M.mv('m') + ' = ' + res.n + ' ' + MI + ' ' + res.m + ' = ' + A.q + '개'),
+      blk('calc', '각도: ' + angs.join(',&ensp; ')),
+      blk('calc', 'Σ극점 = ' + sp.join(' + ') + ' = ' + F.num(A.sumPoles) + '<br>Σ영점 = ' + (sz.length ? sz.join(' + ') + ' = ' + F.num(A.sumZeros) : '0 (영점 없음)')),
+      blk('calc', M.mv('σ') + ' = ' + M.frac('(' + F.num(A.sumPoles) + ') ' + MI + ' (' + F.num(A.sumZeros) + ')', String(A.q)) + ' = ' + cen),
+      blk('result', '중심 ' + cen + '에서 ' + A.angles.map(function (a) { return F.deg(a > 180 ? a - 360 : a); }).join(', ') + ' 방향'),
+      blk('note', (hasComplex ? '복소 극점·영점은 켤레쌍의 허수부가 서로 지워져 실수부만 더해집니다. ' : '') + '각도 식의 소문자 ' + M.mv('k') + '는 0, 1, 2…를 차례로 넣는 정수이고, 이득 ' + M.mv('K') + '와 다릅니다.'),
+      blk('why', '|s|가 아주 크면 G(s)H(s)가 1/(s − σ)^(n−m)처럼 보여서, 무한대로 가는 가지가 σ에서 뻗은 직선을 따라갑니다. 점근선은 먼 곳의 방향만 정하는 보조선이라, 가까운 곳에서는 가지가 점근선을 가로지를 수도 있습니다.')
+    ];
+    return {
+      num: 4, key: 'asym', title: '점근선', short: '점근선', blocks: A.q === 1 ? blocks.concat([blk('note', '점근선이 하나이면 180° 방향으로 실수축과 겹칩니다. 중심값은 계산할 수 있지만 실제 가지의 출발점이 아니므로 그래프에서는 중심 점을 숨깁니다.')]) : blocks,
+      graphNote: A.q === 1 ? '점근선은 180° 방향 하나입니다. 실수축과 겹치므로 중심 점은 표시하지 않습니다.' : '중심 σ가 찍힌 뒤 각도대로 점근선이 하나씩 뻗습니다.',
+      questions: [
+        { q: '점근선 중심은 왜 극점 합에서 영점 합을 빼나요?', a: '아주 먼 곳에서 보면 극점 n개와 영점 m개가 한 점 σ에 모여 있는 것처럼 보입니다. 특성방정식의 sⁿ⁻¹ 계수를 비교하면 그 점이 (Σ극점 − Σ영점)/(n − m)으로 나옵니다.' },
+        { q: '점근선은 근궤적이 반드시 지나는 선인가요?', a: '아닙니다. 아주 먼 곳에서의 방향만 정해 줍니다. 가까운 곳에서는 가지가 점근선 한쪽에 있거나 한 번 가로지를 수 있어서, 그림에서는 계산으로 구한 점을 정확히 지나게 그리는 것이 우선입니다.' },
+        { q: '(2k + 1)·180°에서 k는 무슨 뜻인가요?', a: '각 조건은 180°의 홀수 배를 요구합니다. k는 그 홀수 배를 차례로 고르는 정수(0, 1, 2, …)이고, k 하나마다 점근선이 하나 생깁니다.' }
+      ],
+      ladder: [
+        '점근선은 무한대로 가는 가지의 방향입니다. 개수, 각도, 중심 세 가지를 구합니다.',
+        '극점의 합과 영점의 합을 먼저 구해 보세요. 복소쌍은 실수부만 남습니다.',
+        'σ = (Σ극점 − Σ영점)/(n − m) = (' + F.dec(A.sumPoles) + ' − (' + F.dec(A.sumZeros) + '))/' + A.q + ', 각도 = (2k + 1)·180°/' + A.q + '.',
+        '중심 σ = ' + F.num(A.centroid) + ', 각도 ' + A.angles.map(function (a) { return F.deg(a); }).join(', ') + '.'
+      ],
+      check: { prompt: '점근선 중심 σ는? (분수나 소수)', values: [A.centroid], tol: 0.01 }, example: 'ex-asym',
+      facts: { '점근선 개수': A.q, Σ극점: A.sumPoles, Σ영점: A.sumZeros, '중심 σ': A.centroid, '각도(도)': A.angles }
+    };
+  }
+
+  // ── 5 이탈점 · 진입점 ───────────────────────
+  function step5(res) {
+    var B = res.breaks.B, cands = res.breaks.candidates, i;
+    var Dp = P.deriv(res.D), Np = P.deriv(res.N);
+    // 보기 좋게: 계수 공약수로 나누기
+    var Bn = B.slice(), g = 0;
+    if (Bn.every(function (v) { return Math.abs(v - Math.round(v)) < 1e-9; })) {
+      for (i = 0; i < Bn.length; i++) g = F.gcd(g, Math.round(Math.abs(Bn[i])));
+      if (g > 1) Bn = Bn.map(function (v) { return Math.round(v) / g; });
+    }
+    var lines = [], vb = validBreaks(res);
+    for (i = 0; i < cands.length; i++) {
+      var c = cands[i], sTxt = (c.conjugate ? F.cnum(c.s).replace(' + ', ' ± ') : F.cnum(c.s)), line;
+      if (c.status === 'complexK') line = M.mv('s') + ' = ' + sTxt + ' &ensp;→&ensp; ' + M.mv('K') + '가 복소수 &ensp;→&ensp; 근궤적 위의 점이 아님';
+      else if (c.status === 'negativeK') line = M.mv('s') + ' = ' + sTxt + ' &ensp;→&ensp; ' + M.mv('K') + ' = ' + F.num(c.K) + ' &lt; 0 &ensp;→&ensp; ' + M.mv('K') + ' ≥ 0 근궤적 위의 점이 아님';
+      else if (c.status === 'start') line = M.mv('s') + ' = ' + sTxt + ' &ensp;→&ensp; ' + M.mv('K') + ' = 0인 겹친 극점 자리 &ensp;→&ensp; 출발점이라 이탈점으로 쓰지 않음';
+      else {
+        var lbl = breakLabel(c), why = '';
+        if (c.status === 'breakaway') why = ' (그 구간에서 K가 가장 큰 점, 언덕 꼭대기)';
+        else if (c.status === 'breakin') why = ' (그 구간에서 K가 가장 작은 점, 골짜기 바닥)';
+        else if (c.status === 'multiple') why = ' (' + c.meeting + '개 가지가 한 점에서 만남)';
+        else if (c.status === 'complexBreak') why = ' (실수축 밖에서 가지가 만났다가 갈라짐)';
+        var idx = 0, j;
+        for (j = 0; j < vb.length; j++) if (vb[j].i === i) idx = j;
+        line = M.mv('s') + ' = ' + M.ref('b' + idx, 'key', sTxt) + ' &ensp;→&ensp; ' + M.mv('K') + ' = ' + F.num(c.K) + ' &gt; 0 &ensp;→&ensp; <b>' + lbl + '</b>' + why;
+      }
+      lines.push(line);
+    }
+    var result;
+    if (vb.length) result = vb.map(function (v, k) { return breakLabel(v.c) + ' ' + M.ref('b' + k, 'key', F.cnum(v.c.s)) + ' (' + M.mv('K') + ' = ' + F.num(v.c.K) + ')'; }).join(',&ensp; ');
+    else result = '<b>이 문제에서는 해당하지 않음</b> — K ≥ 0 근궤적 위의 이탈점·진입점이 없습니다.';
+    var blocks = [
+      blk('goal', '가지가 실수축에서 갈라지거나(이탈점) 합쳐지는(진입점·인입점) 점을 찾습니다.'),
+      blk('formula', M.mv('K') + ' = ' + MI + M.frac(M.mv('D') + '(' + M.mv('s') + ')', M.mv('N') + '(' + M.mv('s') + ')') + ' &ensp;→&ensp; ' + M.frac('d' + M.mv('K'), 'd' + M.mv('s')) + ' = 0 &ensp;⇔&ensp; ' + M.mv('D') + '′' + M.mv('N') + ' ' + MI + ' ' + M.mv('D') + M.mv('N') + '′ = 0'),
+      blk('calc', M.mv('D') + '′(' + M.mv('s') + ') = ' + M.polyH(Dp) + ',&ensp; ' + M.mv('N') + '′(' + M.mv('s') + ') = ' + M.polyH(Np)),
+      blk('calc', (P.degree(B) < 1 ? '식이 상수라 해가 없습니다.' : M.polyH(Bn) + ' = 0' + (g > 1 ? ' &ensp;<span class="sm">(공약수 ' + g + '로 나눔)</span>' : '')))
+    ];
+    if (P.degree(B) >= 3) blocks.push(blk('note', '3차 이상이면 공학용 계산기의 방정식 기능이나 구간 대입으로 근을 찾습니다.'));
+    if (lines.length) blocks.push(blk('calc', '후보를 ' + M.mv('K') + ' = ' + MI + M.mv('D') + '/' + M.mv('N') + '에 넣어 확인:<br>' + lines.join('<br>')));
+    blocks.push(blk('result', result));
+    blocks.push(blk('kchart', '', {}));
+    blocks.push(blk('why', '실수축에서 마주 오는 두 가지는 K가 그 구간에서 가장 큰 점에서 만나 갈라지고, 실수축으로 들어오는 두 가지는 K가 가장 작은 점에서 합쳐집니다. dK/ds = 0은 K < 0 근궤적의 점도 함께 내놓으니, 후보를 K 식에 넣어 부호를 꼭 확인합니다.'));
+    var realValid = vb.filter(function (v) { return v.c.s.im === 0; });
+    return {
+      num: 5, key: 'break', title: '이탈점 · 진입점', short: '이탈점', blocks: blocks,
+      graphNote: '후보가 표시되고, K가 양수인 점만 남습니다.',
+      questions: [
+        { q: '이탈점은 왜 K가 가장 큰 점인가요?', a: '두 극점 사이 구간에서는 양쪽 극점에서 K = 0으로 출발한 두 근이 K가 커질수록 서로 다가옵니다. 실수축 위에서 K가 가장 커지는 지점에서 두 근이 만나고, 그보다 큰 K에서는 실수축을 떠나 복소수가 됩니다.' },
+        { q: '후보를 왜 K에 대입해 확인하나요?', a: 'dK/ds = 0의 근에는 K < 0인 근궤적(양의 피드백) 위의 점이나 K가 복소수인 점도 섞여 나옵니다. K = −D/N이 양의 실수인 후보만 K ≥ 0 근궤적 위의 이탈점·진입점입니다.' }
+      ],
+      ladder: [
+        '이탈점·진입점은 실수축 위에서 K가 최대·최소가 되는 점입니다. 그래서 dK/ds = 0을 풉니다.',
+        'K = −D(s)/N(s)를 미분하는 대신 D′N − DN′ = 0을 풀면 됩니다.',
+        'D′(s) = ' + strip(M.polyH(Dp)) + ', N′(s) = ' + strip(M.polyH(Np)) + '이고, D′N − DN′ = ' + strip(M.polyH(Bn)) + ' = 0입니다.',
+        vb.length ? '후보 중 K > 0인 점: ' + vb.map(function (v) { return breakLabel(v.c) + ' s = ' + F.cnum(v.c.s) + ' (K = ' + F.num(v.c.K) + ')'; }).join(', ') + '.' : '후보는 모두 K < 0이거나 K가 복소수라, 이 문제에는 이탈점·진입점이 없습니다.'
+      ],
+      check: realValid.length ? { prompt: '실수축 위 ' + breakLabel(realValid[0].c) + '의 s 값은? (소수 둘째 자리까지)', values: realValid.map(function (v) { return v.c.s.re; }), tol: 0.02 } : null,
+      example: 'ex-break',
+      facts: { '이탈점 방정식 D′N − DN′': strip(M.polyH(Bn)) + ' = 0', 후보: cands.map(function (c) { return { s: F.cnum(c.s), K: typeof c.K === 'number' ? c.K : F.cnum(c.K), 판정: c.status }; }) }
+    };
+  }
+
+  // ── 6 출발각 · 도착각 ───────────────────────
+  function step6(res) {
+    var items = res.angles, i, j;
+    if (!items.length) {
+      return {
+        num: 6, key: 'angle', title: '출발각 · 도착각', short: '출발각',
+        blocks: [
+          blk('goal', '복소 극점에서 가지가 떠나는 방향(출발각), 복소 영점으로 들어오는 방향(도착각)을 구합니다.'),
+          blk('none', '복소 극점·영점이나 겹친 극점이 없습니다.<br><b>이 문제에서는 해당하지 않음</b> — 실수축 위 단순 극점은 실수축을 따라 출발합니다.')
+        ],
+        graphNote: '구할 각이 없습니다.',
+        questions: [{ q: '실수 극점에서는 왜 출발각을 안 구하나요?', a: '실수축 위의 단순 극점에서는 가지가 실수축 구간을 따라 출발하므로 방향이 이미 정해져 있습니다. 복소 극점이나 겹친 극점처럼 방향이 정해지지 않은 경우에만 구합니다.' }],
+        ladder: ['출발각은 복소 극점(또는 겹친 극점)에서만 구합니다.', '극점·영점 목록에서 복소수가 있는지 보세요.', '복소 극점·영점이 없습니다.', '이 문제에는 출발각·도착각이 없습니다.'],
+        check: null, example: 'ex-angle', facts: { 출발각_도착각: '해당 없음' }
+      };
+    }
+    var blocks = [
+      blk('goal', '복소 극점에서 가지가 떠나는 방향(출발각), 복소 영점으로 들어오는 방향(도착각)을 구합니다.'),
+      blk('formula', M.mv('θ') + '<sub>출발</sub> = 180° + Σ(영점 → 그 극점 각) ' + MI + ' Σ(다른 극점 → 그 극점 각)<br>' + M.mv('θ') + '<sub>도착</sub> = 180° + Σ(극점 → 그 영점 각) ' + MI + ' Σ(다른 영점 → 그 영점 각)'),
+      blk('note', '벡터 = (그 점) ' + MI + ' (다른 점), 각 = arctan(세로/가로). 가로가 음수면 180°에서 빼서 사분면을 맞춥니다.')
+    ];
+    var facts = [];
+    for (i = 0; i < items.length; i++) {
+      var it = items[i], dep = it.kind === 'departure', lines = [];
+      var plusName = dep ? '영점' : '극점', minusName = dep ? '극점' : '영점';
+      for (j = 0; j < it.plus.length; j++) { var t = it.plus[j]; lines.push(plusName + ' ' + F.cnum(t.from) + ' → (' + F.numShort(t.dx) + ', ' + F.numShort(t.dy) + '): ' + F.deg(t.angle) + (t.mult > 1 ? ' ×' + t.mult : '')); }
+      for (j = 0; j < it.minus.length; j++) { var u = it.minus[j]; lines.push(minusName + ' ' + F.cnum(u.from) + ' → (' + F.numShort(u.dx) + ', ' + F.numShort(u.dy) + '): ' + F.deg(u.angle) + (u.mult > 1 ? ' ×' + u.mult : '')); }
+      var plusSum = it.plus.length ? it.plus.map(function (t) { return (t.mult > 1 ? t.mult + '×' : '') + F.deg(t.angle); }).join(' + ') : '0°';
+      var minusSum = it.minus.length ? it.minus.map(function (t) { return (t.mult > 1 ? t.mult + '×' : '') + F.deg(t.angle); }).join(' + ') : '0°';
+      var head = '180° + (' + plusSum + ') ' + MI + ' (' + minusSum + ')';
+      var res1 = M.ref('a' + i, 'angle', F.deg(it.angles[0]));
+      blocks.push(blk('sub', (dep ? '출발각' : '도착각') + ' · ' + M.mv('s') + ' = ' + F.cnum(it.at) + (it.mult > 1 ? ' (×' + it.mult + ')' : '')));
+      blocks.push(blk('calc', lines.join('<br>')));
+      if (it.mult === 1) blocks.push(blk('result', M.mv('θ') + ' = ' + head + ' = ' + res1 + (it.at.im > 0 ? ' &ensp;<span class="sm">아래쪽 켤레는 ' + F.deg(-it.angles[0]) + '</span>' : '')));
+      else blocks.push(blk('result', M.mv('θ') + ' = ' + M.frac(head, String(it.mult)) + ' = ' + F.deg(normalize(it.base / it.mult)) + ', 그리고 360°/' + it.mult + '씩 더해 &ensp;→&ensp; ' + it.angles.map(function (a, k) { return k === 0 ? res1 : F.deg(a); }).join(', ')));
+      facts.push({ 종류: dep ? '출발각' : '도착각', 위치: F.cnum(it.at), 각도: it.angles, 더하는_각: it.plus.map(function (t) { return t.angle; }), 빼는_각: it.minus.map(function (t) { return t.angle; }) });
+    }
+    blocks.push(blk('note', '교재 표기 ' + M.mv('θ') + ' = Σ영점각 ' + MI + ' Σ극점각 ' + MI + ' (2' + M.mv('k') + ' + 1)·180°와 같은 값입니다.'));
+    blocks.push(blk('why', '극점 바로 옆의 점도 근궤적 위에 있으려면 각 조건(전체 각 = 180°의 홀수 배)을 만족해야 합니다. 그 조건을 떠나는 방향 θ에 대해 풀면 위 공식이 됩니다.'));
+    var first = items[0];
+    return {
+      num: 6, key: 'angle', title: '출발각 · 도착각', short: '출발각', blocks: blocks,
+      graphNote: '다른 극점·영점에서 그 점으로 벡터를 긋고 각을 잰 뒤, 떠나는 방향을 화살표로 보여 줍니다.',
+      questions: [
+        { q: '출발각 공식에 180°가 왜 들어가나요?', a: '근궤적 위의 점은 각의 합이 180°의 홀수 배여야 합니다. 극점 바로 옆의 점에 이 조건을 쓰고 출발 방향 θ만 남기면 θ = 180° + Σ영점각 − Σ다른 극점각이 됩니다.' },
+        { q: 'arctan을 계산기로 구하면 왜 틀릴 때가 있나요?', a: '계산기의 arctan은 −90°~90°만 돌려줍니다. 벡터의 가로 성분이 음수(2·3사분면)이면 180°를 보정해야 맞는 각이 나옵니다. 예: (−2, 2)는 arctan 값 −45°가 아니라 135°입니다.' }
+      ],
+      ladder: [
+        '출발각은 극점 바로 옆에서도 각 조건(180°의 홀수 배)을 만족하도록 정해집니다.',
+        '다른 극점·영점에서 ' + F.cnum(first.at) + '까지의 벡터를 그리고 각각의 각을 재 보세요.',
+        'θ = 180° + Σ(' + (first.kind === 'departure' ? '영점' : '극점') + ' 각) − Σ(다른 ' + (first.kind === 'departure' ? '극점' : '영점') + ' 각)' + (first.mult > 1 ? ', 겹친 수 ' + first.mult + '로 나눕니다.' : '에 잰 각을 넣습니다.'),
+        items.map(function (it) { return (it.kind === 'departure' ? '출발각' : '도착각') + ' ' + F.cnum(it.at) + ': ' + it.angles.map(function (a) { return F.deg(a); }).join(', '); }).join(' / ') + '.'
+      ],
+      check: { prompt: (first.kind === 'departure' ? '출발각' : '도착각') + ' (' + F.cnum(first.at) + ')은 몇 도인가요?', values: first.angles, tol: 0.6, unit: '°' },
+      example: 'ex-angle', facts: { 각: facts }
+    };
+  }
+  function normalize(a) { a = ((a % 360) + 360) % 360; return a > 180 ? a - 360 : a; }
+
+  // ── 7 Routh 표 · 허수축 교차 ────────────────
+  function step7(res) {
+    var st = res.stability, tb = st.table, rows = [], i, j;
+    for (i = 0; i < tb.rows.length; i++) {
+      var cells = [];
+      for (j = 0; j < tb.rows[i].length; j++) cells.push(M.rkH(tb.rows[i][j]));
+      rows.push({ pw: tb.powers[i], cells: cells });
+    }
+    var special = tb.special.length ? tb.special[0] : null;
+    var blocks = [
+      blk('goal', '근궤적이 허수축을 넘는 K를 찾아, 안정한 K 범위를 정합니다.'),
+      blk('formula', '특성방정식 계수로 Routh 표를 만들고, <b>첫 열이 모두 양수</b>일 때 안정<br><span class="sm">첫 열 부호가 바뀌는 횟수 = 우반면 극점 수</span>'),
+      blk('routh', '', { rows: rows, special: special })
+    ];
+    if (special && special.type === 'firstColZero') {
+      blocks.push(blk('note', M.mv('s') + '<sup>' + tb.powers[special.row] + '</sup> 행 첫 칸이 K와 상관없이 0이 됩니다. 0을 아주 작은 양수 ε로 바꿔 계속 계산하는 방법(ε 방법)을 씁니다. 이 경우 표는 여기까지만 보여 주고, 안정 판정은 각 K에서 폐루프 극점을 직접 계산해 확인했습니다.'));
+    } else {
+      var conds = [];
+      for (i = 0; i < tb.rows.length; i++) {
+        var e = tb.rows[i][0];
+        if (e.n.length === 1 && e.d.length === 1) continue; // 상수는 생략
+        conds.push(M.rkH(e) + ' &gt; 0 &ensp;→&ensp; ' + setText(positiveSet(e, st)));
+      }
+      if (conds.length) blocks.push(blk('calc', '첫 열이 양수인 조건:<br>' + conds.join('<br>')));
+      else blocks.push(blk('calc', '첫 열에 K가 들어간 칸이 없습니다.'));
+    }
+    var stable = setText(st.stableSet);
+    blocks.push(blk('result', '안정한 K 범위: ' + stable));
+    var hasOriginPole = false;
+    for (i = 0; i < res.poles.length; i++) if (Math.abs(res.poles[i].s.re) < 1e-12) hasOriginPole = true;
+    if (hasOriginPole && st.stableSet.length && st.stableSet[0].lo === 0 && !st.stableSet[0].loIncl) {
+      blocks.push(blk('note', M.mv('K') + ' = 0이면 허수축 위(원점)의 개루프 극점이 그대로 남아 임계 안정이므로 범위에 넣지 않습니다.'));
+    }
+    var cp = crossingsPos(res), crossLines = [];
+    for (i = 0; i < cp.length; i++) {
+      var c = cp[i].c, aux = R.auxEquation(tb, c.K), auxTxt = '';
+      if (aux && !special) auxTxt = M.mv('K') + ' = ' + F.num(c.K) + '이면 ' + M.mv('s') + '<sup>' + tb.powers[aux.fromRow + 1] + '</sup> 행이 0 &ensp;→&ensp; 바로 위 ' + M.mv('s') + '<sup>' + aux.power + '</sup> 행으로 보조방정식: ' + M.polyH(aux.poly) + ' = 0 &ensp;→&ensp; ';
+      crossLines.push(auxTxt + M.mv('s') + ' = ±' + M.ref('x' + i, 'key', 'j' + F.num(c.omega)) + ' &ensp;(' + M.mv('K') + ' = ' + F.num(c.K) + ')');
+    }
+    if (crossLines.length) blocks.push(blk('calc', '허수축 교차: <br>' + crossLines.join('<br>')));
+    else blocks.push(blk('none', '허수축 교차 없음 &ensp;→&ensp; ' + (st.stableSet.length ? '근궤적이 허수축을 넘지 않습니다.' : 'K > 0에서 항상 우반면 극점이 있습니다.')));
+    blocks.push(blk('why', '경계의 K에서는 폐루프 극점이 허수축 위에 있어 출력이 줄지도 늘지도 않는 진동(임계 안정)이 됩니다. 그래서 경계 K는 안정 범위에 넣지 않습니다.'));
+    return {
+      num: 7, key: 'routh', title: 'Routh 표 · 허수축 교차', short: 'Routh', blocks: blocks,
+      graphNote: 'Routh 표가 한 행씩 채워지고, 허수축을 지나는 점이 표시됩니다.',
+      questions: [
+        { q: 'Routh 표에서 첫 열만 보는 이유는?', a: 'Routh 판별법에서 첫 열의 부호가 바뀌는 횟수가 우반면 극점 수와 같습니다. 그래서 첫 열이 모두 같은 부호(양수)면 우반면 극점이 없어 안정합니다.' },
+        { q: '경계 K에서는 안정인가요?', a: '아닙니다. 경계 K에서는 폐루프 극점이 허수축 위에 있어 계속 진동하는 임계 안정입니다. 안정 범위는 경계를 빼고 씁니다.' }
+      ],
+      ladder: [
+        '근궤적이 허수축을 넘는 순간이 안정과 불안정의 경계입니다. Routh 표의 첫 열로 찾습니다.',
+        '특성방정식 ' + strip(M.charPolyH(res.charCoef)) + ' = 0의 계수로 Routh 표를 채워 보세요.',
+        '첫 열: ' + rows.map(function (r) { return 's^' + r.pw + ': ' + strip(r.cells[0]); }).join(', ') + '. 모두 양수인 K를 찾습니다.',
+        '안정한 K 범위는 ' + strip(stable) + '. ' + (cp.length ? '허수축 교차: ' + cp.map(function (x) { return 's = ±j' + F.num(x.c.omega) + ' (K = ' + F.num(x.c.K) + ')'; }).join(', ') + '.' : '허수축 교차는 없습니다.')
+      ],
+      check: cp.length ? { prompt: '허수축을 지나는 K는?', values: cp.map(function (x) { return x.c.K; }), tol: 0.02 } : null,
+      example: 'ex-routh',
+      facts: { 'Routh 첫 열': rows.map(function (r) { return 's^' + r.pw + ': ' + strip(r.cells[0]); }), '안정한 K 범위': strip(stable), '허수축 교차': cp.map(function (x) { return { omega: x.c.omega, K: x.c.K }; }), '특수 경우': special ? special.type : '없음' }
+    };
+  }
+
+  // ── 8 근궤적 완성 ───────────────────────────
+  function step8(res) {
+    var segs = onSegments(res).map(segText), vb = validBreaks(res), cp = crossingsPos(res), A = res.asymptotes;
+    var items = [
+      '출발: 극점 ' + joinRefs(res, 'pole') + ' &ensp;(' + M.mv('K') + ' = 0)',
+      '도착: ' + (res.m ? '영점 ' + joinRefs(res, 'zero') : '') + (res.m && res.n - res.m ? ' 그리고 ' : '') + (res.n - res.m ? '무한대 ' + (res.n - res.m) + '개' : ''),
+      '실수축 구간: ' + (segs.length ? segs.join(', ') : '없음'),
+      '점근선: ' + (A ? '중심 ' + F.num(A.centroid) + ', ' + A.angles.map(function (a) { return F.deg(a > 180 ? a - 360 : a); }).join(', ') : '없음'),
+      '이탈점·진입점: ' + (vb.length ? vb.map(function (v) { return breakLabel(v.c) + ' ' + F.cnum(v.c.s); }).join(', ') : '없음'),
+      '출발각·도착각: ' + (res.angles.length ? res.angles.map(function (it) { return F.cnum(it.at) + ' ' + it.angles.map(function (a) { return F.deg(a); }).join('/'); }).join(', ') : '없음'),
+      '허수축 교차: ' + (cp.length ? cp.map(function (x) { return '±j' + F.num(x.c.omega) + ' (' + M.mv('K') + ' = ' + F.num(x.c.K) + ')'; }).join(', ') : '없음'),
+      '안정한 K 범위: ' + setText(res.stability.stableSet)
+    ];
+    return {
+      num: 8, key: 'full', title: '근궤적 완성', short: '완성',
+      blocks: [
+        blk('goal', '지금까지 구한 것을 모아 근궤적을 그립니다.'),
+        blk('list', '', { items: items }),
+        blk('note', '화살표는 K가 커지는 방향입니다. 가지는 극점에서 출발해 영점이나 무한대로 갑니다.')
+      ],
+      graphNote: '극점에서 출발한 가지가 K를 따라 그려집니다.',
+      questions: [
+        { q: '가지는 어느 방향으로 움직이나요?', a: 'K = 0에서 극점에 있던 근이 K가 커질수록 움직여, K → ∞에서 영점에 도착하거나 점근선을 따라 무한대로 갑니다. 그림의 화살표가 K가 커지는 방향입니다.' },
+        { q: '가지가 점근선을 넘어가도 되나요?', a: '됩니다. 점근선은 먼 곳의 방향만 정해 줍니다. 그림에서는 출발각, 이탈점, 허수축 교차점처럼 계산한 점을 정확히 지나게 그리는 것이 우선입니다.' }
+      ],
+      ladder: ['1~7단계 결과를 모두 모아 그립니다.', '극점에서 출발해 실수축 구간, 이탈점, 출발각 방향을 차례로 이어 보세요.', '무한대로 가는 가지는 점근선 쪽으로 휘어 가게 그립니다.', '정리: ' + items.map(strip).join(' / ')],
+      check: null, example: null, facts: { 요약: items.map(strip) }
+    };
+  }
+
+  // ── 9 K 변화 ────────────────────────────────
+  function step9(res) {
+    return {
+      num: 9, key: 'kslide', title: 'K 변화와 안정성', short: 'K 변화',
+      blocks: [
+        blk('goal', 'K를 바꾸며 폐루프 극점이 실제로 어디 있는지 확인합니다.'),
+        blk('slider', ''),
+        blk('note', '× 개루프 극점은 고정이고, ● 폐루프 극점이 K에 따라 가지 위를 움직입니다. 복소 극점 쌍이 있으면 원점에서 그 극점까지의 원(ωn 일정)과 감쇠비 ζ를 함께 보여 줍니다.')
+      ],
+      graphNote: '슬라이더를 움직이면 계산된 폐루프 극점이 가지를 따라 움직입니다.',
+      questions: [
+        { q: 'K를 키우면 왜 불안정해질 수 있나요?', a: '가지가 허수축을 넘어 우반면으로 가면, 그 극점은 시간이 갈수록 커지는 응답을 만듭니다. 근궤적이 허수축을 넘는 K가 안정의 경계입니다.' },
+        { q: '감쇠비 ζ와 극점 위치는 어떤 관계인가요?', a: '복소 극점 s = −ζωn ± jωn√(1 − ζ²)에서, 원점에서 극점까지의 거리가 ωn이고 음의 실수축과 이루는 각 θ에 대해 ζ = cos θ입니다. 극점이 허수축에 가까워질수록 ζ가 작아져 진동이 커집니다.' }
+      ],
+      ladder: ['K마다 특성방정식의 근이 폐루프 극점입니다.', '슬라이더로 K를 바꾸며 극점이 허수축에 다가가는지 보세요.', '허수축 교차 K와 이탈점 K 버튼을 눌러 그 순간의 극점을 확인하세요.', '안정한 K 범위: ' + strip(setText(res.stability.stableSet)) + '.'],
+      check: null, example: null, facts: { '특별한 K': notableK(res).map(function (x) { return x.label + ' K = ' + x.K; }) }
+    };
+  }
+
+  function build(res) { return [step1(res), step2(res), step3(res), step4(res), step5(res), step6(res), step7(res), step8(res), step9(res)]; }
+
+  // 미리 검증한 간단한 예시 (tests/problems.json에 들어 있는 문제)
+  var EXAMPLES = {
+    'ex-real': { title: '실수축 구간 예시', input: 'K(s+2)/(s(s+1))', focus: 3, test: 'T03' },
+    'ex-asym': { title: '점근선 예시', input: 'K/(s(s+1)(s+2))', focus: 4, test: 'T02' },
+    'ex-break': { title: '이탈점 예시', input: 'K/(s(s+2))', focus: 5, test: 'T01' },
+    'ex-angle': { title: '출발각 예시', input: 'K/(s^2+2s+2)', focus: 6, test: 'T15' },
+    'ex-routh': { title: 'Routh 예시', input: 'K/(s(s+1)(s+2))', focus: 7, test: 'T02' }
+  };
+
+  // AI 답변의 숫자 검사용: 이 문제의 검증된 숫자 모음
+  function allNumbers(res) {
+    var out = [], i, j;
+    function add(x) { if (typeof x === 'number' && isFinite(x)) { out.push(x); out.push(Math.abs(x)); } }
+    function addZ(z) { add(z.re); add(z.im); }
+    res.N.forEach(add); res.D.forEach(add);
+    for (i = 0; i < res.charCoef.length; i++) res.charCoef[i].forEach(add);
+    res.poles.forEach(function (p) { addZ(p.s); add(p.mult); });
+    res.zeros.forEach(function (p) { addZ(p.s); add(p.mult); });
+    add(res.n); add(res.m); add(res.n - res.m);
+    if (res.asymptotes) { add(res.asymptotes.centroid); add(res.asymptotes.sumPoles); add(res.asymptotes.sumZeros); res.asymptotes.angles.forEach(function (a) { add(a); add(a - 360); }); }
+    res.breaks.B.forEach(add);
+    res.breaks.candidates.forEach(function (c) { addZ(c.s); if (typeof c.K === 'number') add(c.K); else addZ(c.K); });
+    res.angles.forEach(function (it) { it.angles.forEach(add); add(it.base); add(it.sumPlus); add(it.sumMinus); it.plus.concat(it.minus).forEach(function (t) { add(t.angle); add(t.dx); add(t.dy); }); });
+    var st = res.stability;
+    st.crossings.forEach(function (c) { add(c.omega); add(c.omega * c.omega); add(c.K); });
+    st.stableSet.forEach(function (s) { add(s.lo); add(s.hi); });
+    for (i = 0; i < st.table.rows.length; i++) for (j = 0; j < st.table.rows[i].length; j++) { st.table.rows[i][j].n.forEach(add); st.table.rows[i][j].d.forEach(add); }
+    st.criticalK.forEach(add);
+    return out;
+  }
+
+  RL.content = { build: build, setText: setText, notableK: notableK, validBreaks: validBreaks, crossingsPos: crossingsPos, onSegments: onSegments, segText: segText, EXAMPLES: EXAMPLES, allNumbers: allNumbers, strip: strip, breakLabel: breakLabel };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== app/js/graph.js ===== */
+/*
+ * graph.js — s평면 그래프와 단계별 움직임
+ *
+ * 단계가 바뀔 때마다 그 단계까지의 결과를 다시 그리고, 이번 단계에서 새로 생긴 것만 움직임을 줍니다.
+ * 모든 점의 위치는 엔진이 계산한 값입니다(모양을 흉내 낸 그림이 아님).
+ * 움직임은 브라우저 내장 기능(Web Animations)으로 만들어서, 일시정지하면 한꺼번에 멈춥니다.
+ */
+(function (RL) {
+  'use strict';
+  var C = RL.complex, F = RL.format, P = RL.poly, CT = RL.content;
+  var NS = 'http://www.w3.org/2000/svg';
+  var EASE = 'cubic-bezier(.22,.8,.24,1)';
+
+  function reduced() { return document.documentElement.dataset.motion === 'off' || !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function el(tag, attrs, parent) {
+    var n = document.createElementNS(NS, tag), k;
+    if (attrs) for (k in attrs) if (attrs[k] !== undefined && attrs[k] !== null) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function anim(node, frames, opts) { if (reduced() || !node.animate) return null; return node.animate(frames, opts); }
+  function pop(node, delay) {
+    return anim(node, [{ transform: 'scale(0)', opacity: 0 }, { transform: 'scale(1.3)', opacity: 1, offset: 0.6 }, { transform: 'scale(1)', opacity: 1 }],
+      { duration: 520, delay: delay || 0, easing: EASE, fill: 'backwards' });
+  }
+  function fadeIn(node, delay, dur) { return anim(node, [{ opacity: 0 }, { opacity: 1 }], { duration: dur || 420, delay: delay || 0, easing: 'ease-out', fill: 'backwards' }); }
+  function drawLine(node, dur, delay) {
+    if (reduced() || !node.getTotalLength) return null;
+    var len = node.getTotalLength();
+    if (!len || !isFinite(len)) return null;
+    node.style.strokeDasharray = len + ' ' + len;
+    var a = node.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: dur, delay: delay || 0, easing: EASE, fill: 'backwards' });
+    a.finished.then(function () { node.style.strokeDasharray = ''; }).catch(function () {});
+    return a;
+  }
+  function niceStep(span) {
+    var raw = span / 8, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p;
+  }
+
+  function Graph(svg, opts) {
+    this.svg = svg;
+    this.opts = opts || {};
+    this.res = null;
+    this.token = 0;
+    this.k = 1;         // 화면 1px이 viewBox에서 몇 단위인지
+    this.onRef = null;  // 그래프 요소를 가리킬 때 부르는 함수
+    var self = this;
+    svg.addEventListener('pointerover', function (e) { var t = e.target.closest ? e.target.closest('[data-ref]') : null; if (t && self.onRef) self.onRef(t.getAttribute('data-ref'), true); });
+    svg.addEventListener('pointerout', function (e) { var t = e.target.closest ? e.target.closest('[data-ref]') : null; if (t && self.onRef) self.onRef(t.getAttribute('data-ref'), false); });
+  }
+
+  Graph.prototype.setProblem = function (res) { this.res = res; this.fit(); };
+
+  // 화면 비율에 맞춰 보이는 범위를 정하고 격자를 그림
+  Graph.prototype.fit = function () {
+    var res = this.res;
+    if (!res) return;
+    var box = this.svg.getBoundingClientRect(), cw = box.width || 600, ch = box.height || 600, aspect = cw / ch;
+    var v = res.view, S = v.xmax - v.xmin, cx = (v.xmin + v.xmax) / 2, cy = 0;
+    var spanX = aspect >= 1 ? S * aspect : S, spanY = aspect >= 1 ? S : S / aspect;
+    this.w = { xmin: cx - spanX / 2, xmax: cx + spanX / 2, ymin: cy - spanY / 2, ymax: cy + spanY / 2 };
+    this.VW = aspect >= 1 ? 1000 * aspect : 1000;
+    this.VH = aspect >= 1 ? 1000 : 1000 / aspect;
+    this.scale = this.VW / spanX;
+    this.k = this.VW / cw;
+    this.svg.setAttribute('viewBox', '0 0 ' + this.VW.toFixed(1) + ' ' + this.VH.toFixed(1));
+    this.svg.innerHTML = '';
+    var defs = el('defs', null, this.svg);
+    var clip = el('clipPath', { id: this.id('clip') }, defs);
+    el('rect', { x: 0, y: 0, width: this.VW, height: this.VH }, clip);
+    var kinds = ['pole', 'zero', 'dep'];
+    for (var q = 0; q < kinds.length; q++) { // 화살촉은 색마다 따로 (context-stroke를 못 쓰는 브라우저 대비)
+      var mk = el('marker', { id: this.id('arrow-' + kinds[q]), viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
+      el('path', { d: 'M1 1L9 5L1 9', fill: 'none', 'class': 'ah ah-' + kinds[q], 'stroke-width': 1.6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, mk);
+    }
+    var names = ['grid', 'region', 'axes', 'real', 'asym', 'branch', 'angle', 'key', 'pz', 'cl', 'probe', 'label'];
+    this.L = {};
+    for (var i = 0; i < names.length; i++) this.L[names[i]] = el('g', { 'class': 'L-' + names[i], 'clip-path': 'url(#' + this.id('clip') + ')' }, this.svg);
+    this.drawGrid();
+  };
+  Graph.prototype.id = function (s) { if (!this._uid) this._uid = 'g' + Math.random().toString(36).slice(2, 7); return this._uid + '-' + s; };
+  Graph.prototype.X = function (x) { return (x - this.w.xmin) * this.scale; };
+  Graph.prototype.Y = function (y) { return (this.w.ymax - y) * this.scale; };
+  Graph.prototype.px = function (n) { return n * this.k; };
+
+  Graph.prototype.drawGrid = function () {
+    var g = this.L.grid, w = this.w, st = niceStep(w.ymax - w.ymin), x, y;
+    for (x = Math.ceil(w.xmin / st) * st; x <= w.xmax; x += st) el('line', { x1: this.X(x), y1: 0, x2: this.X(x), y2: this.VH, 'class': 'grid' }, g);
+    for (y = Math.ceil(w.ymin / st) * st; y <= w.ymax; y += st) el('line', { x1: 0, y1: this.Y(y), x2: this.VW, y2: this.Y(y), 'class': 'grid' }, g);
+    var a = this.L.axes;
+    el('line', { x1: 0, y1: this.Y(0), x2: this.VW, y2: this.Y(0), 'class': 'axis' }, a);
+    el('line', { x1: this.X(0), y1: 0, x2: this.X(0), y2: this.VH, 'class': 'axis' }, a);
+    var fs = this.px(11);
+    for (x = Math.ceil(w.xmin / st) * st; x <= w.xmax; x += st) {
+      if (Math.abs(x) < st / 2 || this.X(x) < this.px(14) || this.X(x) > this.VW - this.px(14)) continue;
+      var t = el('text', { x: this.X(x), y: this.Y(0) + this.px(15), 'class': 'tick', 'font-size': fs, 'text-anchor': 'middle' }, a);
+      t.textContent = F.dec(x, 2);
+    }
+    for (y = Math.ceil(w.ymin / st) * st; y <= w.ymax; y += st) {
+      if (Math.abs(y) < st / 2 || this.Y(y) < this.px(36) || this.Y(y) > this.VH - this.px(12)) continue;
+      var t2 = el('text', { x: this.X(0) - this.px(6), y: this.Y(y) + this.px(4), 'class': 'tick', 'font-size': fs, 'text-anchor': 'end' }, a);
+      t2.textContent = (y < 0 ? '−' : '') + 'j' + F.dec(Math.abs(y), 2);
+    }
+    var lx = el('text', { x: this.VW - this.px(10), y: this.Y(0) - this.px(8), 'class': 'axlabel', 'font-size': this.px(13), 'text-anchor': 'end' }, a);
+    lx.textContent = 'σ (실수부)';
+    var nearRight = this.X(0) > this.VW - this.px(110); // 허수축이 오른쪽 끝에 가까우면 글자를 왼쪽에
+    var ly = el('text', { x: this.X(0) + (nearRight ? -this.px(8) : this.px(8)), y: this.px(18), 'class': 'axlabel', 'font-size': this.px(13), 'text-anchor': nearRight ? 'end' : 'start' }, a);
+    ly.textContent = 'jω (허수부)';
+  };
+
+  Graph.prototype.clearDynamic = function () {
+    var names = ['region', 'real', 'asym', 'branch', 'angle', 'key', 'pz', 'cl', 'probe', 'label'];
+    for (var i = 0; i < names.length; i++) this.L[names[i]].innerHTML = '';
+  };
+  Graph.prototype.stop = function () {
+    this.token++;
+    if (this.svg.getAnimations) {
+      var list = this.svg.getAnimations({ subtree: true });
+      for (var i = 0; i < list.length; i++) list[i].cancel();
+    }
+  };
+  // 일시정지에도 함께 멈추는 기다리기
+  Graph.prototype.wait = function (ms, token) {
+    var self = this;
+    if (reduced()) return Promise.resolve(self.token === token);
+    var a = this.L.probe.animate([{ opacity: 1 }, { opacity: 1 }], { duration: ms });
+    return a.finished.then(function () { return self.token === token; }, function () { return false; });
+  };
+
+  // ── 그리는 부품 ─────────────────────────────
+  Graph.prototype.poleMark = function (p, i) {
+    var g = el('g', { 'class': 'mk pole', 'data-ref': 'p' + i, transform: 'translate(' + this.X(p.s.re) + ' ' + this.Y(p.s.im) + ')' }, this.L.pz);
+    var r = this.px(7), inner = el('g', { 'class': 'pop' }, g);
+    el('circle', { r: this.px(14), 'class': 'hit' }, inner);
+    el('path', { d: 'M' + (-r) + ' ' + (-r) + 'L' + r + ' ' + r + 'M' + (-r) + ' ' + r + 'L' + r + ' ' + (-r), 'stroke-width': this.px(2.6) }, inner);
+    if (p.mult > 1) { var t = el('text', { x: this.px(10), y: -this.px(9), 'font-size': this.px(12), 'class': 'mult' }, inner); t.textContent = '×' + p.mult; }
+    return inner;
+  };
+  Graph.prototype.zeroMark = function (z, i) {
+    var g = el('g', { 'class': 'mk zero', 'data-ref': 'z' + i, transform: 'translate(' + this.X(z.s.re) + ' ' + this.Y(z.s.im) + ')' }, this.L.pz);
+    var inner = el('g', { 'class': 'pop' }, g);
+    el('circle', { r: this.px(14), 'class': 'hit' }, inner);
+    el('circle', { r: this.px(6.5), 'stroke-width': this.px(2.4), 'class': 'ring' }, inner);
+    if (z.mult > 1) { var t = el('text', { x: this.px(10), y: -this.px(9), 'font-size': this.px(12), 'class': 'mult' }, inner); t.textContent = '×' + z.mult; }
+    return inner;
+  };
+  Graph.prototype.dot = function (x, y, cls, ref, r, layer) {
+    var g = el('g', { 'class': 'mk ' + cls, 'data-ref': ref || null, transform: 'translate(' + this.X(x) + ' ' + this.Y(y) + ')' }, layer || this.L.key);
+    var inner = el('g', { 'class': 'pop' }, g);
+    el('circle', { r: this.px(13), 'class': 'hit' }, inner);
+    el('circle', { r: this.px(r || 5.5), 'class': 'core' }, inner);
+    return inner;
+  };
+  Graph.prototype.label = function (x, y, text, cls, dx, dy, anchor) {
+    var t = el('text', { x: this.X(x) + this.px(dx || 0), y: this.Y(y) + this.px(dy || 0), 'font-size': this.px(12.5), 'class': 'lbl ' + (cls || ''), 'text-anchor': anchor || 'start' }, this.L.label);
+    t.textContent = text;
+    return t;
+  };
+  Graph.prototype.segment = function (iv, ref) {
+    var w = this.w, lo = Math.max(iv.lo, w.xmin - 1), hi = Math.min(iv.hi, w.xmax + 1);
+    return el('line', { x1: this.X(lo), y1: this.Y(0), x2: this.X(hi), y2: this.Y(0), 'class': 'seg', 'data-ref': ref, 'stroke-width': this.px(6) }, this.L.real);
+  };
+  Graph.prototype.inBox = function (re, im, pad) {
+    var w = this.w, S = (w.xmax - w.xmin) * (pad || 0.6);
+    return re > w.xmin - S && re < w.xmax + S && im > w.ymin - S && im < w.ymax + S;
+  };
+  Graph.prototype.branchPath = function (b) {
+    var last = -1, i, d = '';
+    for (i = 0; i < b.length; i++) if (this.inBox(b[i].re, b[i].im)) last = i;
+    var end = Math.min(b.length - 1, last + 1);
+    for (i = 0; i <= end; i++) d += (i ? 'L' : 'M') + this.X(b[i].re).toFixed(2) + ' ' + this.Y(b[i].im).toFixed(2);
+    return d;
+  };
+  Graph.prototype.arrowOn = function (path, frac) {
+    var len = path.getTotalLength ? path.getTotalLength() : 0;
+    if (!len) return null;
+    var a = path.getPointAtLength(len * frac), b = path.getPointAtLength(Math.min(len, len * frac + this.px(4)));
+    var ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI, s = this.px(6);
+    return el('path', { d: 'M' + (-s) + ' ' + (-s * 0.8) + 'L' + s + ' 0L' + (-s) + ' ' + (s * 0.8) + 'Z', transform: 'translate(' + a.x + ' ' + a.y + ') rotate(' + ang + ')', 'class': 'chev' }, this.L.branch);
+  };
+
+  // ── 단계별 장면 ─────────────────────────────
+  // animate: 이번 단계 부분만 움직임. 반환값: 움직임이 끝날 때 이행되는 Promise
+  Graph.prototype.show = function (step, animate) {
+    this.stop();
+    this.clearDynamic();
+    var token = this.token, res = this.res, self = this, i, j, delay = 0, seq = Promise.resolve();
+    var now = function (n) { return animate && step === n; };
+    if (!res) return seq;
+
+    // 2단계부터: 극점·영점
+    if (step >= 2) {
+      for (i = 0; i < res.poles.length; i++) { var pm = this.poleMark(res.poles[i], i); if (now(2)) pop(pm, delay += 260); }
+      for (i = 0; i < res.zeros.length; i++) { var zm = this.zeroMark(res.zeros[i], i); if (now(2)) pop(zm, delay += 260); }
+      if (now(2)) {
+        for (i = 0; i < res.poles.length; i++) if (res.poles[i].s.im >= 0) fadeIn(this.label(res.poles[i].s.re, res.poles[i].s.im, 'K = 0 출발', 'pole', 10, -12), delay + 300);
+        for (i = 0; i < res.zeros.length; i++) if (res.zeros[i].s.im >= 0) fadeIn(this.label(res.zeros[i].s.re, res.zeros[i].s.im, 'K → ∞ 도착', 'zero', 10, 20), delay + 400);
+      }
+    }
+    // 3단계부터: 실수축 구간
+    var ivs = res.realAxis.intervals;
+    if (step >= 3 && !now(3)) for (i = 0; i < ivs.length; i++) if (ivs[i].onLocus) this.segment(ivs[i], 'r' + i);
+    if (now(3)) seq = this.probeSequence(token);
+    // 4단계부터: 점근선
+    var A = res.asymptotes;
+    if (step >= 4 && A) {
+      var R = (this.w.xmax - this.w.xmin) * 3, d0 = now(4) ? 500 : 0;
+      for (i = 0; i < A.angles.length; i++) {
+        var t = A.angles[i] * Math.PI / 180;
+        var ln = el('line', { x1: this.X(A.centroid), y1: this.Y(0), x2: this.X(A.centroid + R * Math.cos(t)), y2: this.Y(R * Math.sin(t)), 'class': 'asym', 'data-ref': 'c', 'stroke-width': this.px(1.6), 'stroke-dasharray': this.px(7) + ' ' + this.px(6) }, this.L.asym);
+        if (now(4)) { ln.removeAttribute('stroke-dasharray'); this.dashAfter(ln, drawLine(ln, 900, d0 + i * 420)); }
+        if (now(4)) {
+          var lx = A.centroid + (this.w.xmax - this.w.xmin) * 0.16 * Math.cos(t), ly = (this.w.xmax - this.w.xmin) * 0.16 * Math.sin(t);
+          fadeIn(this.label(lx, ly, F.deg(A.angles[i] > 180 ? A.angles[i] - 360 : A.angles[i]), 'asym', 6, ly >= 0 ? -6 : 16), d0 + i * 420 + 500);
+        }
+      }
+      // 점근선 하나는 실수축 방향이므로 중심 표시가 오해를 만들지 않도록 숨깁니다.
+      if (A.q > 1) {
+        var cm = this.dot(A.centroid, 0, 'cen', 'c', 5, this.L.key);
+        if (now(4)) { pop(cm, 150); fadeIn(this.label(A.centroid, 0, 'σ = ' + F.numShort(A.centroid), 'asym', 0, -14, 'middle'), 300); }
+      }
+    }
+    // 5단계부터: 이탈점·진입점
+    var vb = CT.validBreaks(res);
+    if (step >= 5) {
+      var cands = res.breaks.candidates, k = 0;
+      for (i = 0; i < cands.length; i++) {
+        var c = cands[i], valid = ['breakaway', 'breakin', 'multiple', 'complexBreak'].indexOf(c.status) >= 0;
+        if (c.status === 'start') continue;
+        var ref = valid ? 'b' + (k++) : null; // content.js의 b0, b1… 번호와 맞춤
+        if (!valid && step !== 5) continue;
+        if (!this.inBox(c.s.re, c.s.im, 0)) continue;
+        var ys = c.s.im ? [c.s.im, -c.s.im] : [0];
+        for (j = 0; j < ys.length; j++) {
+          var dm = this.dot(c.s.re, ys[j], valid ? 'brk' : 'rej', ref, valid ? 6 : 4.5);
+          if (now(5)) pop(dm, 300 + i * 380);
+          if (now(5) && j === 0) {
+            var txt = valid ? CT.breakLabel(c) : (c.status === 'negativeK' ? 'K < 0 ✗' : 'K 복소수 ✗');
+            fadeIn(this.label(c.s.re, ys[j], txt, valid ? 'key' : 'rej', 0, valid ? -14 : 18, 'middle'), 500 + i * 380);
+          }
+        }
+      }
+    }
+    // 6단계: 출발각 벡터 / 6단계 이후: 출발 방향 화살표
+    if (step >= 6) for (i = 0; i < res.angles.length; i++) this.angleItem(res.angles[i], i, now(6), now(6) ? 400 + i * 2200 : 0, step === 6);
+    // 7단계부터: 불안정 영역, 허수축 교차
+    if (step >= 7) {
+      var rg = el('rect', { x: this.X(0), y: 0, width: Math.max(0, this.VW - this.X(0)), height: this.VH, 'class': 'rhp' }, this.L.region);
+      var rl = el('text', { x: this.VW - this.px(12), y: this.VH - this.px(14), 'class': 'rhplbl', 'font-size': this.px(12), 'text-anchor': 'end' }, this.L.region);
+      rl.textContent = '불안정 영역 (Re s > 0)';
+      if (now(7)) { fadeIn(rg, 200, 700); fadeIn(rl, 400); }
+      var cp = CT.crossingsPos(res);
+      for (i = 0; i < cp.length; i++) {
+        var cc = cp[i].c;
+        for (j = 0; j < 2; j++) {
+          var xm = this.dot(0, j ? -cc.omega : cc.omega, 'crs', 'x' + i, 6);
+          if (now(7)) pop(xm, 900 + i * 300);
+        }
+        var cl = this.label(0, cc.omega, '±j' + F.numShort(cc.omega) + ' (K = ' + F.numShort(cc.K) + ')', 'key', 10, -10);
+        if (now(7)) fadeIn(cl, 1100);
+      }
+    }
+    // 8단계부터: 가지
+    if (step >= 8 && res.branches) {
+      var paths = [];
+      for (i = 0; i < res.branches.length; i++) {
+        var pth = el('path', { d: this.branchPath(res.branches[i]), 'class': 'branch' + (step === 9 ? ' dim' : ''), 'stroke-width': this.px(2.6) }, this.L.branch);
+        paths.push(pth);
+        if (now(8)) drawLine(pth, 2200, 200);
+      }
+      var arrows = function () { if (self.token !== token) return; for (var q = 0; q < paths.length; q++) { var ar = self.arrowOn(paths[q], 0.34); if (ar && now(8)) fadeIn(ar, 0, 300); } };
+      if (now(8)) seq = this.wait(2400, token).then(function (ok) { if (ok) arrows(); return ok; }); else arrows();
+    }
+    // 9단계: 폐루프 극점
+    if (step >= 9) this.initCL();
+    return seq;
+  };
+
+  // 점근선은 다 그려진 뒤 점선으로 바꿈
+  Graph.prototype.dashAfter = function (ln, a) {
+    var self = this, dash = this.px(7) + ' ' + this.px(6);
+    if (!a) { ln.setAttribute('stroke-dasharray', dash); return; }
+    a.finished.then(function () { ln.style.strokeDasharray = ''; ln.setAttribute('stroke-dasharray', dash); }).catch(function () {});
+  };
+
+  // 3단계: 시험점이 오른쪽 구간부터 왼쪽으로 이동하며 개수를 셈
+  Graph.prototype.probeSequence = function (token) {
+    var self = this, res = this.res, ivs = res.realAxis.intervals, w = this.w, span = w.xmax - w.xmin;
+    var probe = el('g', { 'class': 'probe' }, this.L.probe);
+    el('line', { x1: 0, y1: -this.px(16), x2: 0, y2: this.px(16), 'stroke-width': this.px(1.6) }, probe);
+    el('circle', { r: this.px(5), 'class': 'pc' }, probe);
+    var bubble = el('text', { y: -this.px(24), 'font-size': this.px(13), 'text-anchor': 'middle', 'class': 'pt' }, probe);
+    var marks = this.L.pz.querySelectorAll('.mk');
+    function place(x) { probe.setAttribute('transform', 'translate(' + self.X(x) + ' ' + self.Y(0) + ')'); }
+    function mark(x) {
+      for (var m = 0; m < marks.length; m++) {
+        var ref = marks[m].getAttribute('data-ref'), idx = +ref.slice(1), item = ref.charAt(0) === 'p' ? res.poles[idx] : res.zeros[idx];
+        var on = item.s.im === 0 && item.s.re > x;
+        marks[m].classList.toggle('counted', on);
+      }
+    }
+    var i = 0;
+    function next() {
+      if (self.token !== token) return Promise.resolve(false);
+      if (i >= ivs.length) {
+        mark(Infinity);
+        var f = anim(probe, [{ opacity: 1 }, { opacity: 0 }], { duration: 400, fill: 'forwards' });
+        return f ? f.finished.then(function () { return true; }, function () { return false; }) : Promise.resolve(true);
+      }
+      var iv = ivs[i], x;
+      if (iv.hi === Infinity && iv.lo === -Infinity) x = w.xmin + span * 0.7;
+      else if (iv.hi === Infinity) x = Math.min(iv.lo + span * 0.08, w.xmax - span * 0.05);
+      else if (iv.lo === -Infinity) x = Math.max(iv.hi - span * 0.08, w.xmin + span * 0.05);
+      else x = (iv.lo + iv.hi) / 2;
+      var from = probe.__x === undefined ? x : probe.__x;
+      probe.__x = x;
+      var mv = anim(probe, [{ transform: 'translate(' + self.X(from) + 'px,' + self.Y(0) + 'px)' }, { transform: 'translate(' + self.X(x) + 'px,' + self.Y(0) + 'px)' }], { duration: 650, easing: EASE });
+      place(x);
+      var go = mv ? mv.finished : Promise.resolve();
+      return go.then(function () {
+        if (self.token !== token) return false;
+        mark(x);
+        bubble.textContent = '오른쪽 ' + iv.rightCount + '개 · ' + (iv.rightCount % 2 ? '홀수 ✓' : '짝수');
+        bubble.setAttribute('class', 'pt ' + (iv.onLocus ? 'yes' : 'no'));
+        if (iv.onLocus) drawLine(self.segment(iv, 'r' + i), 600, 150);
+        i++;
+        return self.wait(1150, token).then(function (ok) { return ok ? next() : false; });
+      }, function () { return false; });
+    }
+    return this.wait(500, token).then(function (ok) { return ok ? next() : false; });
+  };
+
+  // 6단계: 다른 극점·영점에서 그 점까지 벡터, 각, 출발 방향
+  Graph.prototype.angleItem = function (it, idx, animate, d0, showVectors) {
+    var self = this, tx = this.X(it.at.re), ty = this.Y(it.at.im), list = [], j;
+    for (j = 0; j < it.plus.length; j++) list.push({ t: it.plus[j], cls: it.kind === 'departure' ? 'zero' : 'pole' });
+    for (j = 0; j < it.minus.length; j++) list.push({ t: it.minus[j], cls: it.kind === 'departure' ? 'pole' : 'zero' });
+    if (showVectors) {
+      for (j = 0; j < list.length; j++) {
+        var t = list[j].t, fx = this.X(t.from.re), fy = this.Y(t.from.im), dl = d0 + j * 520;
+        var ln = el('line', { x1: fx, y1: fy, x2: tx, y2: ty, 'class': 'vec ' + list[j].cls, 'stroke-width': this.px(1.6), 'marker-end': 'url(#' + this.id('arrow-' + list[j].cls) + ')' }, this.L.angle);
+        if (animate) drawLine(ln, 480, dl);
+        var r = this.px(22), a0 = 0, a1 = -t.angle * Math.PI / 180;
+        var large = Math.abs(t.angle) > 180 ? 1 : 0, sweep = t.angle > 0 ? 0 : 1;
+        var arc = el('path', { d: 'M' + (fx + r) + ' ' + fy + 'A' + r + ' ' + r + ' 0 ' + large + ' ' + sweep + ' ' + (fx + r * Math.cos(a1)) + ' ' + (fy + r * Math.sin(a1)), 'class': 'arc ' + list[j].cls, 'stroke-width': this.px(1.4) }, this.L.angle);
+        var mid = -t.angle * Math.PI / 360;
+        var lb = el('text', { x: fx + (r + this.px(14)) * Math.cos(mid), y: fy + (r + this.px(14)) * Math.sin(mid) + this.px(4), 'font-size': this.px(11.5), 'class': 'lbl ' + list[j].cls, 'text-anchor': 'middle' }, this.L.angle);
+        lb.textContent = F.deg(t.angle);
+        if (animate) { fadeIn(arc, dl + 380); fadeIn(lb, dl + 420); }
+        void a0;
+      }
+    }
+    // 출발(도착) 방향 화살표: 위쪽 점과 아래쪽 켤레
+    var L = this.px(46), ends = [];
+    for (j = 0; j < it.angles.length; j++) ends.push({ a: it.angles[j], y: 1 });
+    if (it.at.im > 0) for (j = 0; j < it.angles.length; j++) ends.push({ a: -it.angles[j], y: -1 });
+    for (j = 0; j < ends.length; j++) {
+      var ay = ends[j].y > 0 ? ty : this.Y(-it.at.im), ang = ends[j].a * Math.PI / 180;
+      var dirSign = it.kind === 'departure' ? 1 : -1;
+      var x2 = tx + L * Math.cos(ang), y2 = ay - L * Math.sin(ang);
+      var ar = el('line', it.kind === 'departure'
+        ? { x1: tx, y1: ay, x2: x2, y2: y2 }
+        : { x1: x2, y1: y2, x2: tx, y2: ay }, this.L.angle);
+      ar.setAttribute('class', 'dep');
+      ar.setAttribute('data-ref', 'a' + idx);
+      ar.setAttribute('stroke-width', this.px(3));
+      ar.setAttribute('marker-end', 'url(#' + this.id('arrow-dep') + ')');
+      void dirSign;
+      if (animate) drawLine(ar, 500, d0 + list.length * 520 + 200);
+      if (j === 0 && showVectors) {
+        var tl = el('text', { x: x2 + this.px(6), y: y2 - this.px(6), 'font-size': this.px(13), 'class': 'lbl angle' }, this.L.angle);
+        tl.textContent = 'θ = ' + F.deg(ends[j].a);
+        if (animate) fadeIn(tl, d0 + list.length * 520 + 600);
+      }
+    }
+  };
+
+  // 9단계: 폐루프 극점 표시 준비
+  Graph.prototype.initCL = function () {
+    var res = this.res;
+    this.cl = [];
+    this.trails = [];
+    this.zeta = el('g', { 'class': 'zeta' }, this.L.cl);
+    for (var i = 0; i < res.n; i++) {
+      this.trails.push({ pts: [], el: el('polyline', { 'class': 'trail', 'stroke-width': this.px(3) }, this.L.cl) });
+      var g = el('g', { 'class': 'mk clp' }, this.L.cl);
+      el('circle', { r: this.px(12), 'class': 'glow' }, g);
+      el('circle', { r: this.px(6), 'class': 'core' }, g);
+      this.cl.push(g);
+    }
+    this.clPos = null;
+  };
+  // K를 바꾸면 폐루프 극점을 다시 계산해서 옮김
+  Graph.prototype.setK = function (K, jump) {
+    if (!this.cl) return null;
+    var rs = RL.routh.closedLoopPoles(this.res.N, this.res.D, K), n = rs.length, order = [], i;
+    if (this.clPos && this.clPos.length === n) {
+      var used = [];
+      for (i = 0; i < n; i++) used.push(false);
+      for (i = 0; i < n; i++) {
+        var best = -1, bd = Infinity;
+        for (var j = 0; j < n; j++) { if (used[j]) continue; var d = C.dist(this.clPos[i], rs[j]); if (d < bd) { bd = d; best = j; } }
+        used[best] = true; order.push(rs[best]);
+      }
+      rs = order;
+    }
+    // 큰 K 변경과 먼 점 사이를 직선 잔상으로 잇지 않습니다. 실제 계산 위치만 표시합니다.
+    var clearTrail = jump || reduced();
+    if (this.clPos) for (i = 0; i < n; i++) {
+      if (!this.clPos[i] || C.dist(this.clPos[i], rs[i]) * this.scale > this.px(18)) clearTrail = true;
+    }
+    if (clearTrail) for (i = 0; i < this.trails.length; i++) this.trails[i].pts = [];
+    this.clPos = rs;
+    for (i = 0; i < n; i++) {
+      var x = this.X(rs[i].re), y = this.Y(rs[i].im), tr = this.trails[i];
+      this.cl[i].setAttribute('transform', 'translate(' + x + ' ' + y + ')');
+      tr.pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+      if (tr.pts.length > 18) tr.pts.shift();
+      tr.el.setAttribute('points', tr.pts.join(' '));
+    }
+    // 주된 복소 극점 쌍의 ωn 원과 감쇠비
+    this.zeta.innerHTML = '';
+    var dom = null;
+    for (i = 0; i < n; i++) if (rs[i].im > 1e-9 && (!dom || rs[i].re > dom.re)) dom = rs[i];
+    var info = null;
+    if (dom) {
+      var wn = C.abs(dom), zeta = -dom.re / wn, r = wn * this.scale;
+      el('path', { d: 'M' + this.X(0) + ' ' + (this.Y(0) - r) + 'A' + r + ' ' + r + ' 0 0 0 ' + this.X(0) + ' ' + (this.Y(0) + r), 'class': 'wn', 'stroke-width': this.px(1.2), 'stroke-dasharray': this.px(4) + ' ' + this.px(4) }, this.zeta);
+      el('line', { x1: this.X(0), y1: this.Y(0), x2: this.X(dom.re), y2: this.Y(dom.im), 'class': 'wn', 'stroke-width': this.px(1.2) }, this.zeta);
+      info = { zeta: zeta, wn: wn };
+    }
+    return { poles: rs, info: info };
+  };
+
+  // 5단계 보조 그래프: 실수축 위의 K(σ) = −D(σ)/N(σ) (언덕 꼭대기 = 이탈점, 골짜기 바닥 = 진입점)
+  function kChart(container, res, view) {
+    var vb = CT.validBreaks(res), real = [], i;
+    for (i = 0; i < vb.length; i++) if (vb[i].c.s.im === 0) real.push(vb[i].c);
+    if (!real.length) return false;
+    var segs = CT.onSegments(res), W = 640, H = 220, padL = 46, padB = 30, padT = 18;
+    var x0 = view.xmin, x1 = view.xmax, pts = [], kmax = 0;
+    for (i = 0; i < real.length; i++) kmax = Math.max(kmax, real[i].K);
+    var ycap = kmax * 1.8;
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, 'class': 'kchart', role: 'img', 'aria-label': '실수축 위 K(σ) 그래프' });
+    function X(x) { return padL + (x - x0) / (x1 - x0) * (W - padL - 10); }
+    function Y(k) { return H - padB - Math.min(k, ycap) / ycap * (H - padB - padT); }
+    el('line', { x1: padL, y1: H - padB, x2: W - 10, y2: H - padB, 'class': 'axis' }, svg);
+    el('line', { x1: padL, y1: padT, x2: padL, y2: H - padB, 'class': 'axis' }, svg);
+    for (var s = 0; s < segs.length; s++) {
+      var lo = Math.max(segs[s].lo, x0), hi = Math.min(segs[s].hi, x1), d = '', N = 220, started = false;
+      for (i = 0; i <= N; i++) {
+        var x = lo + (hi - lo) * i / N, nv = P.evalReal(res.N, x);
+        if (Math.abs(nv) < 1e-12) continue;
+        var k = -P.evalReal(res.D, x) / nv;
+        if (!(k >= 0)) { started = false; continue; }
+        d += (started ? 'L' : 'M') + X(x).toFixed(1) + ' ' + Y(k).toFixed(1);
+        started = true;
+      }
+      if (d) el('path', { d: d, 'class': 'kc' }, svg);
+      el('line', { x1: X(lo), y1: H - padB, x2: X(hi), y2: H - padB, 'class': 'kseg' }, svg);
+    }
+    for (i = 0; i < real.length; i++) {
+      var c = real[i], cx = X(c.s.re), cy = Y(c.K);
+      el('line', { x1: cx, y1: cy, x2: cx, y2: H - padB, 'class': 'kguide' }, svg);
+      el('circle', { cx: cx, cy: cy, r: 5, 'class': 'kpt' }, svg);
+      var t = el('text', { x: cx, y: cy - 10, 'text-anchor': 'middle', 'class': 'klbl' }, svg);
+      t.textContent = (c.status === 'breakaway' ? '이탈점 (언덕 꼭대기)' : c.status === 'breakin' ? '진입점 (골짜기 바닥)' : CT.breakLabel(c)) + ' K = ' + F.numShort(c.K);
+      var tx = el('text', { x: cx, y: H - padB + 18, 'text-anchor': 'middle', 'class': 'ktick' }, svg);
+      tx.textContent = F.numShort(c.s.re);
+    }
+    var yl = el('text', { x: padL - 8, y: padT + 4, 'text-anchor': 'end', 'class': 'ktick' }, svg); yl.textContent = 'K';
+    var xl = el('text', { x: W - 12, y: H - padB - 8, 'text-anchor': 'end', 'class': 'ktick' }, svg); xl.textContent = 'σ (실수축)';
+    container.appendChild(svg);
+    return true;
+  }
+
+  RL.Graph = Graph;
+  RL.kChart = kChart;
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== app/js/ai.js ===== */
+/*
+ * ai.js — AI 연결부
+ *
+ * 미리보기(claude.ai 아티팩트)에서는 Claude를, 대회용 공개 홈페이지에서는 Gemini 무료 등급을 쓸 예정입니다.
+ * 어느 쪽이든 이 파일의 ask()만 바꾸면 되도록 나눠 두었습니다.
+ * AI 연결이 없으면(인터넷 없음, 로컬 파일 등) 화면은 팀이 쓴 정적 힌트로 그대로 동작합니다.
+ *
+ * 안전장치: AI 답 속 숫자를 엔진이 검증한 숫자와 대조해서, 목록에 없는 숫자가 나오면 경고합니다.
+ */
+(function (RL) {
+  'use strict';
+  var state = { sample: null, images: false, ready: false, disabled: '', provider: '' };
+
+  function init() {
+    return new Promise(function (resolve) {
+      var done = function () { state.ready = true; resolve(state); };
+      if (typeof window === 'undefined' || !window.claude || !window.claude.use) { done(); return; }
+      window.claude.use('sample').then(function (s) {
+        state.sample = s || null;
+        if (!s) { done(); return; }
+        state.provider = 'Claude';
+        s.limits().then(function (lim) { state.images = !!(lim && lim.images); }).catch(function () {}).then(done);
+      }).catch(done);
+    });
+  }
+  function available() { return !!state.sample && !state.disabled; }
+
+  var HIDE = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'];
+  function errMsg(e) {
+    var code = e && e.code ? e.code : 'upstream_error';
+    if (HIDE.indexOf(code) >= 0) { state.disabled = code; return 'AI 사용이 허용되지 않아 정적 힌트로 계속합니다.'; }
+    if (code === 'images_unavailable') { state.images = false; return '이 화면에서는 사진을 보낼 수 없습니다. 식을 직접 입력해 주세요.'; }
+    if (code === 'rate_limited') return 'AI 요청이 너무 많습니다. 잠시 뒤에 다시 눌러 주세요.';
+    if (code === 'session_expired') return 'claude.ai에 다시 로그인해야 합니다.';
+    if (code === 'image_rejected') return '사진을 읽을 수 없습니다. 다른 사진(JPG·PNG, 20MB 이하)을 골라 주세요.';
+    if (code === 'refused') return 'AI가 이 요청에 답하지 않았습니다. 질문을 바꿔 다시 해 주세요.';
+    if (code === 'cancelled') return '';
+    return 'AI 연결이 잠시 끊겼습니다. 다시 눌러 주세요. 정적 힌트는 그대로 쓸 수 있습니다.';
+  }
+
+  var LEVEL = { 1: '1단계(개념만)', 2: '2단계(방향 힌트)', 3: '3단계(공식과 대입)', 4: '4단계(전체 풀이와 답)' };
+
+  function buildPrompt(ctx) {
+    var lines = [
+      '너는 대학 제어공학 수업의 근궤적 학습 도우미다. 학생이 스스로 풀도록 돕는다.',
+      '[규칙]',
+      '1. 숫자는 아래 [검증된 계산 결과]와 [학생 입력]에 있는 값만 쓴다. 새로 계산하거나 지어내지 않는다. 필요한 값이 목록에 없으면 "그 값은 화면의 계산 결과를 확인해 주세요"라고 한다.',
+      '2. 요청한 힌트 단계만큼만 알려 준다. 1단계는 개념만, 2단계는 방향 힌트, 3단계는 공식과 대입, 4단계는 전체 풀이와 답.',
+      '3. 학생 답이 틀렸는데 어느 과정에서 틀렸는지 확실하지 않으면 원인을 단정하지 말고, 어떻게 계산했는지 물어본다.',
+      '4. 한국어 존댓말로 3~5문장. 수식은 s^2 + 2s + 2처럼 일반 글자로 쓴다. 제목, 표, 목록 기호는 쓰지 않는다.',
+      '5. 수업에서 쓰는 방식을 따른다: 실수축은 시험점 오른쪽 개수의 홀짝, 이탈점은 D′N − DN′ = 0을 풀고 K = −D/N의 부호 확인, 출발각은 θ = 180° + Σ영점각 − Σ다른 극점각.',
+      '[문제] 개루프 전달함수 G(s)H(s) = ' + ctx.tf + ', 음의 피드백, K ≥ 0',
+      '[현재 단계] ' + ctx.stepNum + '단계 ' + ctx.stepTitle,
+      '[검증된 계산 결과]',
+      JSON.stringify(ctx.facts),
+      '[요청한 힌트 단계] ' + LEVEL[ctx.level || 2]
+    ];
+    if (ctx.check) lines.push('[학생 답 채점 결과(프로그램이 판정함)] 학생 답: ' + ctx.check.answer + ', 판정: ' + (ctx.check.ok ? '맞음' : '틀림'));
+    lines.push('[학생 입력] ' + (ctx.question || '이 단계를 어떻게 풀어야 할지 모르겠어요.'));
+    return lines.join('\n');
+  }
+
+  function ask(ctx, onText, signal) {
+    if (!available()) return Promise.reject({ code: 'not_granted' });
+    var opts = { modelTier: 'quick', onText: onText };
+    if (signal) opts.signal = signal;
+    return state.sample(buildPrompt(ctx), opts);
+  }
+
+  // 사진 속 손글씨 전달함수 읽기 → 한 줄 식
+  function readPhoto(file, signal) {
+    if (!available() || !state.images) return Promise.reject({ code: 'images_unavailable' });
+    var prompt = '이 사진에는 손으로 쓴 제어공학 개루프 전달함수가 있습니다. 식을 한 줄로 옮겨 적으세요. ' +
+      '형식 예: K(s+2)/((s+3)(s^2+2s+2)). 거듭제곱은 ^로, 분모 전체는 괄호로 감쌉니다. ' +
+      '사진에 없는 내용을 추측하지 말고, 읽을 수 없으면 "읽을 수 없음"이라고만 답하세요. 식 말고 다른 말은 쓰지 마세요.';
+    var opts = { images: [file] };
+    if (signal) opts.signal = signal;
+    return state.sample(prompt, opts).then(function (r) { return r.text.trim().split('\n')[0].replace(/^`+|`+$/g, '').trim(); });
+  }
+
+  // ── 숫자 검사 ─────────────────────────────
+  function numbersIn(text) {
+    var t = String(text).replace(/−/g, '-'), out = [], m;
+    // 2√3/9, √(61/11), √2 같은 꼴을 먼저 값으로 바꿈
+    t = t.replace(/(\d+(?:\.\d+)?)?\s*√\s*\(?\s*(\d+(?:\.\d+)?)\s*(?:\/\s*(\d+))?\s*\)?(?:\s*\/\s*(\d+))?/g, function (all, a, b, c, d) {
+      var v = (a ? parseFloat(a) : 1) * Math.sqrt(parseFloat(b) / (c ? parseFloat(c) : 1)) / (d ? parseFloat(d) : 1);
+      out.push(v);
+      return ' ';
+    });
+    var re = /(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?/g;
+    while ((m = re.exec(t))) out.push(m[2] ? parseFloat(m[1]) / parseFloat(m[2]) : parseFloat(m[1]));
+    return out;
+  }
+  function checkNumbers(text, allowed, extra) {
+    var nums = numbersIn(text), bad = [], i, j;
+    var pool = allowed.concat(extra ? numbersIn(extra) : []);
+    for (i = 0; i < nums.length; i++) {
+      var v = Math.abs(nums[i]), ok = false;
+      if (v <= 12 && Math.abs(v - Math.round(v)) < 1e-9) ok = true;          // 개수, 단계 번호 같은 작은 정수
+      if ([90, 180, 270, 360].indexOf(v) >= 0) ok = true;                     // 각도 기준값
+      for (j = 0; j < pool.length && !ok; j++) {
+        var a = Math.abs(pool[j]);
+        if (Math.abs(v - a) <= Math.max(0.006 * a, 0.0051)) ok = true;     // 반올림 허용
+      }
+      if (!ok) bad.push(nums[i]);
+    }
+    return { ok: bad.length === 0, bad: bad, count: nums.length };
+  }
+
+  RL.ai = { init: init, available: available, state: state, ask: ask, readPhoto: readPhoto, errMsg: errMsg, checkNumbers: checkNumbers, numbersIn: numbersIn, buildPrompt: buildPrompt };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== app/js/store.js ===== */
+/*
+ * store.js — 학습 기록 (같은 기기의 브라우저에만 저장)
+ * 다른 기기와 자동으로 맞춰지지 않고, 브라우저 데이터를 지우면 사라집니다. 화면에도 이렇게 안내합니다.
+ * 저장이 막힌 환경(사생활 보호 창 등)에서도 화면은 그대로 동작하도록 모든 읽기·쓰기를 try로 감쌉니다.
+ */
+(function (RL) {
+  'use strict';
+  var KEY = 'rltutor.records.v1';
+
+  function load() {
+    try { var v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; }
+    catch (e) { return []; }
+  }
+  function save(list) {
+    try { localStorage.setItem(KEY, JSON.stringify(list.slice(0, 40))); return true; }
+    catch (e) { return false; }
+  }
+  // 같은 식이면 하나로 합쳐 최신 상태로 갱신
+  function upsert(rec) {
+    var list = load(), i, found = -1;
+    for (i = 0; i < list.length; i++) if (list[i].id === rec.id) found = i;
+    if (found >= 0) {
+      rec.done = rec.done || list[found].done;
+      list.splice(found, 1);
+    }
+    list.unshift(rec);
+    return save(list);
+  }
+  function remove(id) {
+    var list = load(), out = [], i;
+    for (i = 0; i < list.length; i++) if (list[i].id !== id) out.push(list[i]);
+    return save(out);
+  }
+  function getPref(k, d) { try { var v = localStorage.getItem('rltutor.' + k); return v === null ? d : v; } catch (e) { return d; } }
+  function setPref(k, v) { try { localStorage.setItem('rltutor.' + k, v); } catch (e) { /* 저장 불가 환경 */ } }
+
+  RL.store = { load: load, upsert: upsert, remove: remove, getPref: getPref, setPref: setPref };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+
+/* ===== app/js/main.js ===== */
+/*
+ * main.js — 화면 흐름
+ *   시작 화면: 식 입력 → 수식 미리보기 → 확인·수정 → 학습 시작
+ *   학습 화면: 1~9단계 (설명 + 그래프), 힌트·질문·내 답 확인, 간단한 예시, 학습 기록
+ */
+(function (RL) {
+  'use strict';
+  var M = RL.mv, F = RL.format, CT = RL.content, AI = RL.ai, ST = RL.store;
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+  var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: null, paused: false, tfText: '', thread: {} };
+  var graph, previewGraph, exGraph;
+  var EXAMPLE_INPUTS = [
+    { label: '복소 극점의 출발', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
+    { label: '허수축 교차', input: 'K/(s(s+1)(s+2))' },
+    { label: '원 궤적', input: 'K(s+2)/(s(s+1))' },
+    { label: '복소 이탈점', input: 'K/(s(s+4)(s^2+4s+20))' },
+    { label: '세 가지가 만남', input: 'K(s+1)/(s^2(s+9))' },
+    { label: '우반면 영점', input: 'K(s-3)(s-5)/((s+1)(s+2))' }
+  ];
+  var STATUS_KO = { stable: '안정', marginal: '임계 안정', unstable: '불안정' };
+
+  function tfHTML(res) {
+    var num = res.m > 0 ? M.factorsH(res.zeros, res.N[0]) : M.n(res.N[0]);
+    var den = M.factorsH(res.poles);
+    return M.mv('K') + '·' + M.frac(num, den);
+  }
+  function tfText(res) {
+    var num = res.m > 0 ? CT.strip(M.factorsH(res.zeros, res.N[0])) : F.numShort(res.N[0]);
+    return 'K' + (res.m > 0 ? num : '·' + num) + '/(' + CT.strip(M.factorsH(res.poles)) + ')';
+  }
+  function recIdOf(res) { return res.N.map(function (v) { return +v.toFixed(6); }).join(',') + '|' + res.D.map(function (v) { return +v.toFixed(6); }).join(','); }
+  function nowText() {
+    var d = new Date(), p = function (x) { return (x < 10 ? '0' : '') + x; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  // ── 시작 화면 ───────────────────────────────
+  function onInput() {
+    syncExamples();
+    $('#tf-input').setAttribute('aria-busy', 'false');
+    $('#tf-input').setAttribute('aria-invalid', 'false');
+    var raw = $('#tf-input').value, msg = $('#tf-msg'), pv = $('#tf-preview'), btn = $('#btn-start');
+    var p = RL.parser.parse(raw);
+    S.parsed = null;
+    btn.disabled = true;
+    if (!p.ok) {
+      pv.innerHTML = '<span class="muted">식을 해석하면 여기에 수식으로 보여 드립니다.</span>';
+      $('#tf-input').setAttribute('aria-invalid', 'true');
+      msg.className = 'msg bad';
+      msg.textContent = p.message;
+      previewGraph.res = null; previewGraph.svg.innerHTML = '';
+      return;
+    }
+    var res = RL.locus.analyze(p.N, p.D);
+    var warn = /\/\s*[^(\s][^+\-]*\(/.test(RL.parser.clean(raw)) ? ' 분모 전체를 괄호로 감쌌는지 확인해 주세요. 예: K/(s(s+1)).' : '';
+    if (!res.ok) {
+      pv.innerHTML = M.mv('K') + '·' + M.frac(M.polyH(p.N), M.polyH(p.D));
+      $('#tf-input').setAttribute('aria-invalid', 'true');
+      msg.className = 'msg bad';
+      msg.textContent = res.error.message;
+      previewGraph.res = null; previewGraph.svg.innerHTML = '';
+      return;
+    }
+    S.parsed = p;
+    pv.innerHTML = '<div class="pv-main">' + M.mv('G') + '(' + M.mv('s') + ')' + M.mv('H') + '(' + M.mv('s') + ') = ' + tfHTML(res) + '</div>' +
+      '<div class="pv-sub">' + M.mv('N') + '(' + M.mv('s') + ') = ' + M.polyH(res.N) + ' &ensp;·&ensp; ' + M.mv('D') + '(' + M.mv('s') + ') = ' + M.polyH(res.D) + '</div>';
+    msg.className = 'msg' + (warn ? ' warn' : '');
+    msg.textContent = warn || (p.note ? p.note + ' ' : '') + '✓ 수식이 준비됐어요. 입력한 식과 같은지 확인해 주세요.';
+    btn.disabled = false;
+    previewGraph.setProblem(res);
+    previewGraph.show(8, false);
+  }
+
+  function setExample(input) { $('#tf-input').value = input; onInput(); }
+
+  function reducedMotion() { return document.documentElement.dataset.motion === 'off' || !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function showPanel(name) {
+    var solution = name === 'solution';
+    $('#step-body').hidden = !solution; $('#coach').hidden = solution;
+    ['solution', 'coach'].forEach(function (n) { var b = $('#tab-' + n); b.classList.toggle('selected', n === name); b.setAttribute('aria-selected', String(n === name)); b.tabIndex = n === name ? 0 : -1; });
+    $('#details-scroll').scrollTop = 0;
+  }
+  function syncExamples() {
+    $$('#examples .ex').forEach(function (b) { var selected = b.getAttribute('data-in') === $('#tf-input').value; b.classList.toggle('selected', selected); b.setAttribute('aria-pressed', String(selected)); });
+  }
+
+  // ── 사진으로 입력 ───────────────────────────
+  var photoCtl = null;
+  function onPhotoPicked(file) {
+    if (!file) return;
+    var panel = $('#photo-panel');
+    panel.hidden = false;
+    var url = URL.createObjectURL(file);
+    panel.innerHTML = '<img src="' + url + '" alt="올린 사진" class="thumb">' +
+      '<div class="photo-body"><p><b>사진은 AI(' + (AI.state.provider || 'AI') + ')로 전송됩니다.</b> 개인정보가 찍혀 있지 않은지 확인해 주세요. 읽은 식은 바로 계산하지 않고 먼저 보여 드립니다.</p>' +
+      '<div class="row"><button id="photo-send" class="primary sm">사진 보내서 읽기</button><button id="photo-cancel" class="ghost sm">취소</button></div><p id="photo-status" class="muted"></p></div>';
+    $('#photo-cancel').onclick = function () { if (photoCtl) photoCtl.abort(); panel.hidden = true; panel.innerHTML = ''; URL.revokeObjectURL(url); };
+    $('#photo-send').onclick = function () {
+      var st = $('#photo-status');
+      $('#photo-send').disabled = true;
+      st.textContent = '읽는 중… (몇 초~수십 초)';
+      photoCtl = new AbortController();
+      AI.readPhoto(file, photoCtl.signal).then(function (text) {
+        if (/읽을 수 없음/.test(text)) { st.textContent = 'AI가 식을 읽지 못했습니다. 더 밝고 가까운 사진으로 다시 시도하거나 직접 입력해 주세요.'; $('#photo-send').disabled = false; return; }
+        $('#tf-input').value = text;
+        onInput();
+        st.textContent = 'AI가 읽은 식을 입력칸에 넣었습니다. 분자·분모·괄호·부호·지수를 확인하고 고쳐 주세요.';
+        $('#tf-input').focus();
+      }, function (e) { st.textContent = AI.errMsg(e); $('#photo-send').disabled = false; });
+    };
+  }
+
+  // ── 학습 시작 ───────────────────────────────
+  function startLesson(fromStep) {
+    onInput(); // 디바운스 대기 중 눌러도 현재 입력한 식을 계산합니다.
+    if (!S.parsed) return;
+    var res = RL.locus.analyze(S.parsed.N, S.parsed.D);
+    if (!res.ok) return;
+    S.res = res;
+    S.steps = CT.build(res);
+    S.tfText = tfText(res);
+    S.recId = recIdOf(res);
+    S.thread = {};
+    S.K = null;
+    S.allNums = CT.allNumbers(res);
+    previewGraph.stop();
+    document.body.classList.add('learning');
+    $('#screen-start').hidden = true;
+    $('#screen-lesson').hidden = false;
+    $('#btn-home').hidden = false;
+    $('#stage-tf').innerHTML = M.mv('G') + M.mv('H') + ' = ' + tfHTML(res);
+    renderStepper();
+    graph.setProblem(res);
+    go(fromStep || 0, true);
+    window.scrollTo(0, 0);
+  }
+
+  function renderStepper() {
+    var nav = $('#stepper'), h = '', i;
+    for (i = 0; i < S.steps.length; i++) h += '<button class="st" data-i="' + i + '" aria-label="' + (i + 1) + '단계 ' + S.steps[i].title + '"><span class="st-n">' + (i + 1) + '</span><span class="st-t">' + S.steps[i].short + '</span></button>';
+    nav.innerHTML = h;
+    $$('.st', nav).forEach(function (b) { b.onclick = function () { go(+b.getAttribute('data-i'), true); }; });
+  }
+
+  // ── 단계 이동 ───────────────────────────────
+  function go(i, animate) {
+    if (!S.steps) return;
+    i = Math.max(0, Math.min(S.steps.length - 1, i));
+    animate = animate && !reducedMotion();
+    S.cur = i;
+    S.paused = false;
+    $('#btn-pause').textContent = '일시정지';
+    var step = S.steps[i];
+    $$('#stepper .st').forEach(function (b, k) { b.classList.toggle('on', k === i); b.classList.toggle('done', k < i); if (k === i) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    $('#btn-prev').disabled = i === 0;
+    $('#btn-next').disabled = i === S.steps.length - 1;
+    $('#btn-next').textContent = i === S.steps.length - 1 ? '학습 완료' : '다음 →';
+    $('#current-title').textContent = step.title;
+    $('#progress-label').textContent = (i + 1) + ' / 9 단계';
+    $('#progress-fill').style.width = ((i + 1) / 9 * 100) + '%';
+    $('#graph-empty').hidden = i !== 0;
+    $('#btn-pause').disabled = !animate;
+    $('#btn-skip').disabled = !animate;
+    showPanel('solution');
+    renderStep(step, animate);
+    renderCoach(step);
+    $('#stage-note').textContent = step.graphNote;
+    graph.show(step.num, animate);
+    if (step.num === 9) setK(S.K === null ? defaultK() : S.K);
+    ST.upsert({ id: S.recId, input: $('#tf-input').value, tf: S.tfText, date: nowText(), lastStep: i + 1, done: i === S.steps.length - 1 });
+    var rail = $('#details-scroll');
+    if (rail.scrollTop) rail.scrollTop = 0;
+  }
+
+  function blockHTML(b, idx, step) {
+    var d = 'style="--d:' + (120 + idx * 90) + 'ms"';
+    switch (b.t) {
+      case 'goal': return '<p class="b-goal enter" ' + d + '>' + b.h + '</p>';
+      case 'formula': return '<div class="b-formula enter" ' + d + '><span class="tag">공식</span><div>' + b.h + '</div></div>';
+      case 'calc': return '<div class="b-calc enter" ' + d + '>' + b.h + '</div>';
+      case 'text': return '<p class="b-text enter" ' + d + '>' + b.h + '</p>';
+      case 'sub': return '<h4 class="b-sub enter" ' + d + '>' + b.h + '</h4>';
+      case 'result': return '<div class="b-result enter" ' + d + '><span class="tag">결과</span><div>' + b.h + '</div></div>';
+      case 'none': return '<div class="b-none enter" ' + d + '>' + b.h + '</div>';
+      case 'note': return '<p class="b-note enter" ' + d + '>' + b.h + '</p>';
+      case 'why': return '<details class="b-why enter" ' + d + '><summary>왜 그런가요?</summary><p>' + b.h + '</p></details>';
+      case 'list': return '<ul class="b-list enter" ' + d + '>' + b.items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>';
+      case 'table': {
+        var rows = b.rows.map(function (r, k) {
+          var rd = 200 + k * 100;
+          return '<tr class="enter' + (r.on ? ' on' : '') + '" style="--d:' + rd + 'ms" data-ref="' + r.ref + '">' + r.cells.map(function (c, j) { return j === 0 ? '<th scope="row">' + c + '</th>' : '<td>' + c + '</td>'; }).join('') + '</tr>';
+        }).join('');
+        return '<div class="tbl-wrap enter" ' + d + '><table class="b-table"><thead><tr>' + b.head.map(function (h) { return '<th scope="col">' + h + '</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+      }
+      case 'routh': {
+        var rr = b.rows.map(function (r, k) {
+          var cells = r.cells.map(function (c, j) { return '<td class="' + (j === 0 ? 'c1' : '') + '">' + c + '</td>'; }).join('');
+          return '<tr class="enter" style="--d:' + (200 + k * 100) + 'ms"><th scope="row">' + M.mv('s') + '<sup>' + r.pw + '</sup></th>' + cells + '</tr>';
+        }).join('');
+        return '<div class="tbl-wrap enter" ' + d + '><table class="b-routh"><caption>Routh 표 <span class="sm">(첫 열 강조)</span></caption><tbody>' + rr + '</tbody></table></div>';
+      }
+      case 'kchart': return '<div class="b-kchart enter" ' + d + ' id="kchart-slot"></div>';
+      case 'slider': return sliderHTML();
+    }
+    return '';
+  }
+
+  function renderStep(step, animate) {
+    $('#mobile-k-slot').innerHTML = '';
+    var body = $('#step-body');
+    var h = '<header class="sh"><span class="sh-n">' + String(step.num).padStart(2, '0') + '<small>/09</small></span><h2>' + step.title + '</h2></header>';
+    for (var i = 0; i < step.blocks.length; i++) h += blockHTML(step.blocks[i], i, step);
+    body.innerHTML = h;
+    body.classList.toggle('still', !animate);
+    var slot = $('#kchart-slot');
+    if (slot && !RL.kChart(slot, S.res, S.res.view)) slot.remove();
+    if (step.num === 9) { bindSlider(); placeSlider(); }
+  }
+
+  // ── 9단계 슬라이더 ──────────────────────────
+  // 작은 화면에서는 K 조절을 그래프 바로 아래에 두어 동시에 볼 수 있게 합니다.
+  function placeSlider() {
+    var slider = $('.b-slider'); if (!slider) return;
+    if (window.matchMedia('(max-width: 760px)').matches) $('#mobile-k-slot').appendChild(slider);
+    else $('#step-body .b-goal').insertAdjacentElement('afterend', slider);
+  }
+  function kRange() {
+    var ks = CT.notableK(S.res).map(function (x) { return x.K; }).filter(function (k) { return k > 0; });
+    var ref = ks.length ? Math.sqrt(ks[0] * ks[ks.length - 1]) : 1;
+    return { lo: ref / 1000, hi: ref * 1000 };
+  }
+  function kFromT(t) { var r = kRange(); return t <= 0 ? 0 : r.lo * Math.pow(r.hi / r.lo, t / 1000); }
+  function tFromK(K) { var r = kRange(); return K <= 0 ? 0 : Math.max(1, Math.min(1000, 1000 * Math.log(K / r.lo) / Math.log(r.hi / r.lo))); }
+  function defaultK() { var ks = CT.notableK(S.res); return ks.length ? ks[0].K * 0.6 : 1; }
+  function kText(K) { return K === 0 ? '0' : (K < 0.01 || K >= 1e5 ? K.toExponential(2) : (+K.toPrecision(3)).toString()); }
+  function sliderHTML() {
+    var chips = CT.notableK(S.res).map(function (x) { return '<button class="chip kq" data-k="' + x.K + '">' + x.label + ' K = ' + F.numShort(x.K) + '</button>'; }).join('');
+    return '<div class="b-slider enter" style="--d:150ms">' +
+      '<label for="k-slider" class="k-lab">K = <b id="k-val">0</b> <span id="k-status" class="pill"></span></label>' +
+      '<input type="range" id="k-slider" min="0" max="1000" step="1" value="0" aria-describedby="k-poles">' +
+      '<div class="k-scale"><span>0</span><span>작게</span><span>크게 →</span></div>' +
+      '<div class="chips"><button class="chip kq" data-k="0">K = 0</button>' + chips + '</div>' +
+      '<div id="k-poles" class="k-poles"></div><div id="k-zeta" class="k-zeta"></div></div>';
+  }
+  function bindSlider() {
+    var sl = $('#k-slider');
+    sl.value = tFromK(S.K === null ? defaultK() : S.K);
+    sl.oninput = function () { setK(kFromT(+sl.value)); };
+    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K, true); }; });
+  }
+  function setK(K, jump) {
+    S.K = K;
+    var out = graph.setK(K, jump);
+    var slider = $('#k-slider'); if (slider) slider.setAttribute('aria-valuetext', 'K = ' + kText(K));
+    if (!out) return;
+    var st = RL.routh.classify(out.poles);
+    var v = $('#k-val'); if (v) v.textContent = kText(K);
+    var pill = $('#k-status'); if (pill) { pill.textContent = STATUS_KO[st]; pill.className = 'pill ' + st; }
+    var pl = $('#k-poles');
+    if (pl) pl.innerHTML = '폐루프 극점: ' + out.poles.map(function (z) { return '<span class="nm">' + F.cnum(z, 3) + '</span>'; }).join(', ');
+    var zt = $('#k-zeta');
+    if (zt) zt.innerHTML = out.info ? '주된 복소 극점: ' + M.mv('ω') + '<sub>n</sub> = ' + F.dec(out.info.wn, 3) + ', &ensp;' + M.mv('ζ') + ' = ' + F.dec(out.info.zeta, 3) + (out.info.zeta <= 0 ? ' (감쇠 없음 또는 음수 → 불안정 쪽)' : '') : '복소 극점이 없어 진동하지 않습니다 (실수 극점만).';
+  }
+
+  // ── 코치(힌트·질문·내 답·AI) ────────────────
+  function renderCoach(step) {
+    var box = $('#coach'), aiOn = AI.available();
+    var badge = aiOn ? '<span class="badge on">AI 연결됨 · ' + AI.state.provider + ' 미리보기</span>' : '<span class="badge">기본 힌트 · 인터넷 없이 사용 가능</span>';
+    var h = '<div class="coach-head"><h3>막히면 한 단계씩 열어 보세요</h3>' + badge + '</div>';
+    h += '<div class="ladder" role="group" aria-label="힌트 단계">' + ['개념', '힌트', '공식·대입', '전체 풀이'].map(function (t, k) {
+      return '<button class="lv" data-lv="' + (k + 1) + '"><span>' + (k + 1) + '</span>' + t + '</button>';
+    }).join('') + '</div><div id="ladder-out" class="ladder-out"></div>';
+    if (step.questions.length) h += '<p class="qs-title">이 단계에서 생각해 볼 질문</p><div class="chips qs">' + step.questions.map(function (q, k) { return '<button class="chip q" data-q="' + k + '">' + q.q + '</button>'; }).join('') + '</div><div id="q-out"></div>';
+    if (step.check) h += '<form id="check-form" class="check"><label for="check-in">' + step.check.prompt + '</label><div class="row"><input id="check-in" inputmode="decimal" autocomplete="off" placeholder="예: ' + (step.check.tol ? '−1.5 또는 −3/2' : '3') + '"><button class="primary sm" type="submit">내 답 확인</button></div><div id="check-out" class="check-out" aria-live="polite"></div></form>';
+    if (aiOn) h += '<form id="ask-form" class="ask"><label for="ask-in">AI에게 질문하기</label><textarea id="ask-in" rows="2" placeholder="예: 점근선 중심이 왜 이 값인지 모르겠어요"></textarea><div class="row"><button class="primary sm" type="submit">보내기</button><button type="button" id="ask-stop" class="ghost sm" hidden>멈추기</button></div></form>';
+    else h += '<p class="muted sm">현재는 미리 준비된 단계별 힌트와 연습 문제를 제공합니다. 자유 질문 AI는 추후 연결 예정입니다.</p>';
+    h += '<div id="thread" class="thread" aria-live="polite"></div>';
+    if (step.example) h += '<button id="btn-example" class="ghost wide">간단한 예시로 원리 먼저 보기 →</button>';
+    box.innerHTML = h;
+    $$('.lv', box).forEach(function (b) { b.onclick = function () { openLadder(step, +b.getAttribute('data-lv')); }; });
+    $$('.q', box).forEach(function (b) { b.onclick = function () { openQuestion(step, +b.getAttribute('data-q')); }; });
+    var cf = $('#check-form');
+    if (cf) cf.onsubmit = function (e) { e.preventDefault(); gradeAnswer(step); };
+    var af = $('#ask-form');
+    if (af) af.onsubmit = function (e) { e.preventDefault(); var q = $('#ask-in').value.trim(); if (q) askAI(step, { level: 2, question: q }); };
+    var ex = $('#btn-example');
+    if (ex) ex.onclick = function () { openExample(step.example, step); };
+    var prev = S.thread[step.num];
+    if (prev) $('#thread').innerHTML = prev;
+  }
+
+  function openLadder(step, lv) {
+    var out = $('#ladder-out'), h = '', k;
+    for (k = 0; k < lv; k++) h += '<div class="lad-card enter" style="--d:' + (k === lv - 1 ? 0 : 0) + 'ms"><span class="tag">' + (k + 1) + '단계 · ' + ['개념', '힌트', '공식·대입', '전체 풀이'][k] + '</span><p>' + step.ladder[k] + '</p></div>';
+    if (AI.available()) h += '<button class="ghost sm ai-lv" data-lv="' + lv + '">AI에게 ' + lv + '단계를 내 상황에 맞게 설명 듣기</button>';
+    out.innerHTML = h;
+    $$('.lv').forEach(function (b) { b.classList.toggle('on', +b.getAttribute('data-lv') <= lv); });
+    var ab = $('.ai-lv', out);
+    if (ab) ab.onclick = function () { askAI(step, { level: lv, question: '이 단계를 ' + lv + '단계 수준으로 설명해 주세요.' }); };
+  }
+
+  function openQuestion(step, k) {
+    var q = step.questions[k], out = $('#q-out');
+    out.innerHTML = '<div class="lad-card enter"><span class="tag">' + q.q + '</span><p>' + q.a + '</p>' + (AI.available() ? '<button class="ghost sm" id="q-more">이 질문을 AI에게 더 묻기</button>' : '') + '</div>';
+    var more = $('#q-more');
+    if (more) more.onclick = function () { askAI(step, { level: 2, question: q.q + ' (화면의 기본 설명: ' + q.a + ') 이 문제에 맞춰 더 쉽게 설명해 주세요.' }); };
+  }
+
+  function parseAnswer(s) {
+    var t = String(s).replace(/[−–]/g, '-').replace(/\s/g, '').replace(/°/g, '');
+    var m = /^(-?\d*\.?\d+)\/(\d*\.?\d+)$/.exec(t);
+    if (m) return parseFloat(m[1]) / parseFloat(m[2]);
+    var v = parseFloat(t);
+    return isFinite(v) && /^-?\d*\.?\d+$/.test(t) ? v : NaN;
+  }
+  function gradeAnswer(step) {
+    var c = step.check, raw = $('#check-in').value, v = parseAnswer(raw), out = $('#check-out');
+    if (!isFinite(v)) { out.className = 'check-out warn'; out.textContent = '숫자로 입력해 주세요. 분수는 −3/2처럼 쓸 수 있습니다.'; return; }
+    var ok = c.values.some(function (x) { return c.tol ? Math.abs(v - x) <= c.tol * Math.max(1, Math.abs(x)) : v === x; });
+    S.lastCheck = { answer: raw, ok: ok };
+    if (ok) { out.className = 'check-out ok'; out.innerHTML = '맞습니다. 그래프에서 같은 값을 찾아 확인해 보세요.'; return; }
+    out.className = 'check-out bad';
+    out.innerHTML = '계산 결과와 다릅니다. 어디서 달라졌는지 바로 정답을 보기보다 힌트 2단계부터 열어 보세요.' +
+      (AI.available() ? '<label for="how-in" class="sm">어떻게 계산했는지 적어 주시면 AI가 함께 봅니다</label><textarea id="how-in" rows="2" placeholder="예: Σ극점을 −3 −1 −1로 더했어요"></textarea><button type="button" class="ghost sm" id="how-send">AI에게 내 풀이 보여 주기</button>' : '');
+    var hs = $('#how-send');
+    if (hs) hs.onclick = function () { askAI(step, { level: 2, question: '제 답은 ' + raw + '입니다. 이렇게 계산했어요: ' + ($('#how-in').value || '(설명 없음)'), check: { answer: raw, ok: false } }); };
+  }
+
+  var askCtl = null;
+  function askAI(step, o) {
+    if (!AI.available()) return;
+    var th = $('#thread'), facts = {}, i;
+    for (i = 0; i < step.num; i++) facts[(i + 1) + '단계 ' + S.steps[i].title] = S.steps[i].facts;
+    var ctx = { tf: S.tfText, stepNum: step.num, stepTitle: step.title, facts: facts, level: o.level, question: o.question, check: o.check };
+    var item = document.createElement('div');
+    item.className = 'ai-msg';
+    item.innerHTML = '<div class="ai-q">' + M.esc(o.question.length > 120 ? o.question.slice(0, 120) + '…' : o.question) + '</div><div class="ai-a"><span class="muted">생각하는 중…</span></div><div class="ai-meta"></div>';
+    th.appendChild(item);
+    item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (askCtl) askCtl.abort();
+    askCtl = new AbortController();
+    var stop = $('#ask-stop'); if (stop) { stop.hidden = false; stop.onclick = function () { askCtl.abort(); }; }
+    var a = $('.ai-a', item), meta = $('.ai-meta', item);
+    AI.ask(ctx, function (u) { a.textContent = u.text; }, askCtl.signal).then(function (r) {
+      a.textContent = r.text;
+      var chk = AI.checkNumbers(r.text, S.allNums, o.question);
+      meta.innerHTML = '<span class="by">AI · ' + AI.state.provider + '</span>' + (chk.ok ? '<span class="numck ok">숫자 검사 통과 (' + chk.count + '개)</span>' : '<span class="numck bad">검증값에 없는 숫자: ' + chk.bad.map(function (x) { return F.dec(x, 3); }).join(', ') + ' — 위의 계산 결과로 확인해 주세요</span>');
+      if (r.truncated) meta.innerHTML += '<span class="muted sm">답이 길어 중간에 끊겼습니다.</span>';
+    }, function (e) {
+      var m = AI.errMsg(e);
+      if (e && e.text) a.textContent = e.text; else a.innerHTML = '<span class="muted">' + (m || '멈췄습니다.') + '</span>';
+      if (!AI.available()) renderCoach(step);
+    }).then(function () { if (stop) stop.hidden = true; S.thread[step.num] = th.innerHTML; });
+  }
+
+  // ── 간단한 예시 → 원래 문제로 복귀 ──────────
+  function openExample(id, fromStep) {
+    var ex = CT.EXAMPLES[id], p = RL.parser.parse(ex.input), res = RL.locus.analyze(p.N, p.D, { branches: false });
+    var steps = CT.build(res), st = steps[ex.focus - 1], sheet = $('#example');
+    var keep = st.blocks.filter(function (b) { return ['formula', 'calc', 'result', 'table', 'routh', 'sub'].indexOf(b.t) >= 0; });
+    sheet.hidden = false;
+    $('#ex-title').textContent = ex.title;
+    $('#ex-tf').innerHTML = M.mv('G') + M.mv('H') + ' = ' + tfHTML(res) + ' <span class="sm muted">(미리 검증한 예시)</span>';
+    $('#ex-body').innerHTML = keep.map(function (b, k) { return blockHTML(b, k, { num: 0 }); }).join('');
+    $$('#ex-body .ref').forEach(function (r) { r.removeAttribute('data-ref'); });
+    document.body.classList.add('sheet-open');
+    exGraph.setProblem(res);
+    exGraph.show(ex.focus, true);
+    $('#ex-back').onclick = function () { closeExample(fromStep); };
+    $('#ex-back').focus();
+  }
+  function closeExample(step) {
+    exGraph.stop();
+    $('#example').hidden = true;
+    document.body.classList.remove('sheet-open');
+    var th = $('#thread');
+    var card = document.createElement('div');
+    card.className = 'lad-card back enter';
+    card.innerHTML = '<span class="tag">원래 문제로 돌아왔습니다</span><p>그렇다면 이 문제는 어떻게 될까요? 방금 본 원리를 ' + M.mv('G') + M.mv('H') + ' = ' + tfHTML(S.res) + '에 그대로 적용해 보세요.' + (step.check ? ' 아래 칸에 답을 넣어 확인할 수 있습니다.' : '') + '</p>';
+    th.appendChild(card);
+    S.thread[step.num] = th.innerHTML;
+    var ci = $('#check-in');
+    if (ci) { ci.focus(); ci.scrollIntoView({ block: 'center', behavior: 'smooth' }); } else card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
+  // ── 학습 기록 ───────────────────────────────
+  var recordsReturnFocus = null;
+  function closeRecords() { $('#records').hidden = true; document.body.classList.remove('sheet-open'); if (recordsReturnFocus) recordsReturnFocus.focus(); }
+  function openRecords() {
+    recordsReturnFocus = document.activeElement; document.body.classList.add('sheet-open');
+    var list = ST.load(), box = $('#records-list');
+    if (!list.length) box.innerHTML = '<p class="muted">아직 기록이 없습니다. 학습을 시작하면 단계마다 자동으로 저장됩니다.</p>';
+    else box.innerHTML = list.map(function (r, k) {
+      return '<li class="rec"><div class="rec-tf">' + M.esc(r.tf) + '</div><div class="rec-meta"><span>' + M.esc(r.date) + '</span><span>' + r.lastStep + '/9단계</span>' + (r.done ? '<span class="pill stable">완료</span>' : '') + '</div>' +
+        '<div class="row"><button class="ghost sm" data-act="resume" data-k="' + k + '">이어서 보기</button><button class="ghost sm" data-act="restart" data-k="' + k + '">처음부터</button><button class="ghost sm" data-act="result" data-k="' + k + '">결과 바로 보기</button></div></li>';
+    }).join('');
+    $('#records').hidden = false;
+    $$('#records-list button').forEach(function (b) {
+      b.onclick = function () {
+        var r = list[+b.getAttribute('data-k')], act = b.getAttribute('data-act');
+        closeRecords();
+        $('#tf-input').value = r.input;
+        onInput();
+        if (!S.parsed) return;
+        startLesson(act === 'resume' ? Math.max(0, r.lastStep - 1) : act === 'result' ? 7 : 0);
+      };
+    });
+    $('#records-close').focus();
+  }
+
+  function goHome() {
+    graph.stop();
+    document.body.classList.remove('learning');
+    $('#screen-lesson').hidden = true;
+    $('#screen-start').hidden = false;
+    $('#btn-home').hidden = true;
+    onInput();
+  }
+
+  // 글자와 그래프 연결 강조
+  function light(ref, on) {
+    if (!ref) return;
+    $$('[data-ref="' + ref + '"]').forEach(function (n) { n.classList.toggle('lit', on); });
+  }
+
+  function togglePause() {
+    var list = document.getAnimations ? document.getAnimations() : [];
+    S.paused = !S.paused;
+    for (var i = 0; i < list.length; i++) { if (S.paused) list[i].pause(); else list[i].play(); }
+    $('#btn-pause').textContent = S.paused ? '계속 재생' : '일시정지';
+  }
+
+  function updateMotionButton() {
+    var off = reducedMotion(); $('#btn-motion').textContent = off ? '모션 줄임' : '모션 켜짐'; $('#btn-motion').setAttribute('aria-pressed', String(off));
+    $('#btn-motion').title = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '기기의 움직임 줄이기 설정을 따릅니다' : '움직임 줄이기 켜기 / 끄기';
+  }
+  function applyTheme(t) {
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.removeAttribute('data-theme');
+    $('#btn-theme').setAttribute('aria-label', t === 'dark' ? '밝은 화면으로 전환' : '어두운 화면으로 전환');
+  }
+
+  function init() {
+    applyTheme(ST.getPref('theme', 'light'));
+    document.documentElement.dataset.motion = ST.getPref('motion', 'on');
+    updateMotionButton();
+    graph = new RL.Graph($('#main-graph'));
+    previewGraph = new RL.Graph($('#preview-graph'));
+    exGraph = new RL.Graph($('#ex-graph'));
+    graph.onRef = light;
+    var captions = ['출발각을 눈으로 확인하기', '안정과 불안정의 경계', '갈라지고 다시 만나는 가지', '복소평면의 만남 살펴보기', '중근과 가지의 관계', '영점이 바꾸는 도착점'];
+    var icons = ['M4 28H52M20 3V33M5 26Q25 26 44 4M5 26Q25 26 44 32', 'M4 18H52M31 3V33M7 18Q25 18 43 2M7 18Q25 18 43 34', 'M4 18H52M26 3V33M16 18a12 12 0 1 1 24 0a12 12 0 1 1-24 0', 'M4 18H52M26 3V33M10 4Q45 8 26 18Q7 28 42 32', 'M4 18H52M26 3V33M26 18L48 4M26 18L48 32M26 18H6', 'M4 18H52M26 3V33M6 18Q25 1 45 18M6 18Q25 35 45 18'];
+    $('#examples').innerHTML = EXAMPLE_INPUTS.map(function (e, i) { return '<button class="example-card ex" data-in="' + M.esc(e.input) + '" aria-pressed="false"><span class="example-top">0' + (i + 1) + '<span class="ex-level">' + (i < 3 ? '기본' : '심화') + '</span></span><svg viewBox="0 0 56 36" aria-hidden="true"><path d="' + icons[i] + '"/></svg><strong>' + e.label + '</strong><small>' + captions[i] + '</small><span class="ex-arrow" aria-hidden="true">↗</span></button>'; }).join('');
+    $$('#examples .ex').forEach(function (b) { b.onclick = function () { setExample(b.getAttribute('data-in')); }; });
+    var inp = $('#tf-input'), timer = 0;
+    inp.addEventListener('input', function () {
+      clearTimeout(timer); S.parsed = null; $('#btn-start').disabled = true;
+      inp.setAttribute('aria-busy', 'true'); $('#tf-msg').className = 'msg'; $('#tf-msg').textContent = '입력한 식을 확인하고 있어요…';
+      timer = setTimeout(onInput, 140);
+    });
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { clearTimeout(timer); onInput(); if (S.parsed) startLesson(0); } });
+    $('#btn-start').onclick = function () { startLesson(0); };
+    $('#btn-prev').onclick = function () { go(S.cur - 1, true); };
+    $('#btn-next').onclick = function () { go(S.cur + 1, true); };
+    $('#btn-replay').onclick = function () { go(S.cur, true); };
+    $('#btn-skip').onclick = function () {
+      S.paused = false; $('#btn-pause').textContent = '일시정지'; $('#btn-pause').disabled = true; $('#btn-skip').disabled = true;
+      $('#step-body').classList.add('still'); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K);
+    };
+    $('#tab-solution').onclick = function () { showPanel('solution'); };
+    $('#tab-coach').onclick = function () { showPanel('coach'); };
+    $('.panel-tabs').onkeydown = function (e) { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); e.stopPropagation(); var name = $('#coach').hidden ? 'coach' : 'solution'; showPanel(name); $('#tab-' + name).focus(); } };
+    $('#nav-learn').onclick = goHome;
+    $('#nav-examples').onclick = function () { goHome(); $('#example-section').scrollIntoView({behavior: reducedMotion() ? 'auto' : 'smooth', block:'start'}); };
+    $('#btn-motion').onclick = function () {
+      var next = document.documentElement.dataset.motion === 'off' ? 'on' : 'off'; document.documentElement.dataset.motion = next; ST.setPref('motion', next); updateMotionButton(); if (S.steps) go(S.cur, false);
+    };
+    $('#btn-pause').onclick = togglePause;
+    $('#btn-all').onclick = function () { go(7, false); };
+    $('#btn-home').onclick = goHome;
+    $('#brand').onclick = function (e) { e.preventDefault(); if (!$('#screen-lesson').hidden) goHome(); };
+    $('#btn-records').onclick = openRecords;
+    $('#records-close').onclick = closeRecords;
+    $('#records').onclick = function (e) { if (e.target === $('#records')) closeRecords(); };
+    $('#btn-theme').onclick = function () {
+      var cur = document.documentElement.getAttribute('data-theme');
+      var dark = cur ? cur === 'dark' : !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+      var next = dark ? 'light' : 'dark';
+      applyTheme(next); ST.setPref('theme', next);
+      if (S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
+    };
+    $('#btn-photo').onclick = function () { $('#photo-file').click(); };
+    $('#photo-file').onchange = function (e) { onPhotoPicked(e.target.files && e.target.files[0]); e.target.value = ''; };
+    document.addEventListener('pointerover', function (e) { var t = e.target.closest && e.target.closest('.ref[data-ref], tr[data-ref]'); if (t) light(t.getAttribute('data-ref'), true); });
+    document.addEventListener('pointerout', function (e) { var t = e.target.closest && e.target.closest('.ref[data-ref], tr[data-ref]'); if (t) light(t.getAttribute('data-ref'), false); });
+    document.addEventListener('focusin', function (e) { var t = e.target.closest && e.target.closest('.ref[data-ref]'); if (t) light(t.getAttribute('data-ref'), true); });
+    document.addEventListener('focusout', function (e) { var t = e.target.closest && e.target.closest('.ref[data-ref]'); if (t) light(t.getAttribute('data-ref'), false); });
+    document.addEventListener('keydown', function (e) {
+      var modal = !$('#records').hidden ? $('#records') : !$('#example').hidden ? $('#example') : null;
+      if (modal) {
+        if (e.key === 'Escape') { e.preventDefault(); if (modal.id === 'records') closeRecords(); else closeExample(S.steps[S.cur]); }
+        if (e.key === 'Tab') { var focusable = $$('button:not(:disabled), input, textarea, [tabindex="0"]', modal).filter(function (n) { return n.getClientRects().length; }); var first = focusable[0], last = focusable[focusable.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } }
+        return;
+      }
+      if ($('#screen-lesson').hidden || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(S.cur + 1, true); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(S.cur - 1, true); }
+    });
+    window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function () { updateMotionButton(); if (S.steps && !$('#screen-lesson').hidden) go(S.cur, false); });
+    var rt = 0;
+    window.addEventListener('resize', function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () {
+        if (S.steps && !$('#screen-lesson').hidden) { placeSlider(); graph.fit(); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K); }
+        else if (previewGraph.res) { previewGraph.fit(); previewGraph.show(8, false); }
+      }, 160);
+    });
+    setExample(EXAMPLE_INPUTS[0].input);
+    AI.init().then(function () {
+      $('#btn-photo').hidden = !(AI.available() && AI.state.images);
+      $('#ai-status').textContent = AI.available() ? 'AI 연결됨 (' + AI.state.provider + ' 미리보기)' : '기본 힌트 사용 가능 · 자유 질문 AI 준비 중';
+      $('#ai-status').className = 'ai-status' + (AI.available() ? ' on' : '');
+      if (S.steps && !$('#screen-lesson').hidden) renderCoach(S.steps[S.cur]);
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})(window.RL = window.RL || {});
+
+</script>
+</body>
+</html>

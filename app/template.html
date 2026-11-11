@@ -1,92 +1,74 @@
-<title>근궤적 AI 튜터</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="전달함수를 넣으면 근궤적이 특성방정식부터 K 변화까지 한 단계씩 그려지는 학습 홈페이지">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Orbit&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap">
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f8f7">
+<title>근궤적 스튜디오 · 수식에서 이해로</title>
+<meta name="description" content="전달함수부터 K 변화까지, 수식과 그래프를 연결하는 9단계 근궤적 학습 공간">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%230d7565'/%3E%3Cpath d='M14 44Q30 44 49 14M14 20Q30 20 49 50' stroke='white' stroke-width='3' fill='none'/%3E%3C/svg%3E">
 <style>/*__CSS__*/</style>
-
+</head>
+<body>
 <div class="app" id="app">
   <header class="top">
-    <a class="brand" href="#" id="brand" aria-label="근궤적 AI 튜터 처음 화면"><span class="logo" aria-hidden="true"><i>×</i><i>○</i></span><span class="name">근궤적 AI 튜터</span></a>
+    <a class="brand" href="#" id="brand" aria-label="근궤적 스튜디오 처음 화면">
+      <span class="logo" aria-hidden="true"><svg viewBox="0 0 36 36"><path d="M7 27C18 27 19 18 29 7M7 9C18 9 19 18 29 29"/><path d="M7 5v8M3 9h8"/><circle cx="29" cy="7" r="3"/></svg></span>
+      <span class="brand-copy"><span class="name">근궤적 스튜디오</span><span class="brand-sub">ROOT LOCUS STUDIO</span></span>
+    </a>
+    <nav class="top-nav" aria-label="주 메뉴"><button id="nav-learn" class="nav-link active">학습 공간</button><button id="nav-examples" class="nav-link">예제 둘러보기</button></nav>
     <div class="top-actions">
-      <button id="btn-home" class="ghost sm" hidden>새 문제</button>
-      <button id="btn-records" class="ghost sm">학습 기록</button>
-      <button id="btn-theme" class="ghost sm icon" aria-label="밝게·어둡게 바꾸기" title="밝게·어둡게">◐</button>
+      <button id="btn-home" class="ghost sm" hidden>＋ 새 문제</button>
+      <button id="btn-records" class="ghost sm"><span aria-hidden="true">◷</span> 학습 기록</button>
+      <button id="btn-theme" class="ghost icon" aria-label="어두운 화면으로 전환" title="화면 테마 변경">◐</button>
     </div>
   </header>
 
   <main id="screen-start" class="screen start">
     <section class="start-left">
-      <p class="eyebrow">제어공학 · 근궤적 · 9단계</p>
-      <h1>전달함수를 넣으면<br>근궤적이 한 단계씩 그려집니다</h1>
-      <p class="lede">특성방정식부터 K 변화까지, 수식이 바뀔 때마다 그래프가 함께 자랍니다. 막히면 AI가 정답 대신 힌트를 단계별로 줍니다.</p>
-      <label for="tf-input" class="field-label">개루프 전달함수 <i class="mv">G</i>(<i class="mv">s</i>)<i class="mv">H</i>(<i class="mv">s</i>)</label>
-      <div class="input-row">
-        <input id="tf-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="예: K(s+2)/((s+3)(s^2+2s+2))">
-        <button id="btn-photo" class="ghost" type="button" hidden>사진으로 입력</button>
-      </div>
-      <input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp" hidden>
-      <div id="photo-panel" class="photo" hidden></div>
-      <div id="tf-preview" class="preview" aria-live="polite"></div>
-      <p id="tf-msg" class="msg" aria-live="polite"></p>
-      <div class="ex-row"><span class="ex-label">예제</span><div id="examples" class="chips"></div></div>
-      <div class="start-actions">
-        <button id="btn-start" class="primary lg">학습 시작</button>
-        <span id="ai-status" class="ai-status">AI 연결 확인 중…</span>
-      </div>
-      <details class="scope">
-        <summary>지원하는 식</summary>
-        <ul>
-          <li>연속시간, 음의 피드백, <i class="mv">K</i> ≥ 0</li>
-          <li>분모 4차 이하, 분자 차수 ≤ 분모 차수, 실수 계수</li>
-          <li><i class="mv">K</i>는 식 전체에 한 번 곱해진 꼴. 식에 <i class="mv">K</i>가 없으면 전체에 곱한 것으로 봅니다.</li>
-          <li>쓸 수 있는 글자: <code>s</code> <code>K</code> 숫자 <code>+ − * / ^</code> 괄호. 예: <code>K(s+1)/(s^2(s+9))</code></li>
-          <li>극점·영점 상쇄, 시간 지연, K ≤ 0(양의 피드백)은 계산하지 않고 이유를 안내합니다.</li>
-        </ul>
-      </details>
+      <p class="eyebrow"><span class="status-dot"></span> 눈으로 이해하는 제어공학</p>
+      <h1>수식이 궤적이 되는 순간,<br><em>이해가 시작됩니다.</em></h1>
+      <p class="lede">복잡했던 근궤적을 한 단계씩, 내 속도로.<br>직접 움직여 보고 수식과 그래프의 연결을 발견하세요.</p>
+      <section class="input-card" aria-label="전달함수 입력">
+        <div class="field-top"><label for="tf-input" class="field-label">어떤 시스템을 살펴볼까요?</label><span class="micro">개루프 전달함수</span></div>
+        <div class="input-row"><span class="input-prefix" aria-hidden="true">G(s)H(s)</span><input id="tf-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="tf-msg" placeholder="K/(s(s+1)(s+2))"><button id="btn-photo" class="ghost" type="button" hidden>사진 입력</button></div>
+        <input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp" hidden>
+        <div id="photo-panel" class="photo" hidden></div>
+        <div id="tf-preview" class="preview" aria-live="polite"></div>
+        <p id="tf-msg" class="msg" aria-live="polite"></p>
+        <div class="start-actions"><button id="btn-start" class="primary lg">이 시스템 학습하기 <span aria-hidden="true">↗</span></button><span class="start-shortcut"><kbd>Enter</kbd> 로 시작</span></div>
+      </section>
+      <details class="scope"><summary>입력 방법과 지원 범위 <span aria-hidden="true">＋</span></summary><ul><li>연속시간, 음의 피드백, K ≥ 0, 실수 계수를 지원합니다.</li><li>분모는 4차 이하, 분자 차수는 분모 차수 이하입니다.</li><li>분모 전체를 괄호로 묶어 주세요. 예: <code>K/(s(s+1)(s+2))</code></li><li><code>s</code>, <code>K</code>, 숫자, <code>+ − * / ^</code>, 괄호를 쓸 수 있습니다. K를 생략하면 전체에 곱한 것으로 봅니다.</li><li>극점·영점 상쇄, 시간 지연, 음의 K, 양의 피드백은 지원하지 않습니다.</li></ul></details>
     </section>
-    <section class="start-right" aria-label="입력한 식의 극점과 영점">
-      <div class="plane-card">
-        <svg id="preview-graph" class="plane" role="img" aria-label="극점과 영점 미리보기"></svg>
-        <p class="cap"><span class="k-pole">×</span> 극점(<i class="mv">K</i> = 0 출발) &ensp;<span class="k-zero">○</span> 영점(<i class="mv">K</i> → ∞ 도착)</p>
-      </div>
+    <section class="start-right" aria-label="입력한 시스템의 근궤적 미리보기">
+      <div class="preview-heading"><span><span class="status-dot"></span> LIVE PREVIEW</span><span class="preview-tag">s-plane</span></div>
+      <div class="plane-card hero-plane"><div class="plot-caption"><span>근궤적 미리보기</span><span class="micro">입력한 식으로 계산됩니다</span></div><svg id="preview-graph" class="plane" role="img" aria-label="입력한 시스템의 근궤적 미리보기"></svg><div class="plot-legend"><span><i class="legend-pole">×</i> 극점</span><span><i class="legend-zero">○</i> 영점</span><span><i class="legend-line"></i> 근궤적</span><span><i class="legend-dash"></i> 점근선</span></div></div>
+      <div class="preview-foot"><span class="preview-foot-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 4v9a4 4 0 0 0 4 4h10m-5-5 5 5-5 5"/></svg></span><p><b>작은 변화, 새로운 궤적.</b><br>식을 바꿔 보세요. 오른쪽 그래프가 함께 달라집니다.</p></div>
     </section>
+    <section class="example-section" id="example-section" aria-labelledby="examples-title">
+      <div class="section-heading"><div><p class="eyebrow">EXPLORE THE EXAMPLES</p><h2 id="examples-title">예제로 가볍게 시작하세요</h2></div><p>익숙한 시스템부터 새로운 발견까지</p></div>
+      <div id="examples" class="example-grid"></div>
+    </section>
+    <footer class="start-footer"><span>근궤적 AI 튜터 · 제어공학 학습 프로젝트</span><span id="ai-status" class="ai-status">학습 기능 준비 중…</span><span>내 브라우저에 학습 기록 저장</span></footer>
   </main>
 
   <main id="screen-lesson" class="screen lesson" hidden>
     <aside class="rail" id="rail" aria-label="단계별 풀이">
-      <nav class="stepper" id="stepper" aria-label="단계 이동"></nav>
-      <article id="step-body" class="step-body"></article>
-      <section id="coach" class="coach" aria-label="힌트와 질문"></section>
+      <div class="lesson-sidebar"><div class="sidebar-heading"><span class="eyebrow">LEARNING PATH</span><strong>이해를 향한 9단계</strong><span id="progress-label" class="micro">1 / 9 단계</span><div class="progress-track" aria-hidden="true"><div id="progress-fill"></div></div></div><nav class="stepper" id="stepper" aria-label="단계 이동"></nav><div class="sidebar-foot"><span>서두르지 않아도 괜찮아요.</span><span>각 단계를 내 속도로 살펴보세요.</span><button id="btn-all" class="ghost wide">완성된 궤적 보기 ↗</button><span class="keyboard-note"><kbd>←</kbd> <kbd>→</kbd> 단계 이동</span></div></div>
+      <div class="lesson-details" id="lesson-details"><div class="panel-tabs" role="tablist" aria-label="학습 도구"><button id="tab-solution" role="tab" aria-controls="step-body" aria-selected="true" class="selected">단계별 풀이</button><button id="tab-coach" role="tab" aria-controls="coach" aria-selected="false">힌트 & 연습</button></div><div class="details-scroll" id="details-scroll"><article id="step-body" class="step-body" role="tabpanel" aria-labelledby="tab-solution"></article><section id="coach" class="coach" role="tabpanel" aria-labelledby="tab-coach" hidden></section></div></div>
     </aside>
     <section class="stage" aria-label="s평면 그래프">
-      <div class="stage-head"><span id="stage-tf" class="stage-tf"></span><span id="stage-note" class="stage-note"></span></div>
-      <div class="plane-wrap"><svg id="main-graph" class="plane" role="img" aria-label="s평면 근궤적"></svg></div>
-      <div class="controls" role="toolbar" aria-label="재생 조절">
-        <button id="btn-prev" class="ghost">이전</button>
-        <button id="btn-replay" class="ghost">다시 보기</button>
-        <button id="btn-pause" class="ghost">일시정지</button>
-        <button id="btn-all" class="ghost">전체 결과</button>
-        <button id="btn-next" class="primary">다음</button>
-      </div>
+      <div class="stage-heading"><div><p class="eyebrow">ROOT LOCUS</p><h2 id="current-title">특성방정식</h2></div><button id="btn-motion" class="ghost sm" aria-pressed="false">모션 켜짐</button></div>
+      <div class="graph-panel"><div class="stage-head"><div><span class="micro">분석 중인 시스템</span><div id="stage-tf" class="stage-tf"></div></div><span class="canvas-label">s-plane</span></div><div class="plane-wrap"><svg id="main-graph" class="plane" role="img" aria-label="s평면 근궤적"></svg><div id="graph-empty" class="graph-empty"><span class="empty-math">1 + G(s)H(s) = 0</span><p>먼저 특성방정식을 정리합니다.</p><span>다음 단계에서 극점과 영점이 나타나요.</span></div></div><div class="plot-legend"><span><i class="legend-pole">×</i> 극점</span><span><i class="legend-zero">○</i> 영점</span><span><i class="legend-line"></i> 근궤적</span><span><i class="legend-dash"></i> 점근선</span><span><i class="legend-key">●</i> 핵심 점</span></div></div>
+      <div id="mobile-k-slot" class="mobile-k-slot"></div>
+      <div class="stage-insight"><span class="insight-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 4v9a4 4 0 0 0 4 4h10m-5-5 5 5-5 5"/></svg></span><p id="stage-note" class="stage-note"></p></div>
+      <div class="controls" role="toolbar" aria-label="재생 조절"><button id="btn-prev" class="ghost" aria-label="이전 단계">← 이전</button><div class="play-controls"><button id="btn-replay" class="ghost" title="현재 단계 다시 재생">↻ 다시 보기</button><button id="btn-pause" class="ghost">일시정지</button><button id="btn-skip" class="ghost" title="현재 단계의 움직임을 건너뛰고 결과 보기">건너뛰기</button></div><button id="btn-next" class="primary">다음 →</button></div>
     </section>
   </main>
 
-  <div id="records" class="overlay" hidden>
-    <div class="drawer" role="dialog" aria-modal="true" aria-labelledby="records-title">
-      <div class="drawer-head"><h3 id="records-title">학습 기록</h3><button id="records-close" class="ghost sm">닫기</button></div>
-      <ul id="records-list" class="records-list"></ul>
-      <p class="muted sm">기록은 이 기기의 브라우저에만 저장됩니다. 다른 기기와 자동으로 맞춰지지 않고, 브라우저 데이터를 지우면 사라집니다.</p>
-    </div>
-  </div>
-
-  <div id="example" class="overlay" hidden>
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ex-title">
-      <div class="sheet-head"><div><p class="eyebrow">간단한 예시</p><h3 id="ex-title"></h3><p id="ex-tf" class="ex-tf"></p></div><button id="ex-back" class="primary sm">원래 문제로 돌아가기</button></div>
-      <div class="sheet-body">
-        <div class="plane-card"><svg id="ex-graph" class="plane" role="img" aria-label="예시 그래프"></svg></div>
-        <div id="ex-body" class="ex-body"></div>
-      </div>
-    </div>
-  </div>
+  <div id="records" class="overlay" hidden><div class="drawer" role="dialog" aria-modal="true" aria-labelledby="records-title"><div class="drawer-head"><div><p class="eyebrow">YOUR LEARNING</p><h3 id="records-title">학습 기록</h3></div><button id="records-close" class="ghost sm">닫기 ✕</button></div><ul id="records-list" class="records-list"></ul><p class="muted sm">기록은 이 기기의 브라우저에 저장됩니다. 다른 기기와 자동으로 동기화되지 않으며, 브라우저 데이터를 지우면 사라집니다.</p></div></div>
+  <div id="example" class="overlay" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ex-title"><div class="sheet-head"><div><p class="eyebrow">간단한 예시</p><h3 id="ex-title"></h3><p id="ex-tf" class="ex-tf"></p></div><button id="ex-back" class="primary sm">원래 문제로 돌아가기</button></div><div class="sheet-body"><div class="plane-card"><svg id="ex-graph" class="plane" role="img" aria-label="예시 그래프"></svg></div><div id="ex-body" class="ex-body"></div></div></div></div>
 </div>
 <script>/*__JS__*/</script>
+</body>
+</html>

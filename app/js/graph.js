@@ -11,7 +11,7 @@
   var NS = 'http://www.w3.org/2000/svg';
   var EASE = 'cubic-bezier(.22,.8,.24,1)';
 
-  function reduced() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function reduced() { return document.documentElement.dataset.motion === 'off' || !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
   function el(tag, attrs, parent) {
     var n = document.createElementNS(NS, tag), k;
     if (attrs) for (k in attrs) if (attrs[k] !== undefined && attrs[k] !== null) n.setAttribute(k, attrs[k]);
@@ -93,12 +93,12 @@
     el('line', { x1: this.X(0), y1: 0, x2: this.X(0), y2: this.VH, 'class': 'axis' }, a);
     var fs = this.px(11);
     for (x = Math.ceil(w.xmin / st) * st; x <= w.xmax; x += st) {
-      if (Math.abs(x) < st / 2) continue;
+      if (Math.abs(x) < st / 2 || this.X(x) < this.px(14) || this.X(x) > this.VW - this.px(14)) continue;
       var t = el('text', { x: this.X(x), y: this.Y(0) + this.px(15), 'class': 'tick', 'font-size': fs, 'text-anchor': 'middle' }, a);
       t.textContent = F.dec(x, 2);
     }
     for (y = Math.ceil(w.ymin / st) * st; y <= w.ymax; y += st) {
-      if (Math.abs(y) < st / 2) continue;
+      if (Math.abs(y) < st / 2 || this.Y(y) < this.px(36) || this.Y(y) > this.VH - this.px(12)) continue;
       var t2 = el('text', { x: this.X(0) - this.px(6), y: this.Y(y) + this.px(4), 'class': 'tick', 'font-size': fs, 'text-anchor': 'end' }, a);
       t2.textContent = (y < 0 ? '−' : '') + 'j' + F.dec(Math.abs(y), 2);
     }
@@ -215,8 +215,11 @@
           fadeIn(this.label(lx, ly, F.deg(A.angles[i] > 180 ? A.angles[i] - 360 : A.angles[i]), 'asym', 6, ly >= 0 ? -6 : 16), d0 + i * 420 + 500);
         }
       }
-      var cm = this.dot(A.centroid, 0, 'cen', 'c', 5, this.L.key);
-      if (now(4)) { pop(cm, 150); fadeIn(this.label(A.centroid, 0, 'σ = ' + F.numShort(A.centroid), 'asym', 0, -14, 'middle'), 300); }
+      // 점근선 하나는 실수축 방향이므로 중심 표시가 오해를 만들지 않도록 숨깁니다.
+      if (A.q > 1) {
+        var cm = this.dot(A.centroid, 0, 'cen', 'c', 5, this.L.key);
+        if (now(4)) { pop(cm, 150); fadeIn(this.label(A.centroid, 0, 'σ = ' + F.numShort(A.centroid), 'asym', 0, -14, 'middle'), 300); }
+      }
     }
     // 5단계부터: 이탈점·진입점
     var vb = CT.validBreaks(res);
@@ -389,7 +392,7 @@
     this.clPos = null;
   };
   // K를 바꾸면 폐루프 극점을 다시 계산해서 옮김
-  Graph.prototype.setK = function (K) {
+  Graph.prototype.setK = function (K, jump) {
     if (!this.cl) return null;
     var rs = RL.routh.closedLoopPoles(this.res.N, this.res.D, K), n = rs.length, order = [], i;
     if (this.clPos && this.clPos.length === n) {
@@ -402,6 +405,12 @@
       }
       rs = order;
     }
+    // 큰 K 변경과 먼 점 사이를 직선 잔상으로 잇지 않습니다. 실제 계산 위치만 표시합니다.
+    var clearTrail = jump || reduced();
+    if (this.clPos) for (i = 0; i < n; i++) {
+      if (!this.clPos[i] || C.dist(this.clPos[i], rs[i]) * this.scale > this.px(18)) clearTrail = true;
+    }
+    if (clearTrail) for (i = 0; i < this.trails.length; i++) this.trails[i].pts = [];
     this.clPos = rs;
     for (i = 0; i < n; i++) {
       var x = this.X(rs[i].re), y = this.Y(rs[i].im), tr = this.trails[i];
@@ -469,3 +478,4 @@
   RL.Graph = Graph;
   RL.kChart = kChart;
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+

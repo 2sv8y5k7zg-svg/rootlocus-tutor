@@ -18,4 +18,7 @@ out = tpl.replace('/*__CSS__*/', css).replace('/*__JS__*/', js)
 dist = ROOT / 'dist'
 dist.mkdir(exist_ok=True)
 (dist / 'rootlocus-tutor.html').write_text(out, encoding='utf-8')
+# 웹 호스팅 첫 화면과 오프라인 실행 파일은 같은 내용입니다.
+(dist / 'index.html').write_text(out, encoding='utf-8')
 print('저장: dist/rootlocus-tutor.html (%.1f KB)' % (len(out.encode('utf-8')) / 1024))
+

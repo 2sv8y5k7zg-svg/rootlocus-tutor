@@ -9,10 +9,10 @@
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
-  var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: 0, paused: false, tfText: '', thread: {} };
+  var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: null, paused: false, tfText: '', thread: {} };
   var graph, previewGraph, exGraph;
   var EXAMPLE_INPUTS = [
-    { label: '노트 예제', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
+    { label: '복소 극점의 출발', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
     { label: '허수축 교차', input: 'K/(s(s+1)(s+2))' },
     { label: '원 궤적', input: 'K(s+2)/(s(s+1))' },
     { label: '복소 이탈점', input: 'K/(s(s+4)(s^2+4s+20))' },
@@ -38,21 +38,26 @@
 
   // ── 시작 화면 ───────────────────────────────
   function onInput() {
+    syncExamples();
+    $('#tf-input').setAttribute('aria-busy', 'false');
+    $('#tf-input').setAttribute('aria-invalid', 'false');
     var raw = $('#tf-input').value, msg = $('#tf-msg'), pv = $('#tf-preview'), btn = $('#btn-start');
     var p = RL.parser.parse(raw);
     S.parsed = null;
     btn.disabled = true;
     if (!p.ok) {
       pv.innerHTML = '<span class="muted">식을 해석하면 여기에 수식으로 보여 드립니다.</span>';
+      $('#tf-input').setAttribute('aria-invalid', 'true');
       msg.className = 'msg bad';
       msg.textContent = p.message;
       previewGraph.res = null; previewGraph.svg.innerHTML = '';
       return;
     }
-    var res = RL.locus.analyze(p.N, p.D, { branches: false });
+    var res = RL.locus.analyze(p.N, p.D);
     var warn = /\/\s*[^(\s][^+\-]*\(/.test(RL.parser.clean(raw)) ? ' 분모 전체를 괄호로 감쌌는지 확인해 주세요. 예: K/(s(s+1)).' : '';
     if (!res.ok) {
       pv.innerHTML = M.mv('K') + '·' + M.frac(M.polyH(p.N), M.polyH(p.D));
+      $('#tf-input').setAttribute('aria-invalid', 'true');
       msg.className = 'msg bad';
       msg.textContent = res.error.message;
       previewGraph.res = null; previewGraph.svg.innerHTML = '';
@@ -62,13 +67,24 @@
     pv.innerHTML = '<div class="pv-main">' + M.mv('G') + '(' + M.mv('s') + ')' + M.mv('H') + '(' + M.mv('s') + ') = ' + tfHTML(res) + '</div>' +
       '<div class="pv-sub">' + M.mv('N') + '(' + M.mv('s') + ') = ' + M.polyH(res.N) + ' &ensp;·&ensp; ' + M.mv('D') + '(' + M.mv('s') + ') = ' + M.polyH(res.D) + '</div>';
     msg.className = 'msg' + (warn ? ' warn' : '');
-    msg.textContent = p.note + warn + ' 분자·분모·괄호·부호가 맞으면 학습을 시작하세요.';
+    msg.textContent = warn || (p.note ? p.note + ' ' : '') + '✓ 수식이 준비됐어요. 입력한 식과 같은지 확인해 주세요.';
     btn.disabled = false;
     previewGraph.setProblem(res);
-    previewGraph.show(2, false);
+    previewGraph.show(8, false);
   }
 
   function setExample(input) { $('#tf-input').value = input; onInput(); }
+
+  function reducedMotion() { return document.documentElement.dataset.motion === 'off' || !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function showPanel(name) {
+    var solution = name === 'solution';
+    $('#step-body').hidden = !solution; $('#coach').hidden = solution;
+    ['solution', 'coach'].forEach(function (n) { var b = $('#tab-' + n); b.classList.toggle('selected', n === name); b.setAttribute('aria-selected', String(n === name)); b.tabIndex = n === name ? 0 : -1; });
+    $('#details-scroll').scrollTop = 0;
+  }
+  function syncExamples() {
+    $$('#examples .ex').forEach(function (b) { var selected = b.getAttribute('data-in') === $('#tf-input').value; b.classList.toggle('selected', selected); b.setAttribute('aria-pressed', String(selected)); });
+  }
 
   // ── 사진으로 입력 ───────────────────────────
   var photoCtl = null;
@@ -98,6 +114,7 @@
 
   // ── 학습 시작 ───────────────────────────────
   function startLesson(fromStep) {
+    onInput(); // 디바운스 대기 중 눌러도 현재 입력한 식을 계산합니다.
     if (!S.parsed) return;
     var res = RL.locus.analyze(S.parsed.N, S.parsed.D);
     if (!res.ok) return;
@@ -106,8 +123,10 @@
     S.tfText = tfText(res);
     S.recId = recIdOf(res);
     S.thread = {};
-    S.K = 0;
+    S.K = null;
     S.allNums = CT.allNumbers(res);
+    previewGraph.stop();
+    document.body.classList.add('learning');
     $('#screen-start').hidden = true;
     $('#screen-lesson').hidden = false;
     $('#btn-home').hidden = false;
@@ -129,21 +148,29 @@
   function go(i, animate) {
     if (!S.steps) return;
     i = Math.max(0, Math.min(S.steps.length - 1, i));
+    animate = animate && !reducedMotion();
     S.cur = i;
     S.paused = false;
     $('#btn-pause').textContent = '일시정지';
     var step = S.steps[i];
-    $$('#stepper .st').forEach(function (b, k) { b.classList.toggle('on', k === i); b.classList.toggle('done', k < i); });
+    $$('#stepper .st').forEach(function (b, k) { b.classList.toggle('on', k === i); b.classList.toggle('done', k < i); if (k === i) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
     $('#btn-prev').disabled = i === 0;
     $('#btn-next').disabled = i === S.steps.length - 1;
-    $('#btn-next').textContent = i === S.steps.length - 1 ? '마지막 단계' : '다음';
+    $('#btn-next').textContent = i === S.steps.length - 1 ? '학습 완료' : '다음 →';
+    $('#current-title').textContent = step.title;
+    $('#progress-label').textContent = (i + 1) + ' / 9 단계';
+    $('#progress-fill').style.width = ((i + 1) / 9 * 100) + '%';
+    $('#graph-empty').hidden = i !== 0;
+    $('#btn-pause').disabled = !animate;
+    $('#btn-skip').disabled = !animate;
+    showPanel('solution');
     renderStep(step, animate);
     renderCoach(step);
     $('#stage-note').textContent = step.graphNote;
     graph.show(step.num, animate);
-    if (step.num === 9) setK(S.K || defaultK());
+    if (step.num === 9) setK(S.K === null ? defaultK() : S.K);
     ST.upsert({ id: S.recId, input: $('#tf-input').value, tf: S.tfText, date: nowText(), lastStep: i + 1, done: i === S.steps.length - 1 });
-    var rail = $('#rail');
+    var rail = $('#details-scroll');
     if (rail.scrollTop) rail.scrollTop = 0;
   }
 
@@ -162,7 +189,7 @@
       case 'list': return '<ul class="b-list enter" ' + d + '>' + b.items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>';
       case 'table': {
         var rows = b.rows.map(function (r, k) {
-          var rd = step.num === 3 ? 500 + k * 1800 + 650 : 200 + k * 120;
+          var rd = 200 + k * 100;
           return '<tr class="enter' + (r.on ? ' on' : '') + '" style="--d:' + rd + 'ms" data-ref="' + r.ref + '">' + r.cells.map(function (c, j) { return j === 0 ? '<th scope="row">' + c + '</th>' : '<td>' + c + '</td>'; }).join('') + '</tr>';
         }).join('');
         return '<div class="tbl-wrap enter" ' + d + '><table class="b-table"><thead><tr>' + b.head.map(function (h) { return '<th scope="col">' + h + '</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
@@ -170,7 +197,7 @@
       case 'routh': {
         var rr = b.rows.map(function (r, k) {
           var cells = r.cells.map(function (c, j) { return '<td class="' + (j === 0 ? 'c1' : '') + '">' + c + '</td>'; }).join('');
-          return '<tr class="enter" style="--d:' + (450 + k * 420) + 'ms"><th scope="row">' + M.mv('s') + '<sup>' + r.pw + '</sup></th>' + cells + '</tr>';
+          return '<tr class="enter" style="--d:' + (200 + k * 100) + 'ms"><th scope="row">' + M.mv('s') + '<sup>' + r.pw + '</sup></th>' + cells + '</tr>';
         }).join('');
         return '<div class="tbl-wrap enter" ' + d + '><table class="b-routh"><caption>Routh 표 <span class="sm">(첫 열 강조)</span></caption><tbody>' + rr + '</tbody></table></div>';
       }
@@ -181,6 +208,7 @@
   }
 
   function renderStep(step, animate) {
+    $('#mobile-k-slot').innerHTML = '';
     var body = $('#step-body');
     var h = '<header class="sh"><span class="sh-n">' + String(step.num).padStart(2, '0') + '<small>/09</small></span><h2>' + step.title + '</h2></header>';
     for (var i = 0; i < step.blocks.length; i++) h += blockHTML(step.blocks[i], i, step);
@@ -188,10 +216,16 @@
     body.classList.toggle('still', !animate);
     var slot = $('#kchart-slot');
     if (slot && !RL.kChart(slot, S.res, S.res.view)) slot.remove();
-    if (step.num === 9) bindSlider();
+    if (step.num === 9) { bindSlider(); placeSlider(); }
   }
 
   // ── 9단계 슬라이더 ──────────────────────────
+  // 작은 화면에서는 K 조절을 그래프 바로 아래에 두어 동시에 볼 수 있게 합니다.
+  function placeSlider() {
+    var slider = $('.b-slider'); if (!slider) return;
+    if (window.matchMedia('(max-width: 760px)').matches) $('#mobile-k-slot').appendChild(slider);
+    else $('#step-body .b-goal').insertAdjacentElement('afterend', slider);
+  }
   function kRange() {
     var ks = CT.notableK(S.res).map(function (x) { return x.K; }).filter(function (k) { return k > 0; });
     var ref = ks.length ? Math.sqrt(ks[0] * ks[ks.length - 1]) : 1;
@@ -212,13 +246,14 @@
   }
   function bindSlider() {
     var sl = $('#k-slider');
-    sl.value = tFromK(S.K || defaultK());
+    sl.value = tFromK(S.K === null ? defaultK() : S.K);
     sl.oninput = function () { setK(kFromT(+sl.value)); };
-    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K); }; });
+    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K, true); }; });
   }
-  function setK(K) {
+  function setK(K, jump) {
     S.K = K;
-    var out = graph.setK(K);
+    var out = graph.setK(K, jump);
+    var slider = $('#k-slider'); if (slider) slider.setAttribute('aria-valuetext', 'K = ' + kText(K));
     if (!out) return;
     var st = RL.routh.classify(out.poles);
     var v = $('#k-val'); if (v) v.textContent = kText(K);
@@ -232,7 +267,7 @@
   // ── 코치(힌트·질문·내 답·AI) ────────────────
   function renderCoach(step) {
     var box = $('#coach'), aiOn = AI.available();
-    var badge = aiOn ? '<span class="badge on">AI 연결됨 · ' + AI.state.provider + ' 미리보기</span>' : '<span class="badge">AI 없이 정적 힌트로 동작</span>';
+    var badge = aiOn ? '<span class="badge on">AI 연결됨 · ' + AI.state.provider + ' 미리보기</span>' : '<span class="badge">기본 힌트 · 인터넷 없이 사용 가능</span>';
     var h = '<div class="coach-head"><h3>막히면 한 단계씩 열어 보세요</h3>' + badge + '</div>';
     h += '<div class="ladder" role="group" aria-label="힌트 단계">' + ['개념', '힌트', '공식·대입', '전체 풀이'].map(function (t, k) {
       return '<button class="lv" data-lv="' + (k + 1) + '"><span>' + (k + 1) + '</span>' + t + '</button>';
@@ -240,7 +275,7 @@
     if (step.questions.length) h += '<p class="qs-title">이 단계에서 생각해 볼 질문</p><div class="chips qs">' + step.questions.map(function (q, k) { return '<button class="chip q" data-q="' + k + '">' + q.q + '</button>'; }).join('') + '</div><div id="q-out"></div>';
     if (step.check) h += '<form id="check-form" class="check"><label for="check-in">' + step.check.prompt + '</label><div class="row"><input id="check-in" inputmode="decimal" autocomplete="off" placeholder="예: ' + (step.check.tol ? '−1.5 또는 −3/2' : '3') + '"><button class="primary sm" type="submit">내 답 확인</button></div><div id="check-out" class="check-out" aria-live="polite"></div></form>';
     if (aiOn) h += '<form id="ask-form" class="ask"><label for="ask-in">AI에게 질문하기</label><textarea id="ask-in" rows="2" placeholder="예: 점근선 중심이 왜 이 값인지 모르겠어요"></textarea><div class="row"><button class="primary sm" type="submit">보내기</button><button type="button" id="ask-stop" class="ghost sm" hidden>멈추기</button></div></form>';
-    else h += '<p class="muted sm">AI에게 직접 묻기는 AI가 연결된 화면(claude.ai 미리보기 또는 공개 홈페이지)에서 켜집니다.</p>';
+    else h += '<p class="muted sm">현재는 미리 준비된 단계별 힌트와 연습 문제를 제공합니다. 자유 질문 AI는 추후 연결 예정입니다.</p>';
     h += '<div id="thread" class="thread" aria-live="polite"></div>';
     if (step.example) h += '<button id="btn-example" class="ghost wide">간단한 예시로 원리 먼저 보기 →</button>';
     box.innerHTML = h;
@@ -351,7 +386,10 @@
   }
 
   // ── 학습 기록 ───────────────────────────────
+  var recordsReturnFocus = null;
+  function closeRecords() { $('#records').hidden = true; document.body.classList.remove('sheet-open'); if (recordsReturnFocus) recordsReturnFocus.focus(); }
   function openRecords() {
+    recordsReturnFocus = document.activeElement; document.body.classList.add('sheet-open');
     var list = ST.load(), box = $('#records-list');
     if (!list.length) box.innerHTML = '<p class="muted">아직 기록이 없습니다. 학습을 시작하면 단계마다 자동으로 저장됩니다.</p>';
     else box.innerHTML = list.map(function (r, k) {
@@ -362,7 +400,7 @@
     $$('#records-list button').forEach(function (b) {
       b.onclick = function () {
         var r = list[+b.getAttribute('data-k')], act = b.getAttribute('data-act');
-        $('#records').hidden = true;
+        closeRecords();
         $('#tf-input').value = r.input;
         onInput();
         if (!S.parsed) return;
@@ -374,6 +412,7 @@
 
   function goHome() {
     graph.stop();
+    document.body.classList.remove('learning');
     $('#screen-lesson').hidden = true;
     $('#screen-start').hidden = false;
     $('#btn-home').hidden = true;
@@ -393,32 +432,58 @@
     $('#btn-pause').textContent = S.paused ? '계속 재생' : '일시정지';
   }
 
+  function updateMotionButton() {
+    var off = reducedMotion(); $('#btn-motion').textContent = off ? '모션 줄임' : '모션 켜짐'; $('#btn-motion').setAttribute('aria-pressed', String(off));
+    $('#btn-motion').title = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '기기의 움직임 줄이기 설정을 따릅니다' : '움직임 줄이기 켜기 / 끄기';
+  }
   function applyTheme(t) {
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
     else document.documentElement.removeAttribute('data-theme');
+    $('#btn-theme').setAttribute('aria-label', t === 'dark' ? '밝은 화면으로 전환' : '어두운 화면으로 전환');
   }
 
   function init() {
-    applyTheme(ST.getPref('theme', ''));
+    applyTheme(ST.getPref('theme', 'light'));
+    document.documentElement.dataset.motion = ST.getPref('motion', 'on');
+    updateMotionButton();
     graph = new RL.Graph($('#main-graph'));
     previewGraph = new RL.Graph($('#preview-graph'));
     exGraph = new RL.Graph($('#ex-graph'));
     graph.onRef = light;
-    $('#examples').innerHTML = EXAMPLE_INPUTS.map(function (e) { return '<button class="chip ex" data-in="' + M.esc(e.input) + '">' + e.label + '</button>'; }).join('');
+    var captions = ['출발각을 눈으로 확인하기', '안정과 불안정의 경계', '갈라지고 다시 만나는 가지', '복소평면의 만남 살펴보기', '중근과 가지의 관계', '영점이 바꾸는 도착점'];
+    var icons = ['M4 28H52M20 3V33M5 26Q25 26 44 4M5 26Q25 26 44 32', 'M4 18H52M31 3V33M7 18Q25 18 43 2M7 18Q25 18 43 34', 'M4 18H52M26 3V33M16 18a12 12 0 1 1 24 0a12 12 0 1 1-24 0', 'M4 18H52M26 3V33M10 4Q45 8 26 18Q7 28 42 32', 'M4 18H52M26 3V33M26 18L48 4M26 18L48 32M26 18H6', 'M4 18H52M26 3V33M6 18Q25 1 45 18M6 18Q25 35 45 18'];
+    $('#examples').innerHTML = EXAMPLE_INPUTS.map(function (e, i) { return '<button class="example-card ex" data-in="' + M.esc(e.input) + '" aria-pressed="false"><span class="example-top">0' + (i + 1) + '<span class="ex-level">' + (i < 3 ? '기본' : '심화') + '</span></span><svg viewBox="0 0 56 36" aria-hidden="true"><path d="' + icons[i] + '"/></svg><strong>' + e.label + '</strong><small>' + captions[i] + '</small><span class="ex-arrow" aria-hidden="true">↗</span></button>'; }).join('');
     $$('#examples .ex').forEach(function (b) { b.onclick = function () { setExample(b.getAttribute('data-in')); }; });
     var inp = $('#tf-input'), timer = 0;
-    inp.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(onInput, 140); });
-    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !$('#btn-start').disabled) startLesson(0); });
+    inp.addEventListener('input', function () {
+      clearTimeout(timer); S.parsed = null; $('#btn-start').disabled = true;
+      inp.setAttribute('aria-busy', 'true'); $('#tf-msg').className = 'msg'; $('#tf-msg').textContent = '입력한 식을 확인하고 있어요…';
+      timer = setTimeout(onInput, 140);
+    });
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { clearTimeout(timer); onInput(); if (S.parsed) startLesson(0); } });
     $('#btn-start').onclick = function () { startLesson(0); };
     $('#btn-prev').onclick = function () { go(S.cur - 1, true); };
     $('#btn-next').onclick = function () { go(S.cur + 1, true); };
     $('#btn-replay').onclick = function () { go(S.cur, true); };
+    $('#btn-skip').onclick = function () {
+      S.paused = false; $('#btn-pause').textContent = '일시정지'; $('#btn-pause').disabled = true; $('#btn-skip').disabled = true;
+      $('#step-body').classList.add('still'); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K);
+    };
+    $('#tab-solution').onclick = function () { showPanel('solution'); };
+    $('#tab-coach').onclick = function () { showPanel('coach'); };
+    $('.panel-tabs').onkeydown = function (e) { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); e.stopPropagation(); var name = $('#coach').hidden ? 'coach' : 'solution'; showPanel(name); $('#tab-' + name).focus(); } };
+    $('#nav-learn').onclick = goHome;
+    $('#nav-examples').onclick = function () { goHome(); $('#example-section').scrollIntoView({behavior: reducedMotion() ? 'auto' : 'smooth', block:'start'}); };
+    $('#btn-motion').onclick = function () {
+      var next = document.documentElement.dataset.motion === 'off' ? 'on' : 'off'; document.documentElement.dataset.motion = next; ST.setPref('motion', next); updateMotionButton(); if (S.steps) go(S.cur, false);
+    };
     $('#btn-pause').onclick = togglePause;
     $('#btn-all').onclick = function () { go(7, false); };
     $('#btn-home').onclick = goHome;
     $('#brand').onclick = function (e) { e.preventDefault(); if (!$('#screen-lesson').hidden) goHome(); };
     $('#btn-records').onclick = openRecords;
-    $('#records-close').onclick = function () { $('#records').hidden = true; };
+    $('#records-close').onclick = closeRecords;
+    $('#records').onclick = function (e) { if (e.target === $('#records')) closeRecords(); };
     $('#btn-theme').onclick = function () {
       var cur = document.documentElement.getAttribute('data-theme');
       var dark = cur ? cur === 'dark' : !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
@@ -433,23 +498,29 @@
     document.addEventListener('focusin', function (e) { var t = e.target.closest && e.target.closest('.ref[data-ref]'); if (t) light(t.getAttribute('data-ref'), true); });
     document.addEventListener('focusout', function (e) { var t = e.target.closest && e.target.closest('.ref[data-ref]'); if (t) light(t.getAttribute('data-ref'), false); });
     document.addEventListener('keydown', function (e) {
+      var modal = !$('#records').hidden ? $('#records') : !$('#example').hidden ? $('#example') : null;
+      if (modal) {
+        if (e.key === 'Escape') { e.preventDefault(); if (modal.id === 'records') closeRecords(); else closeExample(S.steps[S.cur]); }
+        if (e.key === 'Tab') { var focusable = $$('button:not(:disabled), input, textarea, [tabindex="0"]', modal).filter(function (n) { return n.getClientRects().length; }); var first = focusable[0], last = focusable[focusable.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } }
+        return;
+      }
       if ($('#screen-lesson').hidden || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
-      if (e.key === 'ArrowRight') go(S.cur + 1, true);
-      if (e.key === 'ArrowLeft') go(S.cur - 1, true);
-      if (e.key === 'Escape') { if (!$('#example').hidden) closeExample(S.steps[S.cur]); $('#records').hidden = true; }
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(S.cur + 1, true); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(S.cur - 1, true); }
     });
+    window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function () { updateMotionButton(); if (S.steps && !$('#screen-lesson').hidden) go(S.cur, false); });
     var rt = 0;
     window.addEventListener('resize', function () {
       clearTimeout(rt);
       rt = setTimeout(function () {
-        if (S.steps && !$('#screen-lesson').hidden) { graph.fit(); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K); }
-        else if (previewGraph.res) { previewGraph.fit(); previewGraph.show(2, false); }
+        if (S.steps && !$('#screen-lesson').hidden) { placeSlider(); graph.fit(); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K); }
+        else if (previewGraph.res) { previewGraph.fit(); previewGraph.show(8, false); }
       }, 160);
     });
     setExample(EXAMPLE_INPUTS[0].input);
     AI.init().then(function () {
       $('#btn-photo').hidden = !(AI.available() && AI.state.images);
-      $('#ai-status').textContent = AI.available() ? 'AI 연결됨 (' + AI.state.provider + ' 미리보기)' : 'AI 연결 없음: 정적 힌트로 동작';
+      $('#ai-status').textContent = AI.available() ? 'AI 연결됨 (' + AI.state.provider + ' 미리보기)' : '기본 힌트 사용 가능 · 자유 질문 AI 준비 중';
       $('#ai-status').className = 'ai-status' + (AI.available() ? ' on' : '');
       if (S.steps && !$('#screen-lesson').hidden) renderCoach(S.steps[S.cur]);
     });
@@ -457,3 +528,4 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })(window.RL = window.RL || {});
+
