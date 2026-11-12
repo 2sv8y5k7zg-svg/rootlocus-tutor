@@ -36,6 +36,65 @@
     return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
   }
 
+  // 화면을 즉시 전환한 뒤 가벼운 등장 효과를 준다. 숨겨진 화면은 클릭·탭 대상에서 제외된다.
+  function showScreen(id) {
+    ['screen-welcome', 'screen-start', 'screen-lesson'].forEach(function (name) {
+      var screen = document.getElementById(name);
+      screen.hidden = name !== id;
+      screen.classList.remove('screen-arrive');
+    });
+    var next = document.getElementById(id);
+    void next.offsetWidth;
+    next.classList.add('screen-arrive');
+    window.scrollTo(0, 0);
+  }
+  function enterInput() {
+    graph.stop();
+    showScreen('screen-start');
+    $('#btn-home').hidden = true;
+    onInput();
+    $('#tf-input').focus({ preventScroll: true });
+  }
+  function welcome() {
+    graph.stop();
+    if (photoCtl) photoCtl.abort();
+    showScreen('screen-welcome');
+    $('#btn-home').hidden = true;
+    $('#welcome-title').focus({ preventScroll: true });
+  }
+  function reducedMotion() {
+    return document.documentElement.getAttribute('data-motion') === 'reduced' || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+  function setMotion(reduce) {
+    document.documentElement.setAttribute('data-motion', reduce ? 'reduced' : 'auto');
+    $('#btn-motion').setAttribute('aria-pressed', String(reduce));
+    ST.setPref('reduce-motion', reduce);
+    if (reduce && S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
+  }
+  // 포인터 이벤트를 프레임당 한 번만 반영한다. 터치 스크롤은 막지 않는다.
+  function bindWelcomeMotion() {
+    var area = $('#screen-welcome'), pending = false, x = 0, y = 0;
+    area.addEventListener('pointermove', function (e) {
+      if (reducedMotion() || e.pointerType === 'touch' || area.hidden) return;
+      var rect = area.getBoundingClientRect();
+      x = (e.clientX - rect.left) / rect.width - 0.5;
+      y = (e.clientY - rect.top) / rect.height - 0.5;
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        if (area.hidden || reducedMotion()) return;
+        area.style.setProperty('--drift-x', (x * 24).toFixed(1) + 'px');
+        area.style.setProperty('--drift-y', (y * 20).toFixed(1) + 'px');
+      });
+    }, { passive: true });
+    area.addEventListener('pointerleave', function () {
+      x = 0; y = 0;
+      area.style.setProperty('--drift-x', '0px');
+      area.style.setProperty('--drift-y', '0px');
+    });
+  }
+
   // ── 시작 화면 ───────────────────────────────
   function onInput() {
     var raw = $('#tf-input').value, msg = $('#tf-msg'), pv = $('#tf-preview'), btn = $('#btn-start');
@@ -44,6 +103,7 @@
     btn.disabled = true;
     if (!p.ok) {
       pv.innerHTML = '<span class="muted">식을 해석하면 여기에 수식으로 보여 드립니다.</span>';
+      $('#tf-input').setAttribute('aria-invalid', 'true');
       msg.className = 'msg bad';
       msg.textContent = p.message;
       previewGraph.res = null; previewGraph.svg.innerHTML = '';
@@ -53,11 +113,13 @@
     var warn = /\/\s*[^(\s][^+\-]*\(/.test(RL.parser.clean(raw)) ? ' 분모 전체를 괄호로 감쌌는지 확인해 주세요. 예: K/(s(s+1)).' : '';
     if (!res.ok) {
       pv.innerHTML = M.mv('K') + '·' + M.frac(M.polyH(p.N), M.polyH(p.D));
+      $('#tf-input').setAttribute('aria-invalid', 'true');
       msg.className = 'msg bad';
       msg.textContent = res.error.message;
       previewGraph.res = null; previewGraph.svg.innerHTML = '';
       return;
     }
+    $('#tf-input').setAttribute('aria-invalid', 'false');
     S.parsed = p;
     pv.innerHTML = '<div class="pv-main">' + M.mv('G') + '(' + M.mv('s') + ')' + M.mv('H') + '(' + M.mv('s') + ') = ' + tfHTML(res) + '</div>' +
       '<div class="pv-sub">' + M.mv('N') + '(' + M.mv('s') + ') = ' + M.polyH(res.N) + ' &ensp;·&ensp; ' + M.mv('D') + '(' + M.mv('s') + ') = ' + M.polyH(res.D) + '</div>';
@@ -71,28 +133,39 @@
   function setExample(input) { $('#tf-input').value = input; onInput(); }
 
   // ── 사진으로 입력 ───────────────────────────
-  var photoCtl = null;
+  var photoCtl = null, photoURL = null;
   function onPhotoPicked(file) {
     if (!file) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 20 * 1024 * 1024) {
+      $('#photo-help').textContent = 'JPG·PNG·WebP, 20MB 이하 사진을 선택해 주세요.'; return;
+    }
+    if (photoCtl) photoCtl.abort();
+    if (photoURL) URL.revokeObjectURL(photoURL);
     var panel = $('#photo-panel');
     panel.hidden = false;
-    var url = URL.createObjectURL(file);
+    var url = photoURL = URL.createObjectURL(file);
     panel.innerHTML = '<img src="' + url + '" alt="올린 사진" class="thumb">' +
       '<div class="photo-body"><p><b>사진은 AI(' + (AI.state.provider || 'AI') + ')로 전송됩니다.</b> 개인정보가 찍혀 있지 않은지 확인해 주세요. 읽은 식은 바로 계산하지 않고 먼저 보여 드립니다.</p>' +
       '<div class="row"><button id="photo-send" class="primary sm">사진 보내서 읽기</button><button id="photo-cancel" class="ghost sm">취소</button></div><p id="photo-status" class="muted"></p></div>';
+    if (!AI.available() || !AI.state.images) {
+      panel.querySelector('.photo-body p').textContent = '사진은 이 기기에서만 표시됩니다. 현재 자동 인식 연결이 없어 사진을 보며 식을 직접 입력해 주세요.';
+      $('#photo-send').hidden = true;
+    }
     $('#photo-cancel').onclick = function () { if (photoCtl) photoCtl.abort(); panel.hidden = true; panel.innerHTML = ''; URL.revokeObjectURL(url); };
     $('#photo-send').onclick = function () {
       var st = $('#photo-status');
       $('#photo-send').disabled = true;
       st.textContent = '읽는 중… (몇 초~수십 초)';
       photoCtl = new AbortController();
-      AI.readPhoto(file, photoCtl.signal).then(function (text) {
+      var request = photoCtl;
+      AI.readPhoto(file, request.signal).then(function (text) {
+        if (request.signal.aborted || request !== photoCtl) return;
         if (/읽을 수 없음/.test(text)) { st.textContent = 'AI가 식을 읽지 못했습니다. 더 밝고 가까운 사진으로 다시 시도하거나 직접 입력해 주세요.'; $('#photo-send').disabled = false; return; }
         $('#tf-input').value = text;
         onInput();
         st.textContent = 'AI가 읽은 식을 입력칸에 넣었습니다. 분자·분모·괄호·부호·지수를 확인하고 고쳐 주세요.';
         $('#tf-input').focus();
-      }, function (e) { st.textContent = AI.errMsg(e); $('#photo-send').disabled = false; });
+      }, function (e) { if (request.signal.aborted || request !== photoCtl) return; st.textContent = AI.errMsg(e); $('#photo-send').disabled = false; });
     };
   }
 
@@ -110,14 +183,13 @@
     S.thread = {};
     S.K = null;
     S.allNums = CT.allNumbers(res);
-    $('#screen-start').hidden = true;
-    $('#screen-lesson').hidden = false;
+    showScreen('screen-lesson');
     $('#btn-home').hidden = false;
     $('#stage-tf').innerHTML = M.mv('G') + M.mv('H') + ' = ' + tfHTML(res);
     renderStepper();
     graph.setProblem(res);
     go(fromStep || 0, true);
-    window.scrollTo(0, 0);
+    $('#stepper button').focus({ preventScroll: true });
   }
 
   function renderStepper() {
@@ -135,7 +207,7 @@
     S.paused = false;
     $('#btn-pause').textContent = '일시정지';
     var step = S.steps[i];
-    $$('#stepper .st').forEach(function (b, k) { b.classList.toggle('on', k === i); b.classList.toggle('done', k < i); });
+    $$('#stepper .st').forEach(function (b, k) { b.classList.toggle('on', k === i); b.classList.toggle('done', k < i); if (k === i) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
     $('#btn-prev').disabled = i === 0;
     $('#btn-next').disabled = i === S.steps.length - 1;
     $('#btn-next').textContent = i === S.steps.length - 1 ? '마지막 단계' : '다음';
@@ -305,7 +377,7 @@
     item.className = 'ai-msg';
     item.innerHTML = '<div class="ai-q">' + M.esc(o.question.length > 120 ? o.question.slice(0, 120) + '…' : o.question) + '</div><div class="ai-a"><span class="muted">생각하는 중…</span></div><div class="ai-meta"></div>';
     th.appendChild(item);
-    item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    item.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' });
     if (askCtl) askCtl.abort();
     askCtl = new AbortController();
     var stop = $('#ask-stop'); if (stop) { stop.hidden = false; stop.onclick = function () { askCtl.abort(); }; }
@@ -349,10 +421,12 @@
     th.appendChild(card);
     S.thread[step.num] = th.innerHTML;
     var ci = $('#check-in');
-    if (ci) { ci.focus(); ci.scrollIntoView({ block: 'center', behavior: 'smooth' }); } else card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (ci) { ci.focus(); ci.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' }); } else { card.tabIndex = -1; card.focus(); card.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' }); }
   }
 
   // ── 학습 기록 ───────────────────────────────
+  function closeRecords() { $('#records').hidden = true; $('#btn-records').focus({ preventScroll: true }); }
+
   function openRecords() {
     var list = ST.load(), box = $('#records-list');
     if (!list.length) box.innerHTML = '<p class="muted">아직 기록이 없습니다. 학습을 시작하면 단계마다 자동으로 저장됩니다.</p>';
@@ -374,13 +448,7 @@
     $('#records-close').focus();
   }
 
-  function goHome() {
-    graph.stop();
-    $('#screen-lesson').hidden = true;
-    $('#screen-start').hidden = false;
-    $('#btn-home').hidden = true;
-    onInput();
-  }
+  function goHome() { enterInput(); }
 
   // 글자와 그래프 연결 강조
   function light(ref, on) {
@@ -389,7 +457,7 @@
   }
 
   function togglePause() {
-    var list = document.getAnimations ? document.getAnimations() : [];
+    var list = graph.svg.getAnimations ? graph.svg.getAnimations({ subtree: true }) : [];
     S.paused = !S.paused;
     for (var i = 0; i < list.length; i++) { if (S.paused) list[i].pause(); else list[i].play(); }
     $('#btn-pause').textContent = S.paused ? '계속 재생' : '일시정지';
@@ -397,7 +465,7 @@
 
   function applyTheme(t) {
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
-    else document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', 'dark');
   }
 
   function init() {
@@ -423,9 +491,14 @@
     $('#btn-pause').onclick = togglePause;
     $('#btn-all').onclick = function () { go(7, false); };
     $('#btn-home').onclick = goHome;
-    $('#brand').onclick = function (e) { e.preventDefault(); if (!$('#screen-lesson').hidden) goHome(); };
+    $('#brand').onclick = function (e) { e.preventDefault(); welcome(); };
+    $('#btn-begin').onclick = enterInput;
+    $('#btn-welcome').onclick = welcome;
+    bindWelcomeMotion();
+    setMotion(ST.getPref('reduce-motion', 'false') === 'true');
+    $('#btn-motion').onclick = function () { setMotion(document.documentElement.getAttribute('data-motion') !== 'reduced'); };
     $('#btn-records').onclick = openRecords;
-    $('#records-close').onclick = function () { $('#records').hidden = true; };
+    $('#records-close').onclick = closeRecords;
     $('#btn-theme').onclick = function () {
       var cur = document.documentElement.getAttribute('data-theme');
       var dark = cur ? cur === 'dark' : !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
@@ -440,7 +513,15 @@
     document.addEventListener('focusin', function (e) { var t = e.target.closest && e.target.closest('.ref[data-ref]'); if (t) light(t.getAttribute('data-ref'), true); });
     document.addEventListener('focusout', function (e) { var t = e.target.closest && e.target.closest('.ref[data-ref]'); if (t) light(t.getAttribute('data-ref'), false); });
     document.addEventListener('keydown', function (e) {
-      if ($('#screen-lesson').hidden || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+      var modal = !$('#records').hidden ? $('#records') : !$('#example').hidden ? $('#example') : null;
+      if (modal && e.key === 'Tab') {
+        var focusable = $$('button:not(:disabled), input, textarea, summary, a[href], [tabindex="0"]', modal).filter(function (n) { return n.getClientRects().length > 0; });
+        var first = focusable[0], last = focusable[focusable.length - 1];
+        if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+      }
+      if (e.key === 'Escape' && modal) { if (modal.id === 'records') closeRecords(); else closeExample(S.steps[S.cur]); return; }
+      if (!$('#records').hidden || !$('#example').hidden || $('#screen-lesson').hidden || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
       if (e.key === 'ArrowRight') go(S.cur + 1, true);
       if (e.key === 'ArrowLeft') go(S.cur - 1, true);
       if (e.key === 'Escape') { if (!$('#example').hidden) closeExample(S.steps[S.cur]); $('#records').hidden = true; }
@@ -455,7 +536,7 @@
     });
     setExample(EXAMPLE_INPUTS[0].input);
     AI.init().then(function () {
-      $('#btn-photo').hidden = !(AI.available() && AI.state.images);
+      $('#photo-help').textContent = AI.available() && AI.state.images ? '사진을 선택한 뒤 전송에 동의하면 식으로 옮겨 드립니다.' : '현재 사진 자동 인식은 연결되어 있지 않습니다. 사진을 띄워 놓고 직접 입력할 수 있습니다.';
       $('#ai-status').textContent = AI.available() ? 'AI 연결됨 (' + AI.state.provider + ' 미리보기)' : 'AI 연결 없음: 정적 힌트로 동작';
       $('#ai-status').className = 'ai-status' + (AI.available() ? ' on' : '');
       if (S.steps && !$('#screen-lesson').hidden) renderCoach(S.steps[S.cur]);

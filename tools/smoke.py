@@ -50,6 +50,7 @@ with sync_playwright() as p:
     pg.on('console', on_console)
     pg.on('pageerror', lambda e: errors.append('pageerror: ' + str(e)))
     pg.goto(url)
+    pg.click('#btn-begin')
     pg.wait_for_timeout(600)
     n_ex = pg.locator('#examples .ex').count()
     for e in range(n_ex):
@@ -103,6 +104,7 @@ with sync_playwright() as p:
     mp = br.new_page(viewport={'width': 390, 'height': 844}, color_scheme='light', device_scale_factor=2)
     mp.on('pageerror', lambda e: errors.append('mobile pageerror: ' + str(e)))
     mp.goto(url)
+    mp.click('#btn-begin')
     mp.wait_for_timeout(500)
     mp.screenshot(path=str(shots / 'mobile-start.png'))
     mp.click('#btn-start')
@@ -124,3 +126,4 @@ print('오류:', len(errors))
 for e in errors[:20]:
     print('  ', e)
 sys.exit(1 if errors else 0)
+

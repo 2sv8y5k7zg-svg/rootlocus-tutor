@@ -1,6 +1,6 @@
 """
 build.py — 여러 파일을 한 파일(dist/rootlocus-tutor.html)로 묶습니다.
-묶은 파일은 인터넷 없이 브라우저로 열어도 동작합니다(글꼴만 기본 글꼴로 바뀜).
+묶은 파일은 인터넷 없이 브라우저로 열어도 동작합니다(글꼴은 기기의 시스템 글꼴 사용).
 실행: python3 tools/build.py
 """
 from pathlib import Path
@@ -19,3 +19,4 @@ dist = ROOT / 'dist'
 dist.mkdir(exist_ok=True)
 (dist / 'rootlocus-tutor.html').write_text(out, encoding='utf-8')
 print('저장: dist/rootlocus-tutor.html (%.1f KB)' % (len(out.encode('utf-8')) / 1024))
+

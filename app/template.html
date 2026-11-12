@@ -6,7 +6,6 @@
 <title>근궤적 AI 튜터</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="전달함수를 넣으면 근궤적이 특성방정식부터 K 변화까지 한 단계씩 그려지는 학습 홈페이지">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Orbit&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap">
 <style>/*__CSS__*/</style>
 
 </head>
@@ -16,28 +15,44 @@
     <a class="brand" href="#" id="brand" aria-label="근궤적 AI 튜터 처음 화면"><span class="logo" aria-hidden="true"><i>×</i><i>○</i></span><span class="name">근궤적 AI 튜터</span></a>
     <div class="top-actions">
       <button id="btn-home" class="ghost sm" hidden>새 문제</button>
+      <button id="btn-motion" class="ghost sm" aria-pressed="false">움직임 줄이기</button>
       <button id="btn-records" class="ghost sm">학습 기록</button>
-      <button id="btn-theme" class="ghost sm icon" aria-label="밝게·어둡게 바꾸기" title="밝게·어둡게">◐</button>
+      <button id="btn-theme" hidden class="ghost sm icon" aria-label="테마 전환" title="밝게·어둡게">◐</button>
     </div>
   </header>
 
-  <main id="screen-start" class="screen start">
+  <main id="screen-welcome" class="screen welcome" aria-labelledby="welcome-title">
+    <div class="welcome-art" aria-hidden="true">
+      <div class="light-haze"></div><div class="light-core"></div>
+    </div>
+    <div class="welcome-content">
+      <p class="eyebrow">ROOT LOCUS STUDY</p>
+      <h1 id="welcome-title" tabindex="-1">이번엔 어떻게<br><em>그려볼까요?</em></h1>
+      <p class="welcome-sub">식을 입력하고, 근궤적이 만들어지는<br class="mobile-break"> 과정을 따라가 보세요.</p>
+      <button id="btn-begin" class="primary lg">학습 시작 <span aria-hidden="true">↗</span></button>
+
+    </div>
+    <footer class="welcome-bottom"><span>식 입력</span><i aria-hidden="true">—</i><span>단계별 풀이</span><i aria-hidden="true">—</i><span>K 변화 탐구</span></footer>
+  </main>
+
+  <main id="screen-start" class="screen start" hidden>
     <section class="start-left">
-      <p class="eyebrow">제어공학 · 근궤적 · 9단계</p>
-      <h1>전달함수를 넣으면<br>근궤적이 한 단계씩 그려집니다</h1>
-      <p class="lede">특성방정식부터 K 변화까지, 수식이 바뀔 때마다 그래프가 함께 자랍니다. 막히면 AI가 정답 대신 힌트를 단계별로 줍니다.</p>
+      <button id="btn-welcome" class="ghost sm back-welcome">← 처음으로</button><p class="eyebrow">01 / YOUR EQUATION</p>
+      <h1>어떤 식을<br> 탐구해 볼까요?</h1>
+      <p class="lede">전달함수를 입력하거나 예제를 골라 주세요. 식을 확인하면 아홉 단계의 탐구가 시작됩니다.</p>
       <label for="tf-input" class="field-label">개루프 전달함수 <i class="mv">G</i>(<i class="mv">s</i>)<i class="mv">H</i>(<i class="mv">s</i>)</label>
       <div class="input-row">
-        <input id="tf-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="예: K(s+2)/((s+3)(s^2+2s+2))">
-        <button id="btn-photo" class="ghost" type="button" hidden>사진으로 입력</button>
+        <input id="tf-input" aria-describedby="tf-msg photo-help" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="예: K(s+2)/((s+3)(s^2+2s+2))">
+        <button id="btn-photo" class="ghost" type="button">사진 참고</button>
       </div>
       <input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp" hidden>
+      <p id="photo-help" class="photo-help" aria-live="polite">사진 인식 연결 확인 중…</p>
       <div id="photo-panel" class="photo" hidden></div>
       <div id="tf-preview" class="preview" aria-live="polite"></div>
       <p id="tf-msg" class="msg" aria-live="polite"></p>
       <div class="ex-row"><span class="ex-label">예제</span><div id="examples" class="chips"></div></div>
       <div class="start-actions">
-        <button id="btn-start" class="primary lg">학습 시작</button>
+        <button id="btn-start" class="primary lg">근궤적 탐구 시작</button>
         <span id="ai-status" class="ai-status">AI 연결 확인 중…</span>
       </div>
       <details class="scope">
@@ -51,7 +66,7 @@
         </ul>
       </details>
     </section>
-    <section class="start-right" aria-label="입력한 식의 극점과 영점">
+    <section class="start-right" aria-label="입력한 식의 극점과 영점"><p class="eyebrow">PREVIEW / S-PLANE</p>
       <div class="plane-card">
         <svg id="preview-graph" class="plane" role="img" aria-label="극점과 영점 미리보기"></svg>
         <p class="cap"><span class="k-pole">×</span> 극점(<i class="mv">K</i> = 0 출발) &ensp;<span class="k-zero">○</span> 영점(<i class="mv">K</i> → ∞ 도착)</p>
