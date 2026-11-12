@@ -397,7 +397,7 @@
 
   function applyTheme(t) {
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
-    else document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', 'dark');
   }
 
   function init() {

@@ -330,3 +330,108 @@ body.sheet-open { overflow: hidden; }
   .enter { animation: none; }
   .plane .clp, .plane .pop { transition: none; }
 }
+
+
+/* Navy / Cream / Coral — 학습 도구의 색과 표면 */
+:root, :root:not([data-theme="dark"]), :root[data-theme="light"], :root[data-theme="dark"] {
+  --bg:#14213d; --surface:#1b2c4a; --surface2:#243653; --line:#3b4a64; --grid:#263650;
+  --fg:#f4ede0; --muted:#bbc5d5; --faint:#a1afc4;
+  --pole:#ff9584; --zero:#8fcfff; --locus:#8de1c6; --asym:#c4b4f0; --key:#f0cf86;
+  --accent:#f17c67; --accent-ink:#14213d; --glass:rgba(20,33,61,.96);
+  --font-display:var(--font-body); --r:22px; --r-sm:12px;
+  color-scheme:dark;
+}
+*, *::before, *::after { box-sizing:border-box; }
+body { background:radial-gradient(ellipse at 85% 0%,#2c3c58 0,transparent 48%),#14213d; }
+.app { max-width:1680px; margin:auto; padding-inline:clamp(16px,2.5vw,42px); }
+.top { padding-block:18px; background:#14213d; border-color:#ffffff1a; }
+.name { font-weight:650; letter-spacing:-.035em; }
+.logo i { width:28px; height:28px; border-radius:9px; }
+.screen.start { max-width:1400px; gap:clamp(28px,5vw,80px); padding-block:44px; }
+.start-left { gap:18px; }
+.eyebrow { color:#f17c67; letter-spacing:.16em; font-size:.72rem; }
+h1 { font-size:clamp(2.1rem,3.8vw,3.5rem); font-weight:650; line-height:1.25; letter-spacing:-.06em; }
+.lede { line-height:1.85; max-width:48ch; }
+#tf-input { padding:17px 18px; background:#0f1c34; }
+.preview { border:1px solid #43516a; background:#1b2c4a; padding:20px; }
+button { min-height:42px; }
+button.primary { font-weight:700; box-shadow:0 5px 16px #00000012; }
+button.primary:hover:not(:disabled) { transform:translateY(-2px); filter:none; background:#ff9a87; }
+button:focus-visible, input:focus-visible { outline:3px solid #f17c67; outline-offset:3px; }
+.start-actions { gap:16px; }
+#btn-start { padding:14px 30px; border-radius:14px; }
+.start-right { position:relative; }
+.start-right::before { content:'S–PLANE / 극점과 영점'; display:block; font: .72rem var(--font-mono); letter-spacing:.12em; color:#bbc5d5; margin:0 0 14px 6px; }
+.plane-card { background:#14213d; padding:18px; border-color:#43516a; box-shadow:0 24px 64px #08122445; }
+.cap { padding:12px 4px; }
+.screen.lesson { grid-template-columns:minmax(380px, .9fr) minmax(0,1.5fr); gap:24px; padding-block:24px; }
+/* 풀이·기록은 종이처럼 밝게, 그래프의 의미 색은 명도에 맞춰 조절 */
+.rail, .drawer, .sheet {
+  --bg:#f4ede0; --surface:#fffaf1; --surface2:#eee4d5; --line:#d5cabb; --grid:#ded4c5;
+  --fg:#14213d; --muted:#526075; --faint:#5c6879;
+  --pole:#a93832; --zero:#236291; --locus:#196b59; --asym:#70509a; --key:#89600b;
+  --ok:#196b59; --bad:#a93832; --warn:#89600b; --accent:#a63f30; --accent-ink:#fffaf1;
+  color-scheme:light; color:var(--fg); background:var(--bg);
+}
+.rail { padding:20px!important; border-radius:22px; gap:22px; scrollbar-width:thin; scrollbar-color:#b9ac99 transparent; }
+.stepper { padding:0 0 14px; gap:2px; border-bottom:1px solid var(--line); }
+.st { min-height:52px; }
+.st-n { border-radius:10px; border-color:#d5cabb; }
+.st.on .st-n { background:#f17c67; color:#14213d; font-weight:700; box-shadow:0 4px 10px #a63f3020; }
+.st-t { color:#526075; }
+.step-body { gap:16px; }
+.sh { padding-block:8px; align-items:center; }
+.sh-n { color:#a63f30; font:500 2.2rem var(--font-mono); }
+.sh h2 { font-size:1.42rem; font-weight:650; letter-spacing:-.04em; }
+.b-formula,.b-result { padding:18px; }
+.b-result { background:#e6eee3; border-color:#afc5b7; }
+.b-calc { padding-block:6px; }
+.coach { padding:18px; box-shadow:none; }
+.stage { gap:16px; }
+.stage-head { padding:0 6px; }
+.stage-tf { font-size:1.18rem; }
+.stage-note { font-size:.9rem; }
+.plane-wrap { background:#14213d; border-color:#43516a; box-shadow:0 20px 50px #08122426; }
+.controls { gap:8px; }
+.controls button { border-radius:12px; }
+.enter { animation-duration:.32s; }
+/* 표는 즉시 읽을 수 있게 하고 그래프의 순차 재생은 유지한다. */
+.b-table tr.enter { animation-delay:0ms!important; }
+.sheet .plane-card { --surface:#14213d; --grid:#263650; --faint:#a1afc4; --muted:#bbc5d5; --pole:#ff9584; --zero:#8fcfff; --locus:#8de1c6; --asym:#c4b4f0; --key:#f0cf86; --fg:#f4ede0; }
+@media(min-width:1000px) { .rail { padding-bottom:30px!important; } }
+@media(max-width:999px) {
+ .screen.lesson { grid-template-columns:minmax(0,1fr); gap:20px; }
+ .screen.start { padding-block:28px; }
+ .stage { gap:12px; }
+ .plane-wrap { min-height:280px; }
+ .controls { background:#14213df5; }
+ .rail { overflow:hidden; }
+ .top { padding-block:12px; }
+}
+@media(max-width:480px) {
+ .name { font-size:.88rem; }
+ .top-actions { gap:4px; }
+ .top-actions button { padding-inline:8px; font-size:.78rem; }
+ .rail { padding:16px!important; }
+ .controls { gap:5px; padding-inline:10px; }
+ .controls button { font-size:.8rem; padding-inline:9px; }
+ .plane-wrap { min-height:250px; }
+}
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+/* 밝은 테마에서도 그래프는 네이비로 유지해 선의 대비를 보장한다. */
+:root[data-theme="light"] {
+ --bg:#f4ede0; --surface:#fffaf1; --surface2:#eee4d5; --line:#d5cabb;
+ --fg:#14213d; --muted:#526075; --faint:#5c6879; --locus:#196b59;
+ --bad:#a93832; --ok:#196b59; --warn:#89600b;
+}
+:root[data-theme="light"] body { background:#f4ede0; }
+:root[data-theme="light"] .top { background:#f4ede0; border-color:#d5cabb; }
+:root[data-theme="light"] #tf-input, :root[data-theme="light"] .preview { background:#fffaf1; border-color:#c9bdac; }
+:root[data-theme="light"] .eyebrow { color:#a63f30; }
+:root[data-theme="light"] .start-right::before { color:#526075; }
+.plane-card, .plane-wrap {
+ --surface:#14213d; --grid:#263650; --faint:#a1afc4; --muted:#bbc5d5;
+ --pole:#ff9584; --zero:#8fcfff; --locus:#8de1c6; --asym:#c4b4f0; --key:#f0cf86;
+ --fg:#f4ede0; --bad:#ff9584;
+}
+@media(max-width:999px) { .controls { color:#f4ede0; --line:#3b4a64; --surface2:#243653; } }
