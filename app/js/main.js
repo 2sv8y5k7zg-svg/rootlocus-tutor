@@ -10,7 +10,7 @@
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
   var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: null, paused: false, tfText: '', thread: {} };
-  var graph, previewGraph, exGraph;
+  var graph, previewGraph, exGraph, resetWelcomeMotion = function () {};
   var EXAMPLE_INPUTS = [
     { label: '노트 예제', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
     { label: '허수축 교차', input: 'K/(s(s+1)(s+2))' },
@@ -38,6 +38,7 @@
 
   // 화면을 즉시 전환한 뒤 가벼운 등장 효과를 준다. 숨겨진 화면은 클릭·탭 대상에서 제외된다.
   function showScreen(id) {
+    resetWelcomeMotion();
     ['screen-welcome', 'screen-start', 'screen-lesson'].forEach(function (name) {
       var screen = document.getElementById(name);
       screen.hidden = name !== id;
@@ -69,29 +70,43 @@
     document.documentElement.setAttribute('data-motion', reduce ? 'reduced' : 'auto');
     $('#btn-motion').setAttribute('aria-pressed', String(reduce));
     ST.setPref('reduce-motion', reduce);
+    resetWelcomeMotion();
     if (reduce && S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
   }
   // 포인터 이벤트를 프레임당 한 번만 반영한다. 터치 스크롤은 막지 않는다.
   function bindWelcomeMotion() {
-    var area = $('#screen-welcome'), pending = false, x = 0, y = 0;
+    var area = $('#screen-welcome'), frame = 0, x = 0, y = 0, depth = 0;
+    function paint() {
+      frame = 0;
+      if (area.hidden || document.hidden || reducedMotion()) return;
+      area.style.setProperty('--drift-x', (x * 28).toFixed(1) + 'px');
+      area.style.setProperty('--drift-y', (y * 20 + depth).toFixed(1) + 'px');
+      area.style.setProperty('--tilt', (x * 3).toFixed(2) + 'deg');
+    }
+    function schedule() { if (!frame) frame = requestAnimationFrame(paint); }
+    resetWelcomeMotion = function () {
+      cancelAnimationFrame(frame); frame = 0; x = 0; y = 0; depth = 0;
+      area.style.setProperty('--drift-x', '0px');
+      area.style.setProperty('--drift-y', '0px');
+      area.style.setProperty('--tilt', '0deg');
+    };
     area.addEventListener('pointermove', function (e) {
-      if (reducedMotion() || e.pointerType === 'touch' || area.hidden) return;
+      if (reducedMotion() || e.pointerType === 'touch' || area.hidden || document.hidden) return;
       var rect = area.getBoundingClientRect();
       x = (e.clientX - rect.left) / rect.width - 0.5;
       y = (e.clientY - rect.top) / rect.height - 0.5;
-      if (pending) return;
-      pending = true;
-      requestAnimationFrame(function () {
-        pending = false;
-        if (area.hidden || reducedMotion()) return;
-        area.style.setProperty('--drift-x', (x * 24).toFixed(1) + 'px');
-        area.style.setProperty('--drift-y', (y * 20).toFixed(1) + 'px');
-      });
+      schedule();
     }, { passive: true });
-    area.addEventListener('pointerleave', function () {
-      x = 0; y = 0;
-      area.style.setProperty('--drift-x', '0px');
-      area.style.setProperty('--drift-y', '0px');
+    area.addEventListener('pointerleave', resetWelcomeMotion);
+    // 짧은 화면에서 실제 스크롤이 생긴 경우에만 빛의 깊이를 조금 바꾼다.
+    window.addEventListener('scroll', function () {
+      if (area.hidden || document.hidden || reducedMotion()) return;
+      depth = Math.min(12, window.scrollY * 0.06); schedule();
+    }, { passive: true });
+    document.addEventListener('visibilitychange', resetWelcomeMotion);
+    window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function () {
+      resetWelcomeMotion();
+      if (reducedMotion() && S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
     });
   }
 
@@ -249,7 +264,7 @@
         return '<div class="tbl-wrap enter" ' + d + '><table class="b-routh"><caption>Routh 표 <span class="sm">(첫 열 강조)</span></caption><tbody>' + rr + '</tbody></table></div>';
       }
       case 'kchart': return '<div class="b-kchart enter" ' + d + ' id="kchart-slot"></div>';
-      case 'slider': return sliderHTML();
+      case 'slider': return ''; // 조작부는 그래프 바로 아래 하나만 둔다.
     }
     return '';
   }
@@ -259,6 +274,9 @@
     var h = '<header class="sh"><span class="sh-n">' + String(step.num).padStart(2, '0') + '<small>/09</small></span><h2>' + step.title + '</h2></header>';
     for (var i = 0; i < step.blocks.length; i++) h += blockHTML(step.blocks[i], i, step);
     body.innerHTML = h;
+    var controls = $('#k-controls');
+    controls.hidden = step.num !== 9;
+    controls.innerHTML = step.num === 9 ? sliderHTML() : '';
     body.classList.toggle('still', !animate);
     var slot = $('#kchart-slot');
     if (slot && !RL.kChart(slot, S.res, S.res.view)) slot.remove();
@@ -277,9 +295,9 @@
   function kText(K) { return K === 0 ? '0' : (K < 0.01 || K >= 1e5 ? K.toExponential(2) : (+K.toPrecision(3)).toString()); }
   function sliderHTML() {
     var chips = CT.notableK(S.res).map(function (x) { return '<button class="chip kq" data-k="' + x.K + '">' + x.label + ' K = ' + F.numShort(x.K) + '</button>'; }).join('');
-    return '<div class="b-slider enter" style="--d:150ms">' +
+    return '<div class="b-slider">' +
       '<label for="k-slider" class="k-lab">K = <b id="k-val">0</b> <span id="k-status" class="pill"></span></label>' +
-      '<input type="range" id="k-slider" min="0" max="1000" step="1" value="0" aria-describedby="k-poles">' +
+      '<input type="range" id="k-slider" min="0" max="1000" step="1" value="0" aria-describedby="k-poles" aria-valuetext="K = 0">' +
       '<div class="k-scale"><span>0</span><span>작게</span><span>크게 →</span></div>' +
       '<div class="chips"><button class="chip kq" data-k="0">K = 0</button>' + chips + '</div>' +
       '<div id="k-poles" class="k-poles"></div><div id="k-zeta" class="k-zeta"></div></div>';
@@ -296,7 +314,8 @@
     if (!out) return;
     var st = RL.routh.classify(out.poles);
     var v = $('#k-val'); if (v) v.textContent = kText(K);
-    var pill = $('#k-status'); if (pill) { pill.textContent = STATUS_KO[st]; pill.className = 'pill ' + st; }
+    var slider = $('#k-slider'); if (slider) slider.setAttribute('aria-valuetext', 'K = ' + kText(K) + ', ' + STATUS_KO[st]);
+    var pill = $('#k-status'); if (pill) { pill.textContent = (st === 'stable' ? '✓ ' : st === 'marginal' ? '△ ' : '! ') + STATUS_KO[st]; pill.className = 'pill ' + st; }
     var pl = $('#k-poles');
     if (pl) pl.innerHTML = '폐루프 극점: ' + out.poles.map(function (z) { return '<span class="nm">' + F.cnum(z, 3) + '</span>'; }).join(', ');
     var zt = $('#k-zeta');
@@ -441,7 +460,7 @@
         $('#records').hidden = true;
         $('#tf-input').value = r.input;
         onInput();
-        if (!S.parsed) return;
+        if (!S.parsed) { enterInput(); return; }
         startLesson(act === 'resume' ? Math.max(0, r.lastStep - 1) : act === 'result' ? 7 : 0);
       };
     });
@@ -545,4 +564,3 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })(window.RL = window.RL || {});
-

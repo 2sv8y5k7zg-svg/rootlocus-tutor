@@ -8,7 +8,15 @@
   var KEY = 'rltutor.records.v1';
 
   function load() {
-    try { var v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; }
+    try {
+      var v = JSON.parse(localStorage.getItem(KEY) || '[]');
+      if (!Array.isArray(v)) return [];
+      return v.filter(function (r) {
+        return r && typeof r.id === 'string' && typeof r.input === 'string' &&
+          typeof r.tf === 'string' && typeof r.date === 'string' &&
+          Number.isInteger(r.lastStep) && r.lastStep >= 1 && r.lastStep <= 9;
+      });
+    }
     catch (e) { return []; }
   }
   function save(list) {
