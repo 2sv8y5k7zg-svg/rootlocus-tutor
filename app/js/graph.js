@@ -11,7 +11,7 @@
   var NS = 'http://www.w3.org/2000/svg';
   var EASE = 'cubic-bezier(.22,.8,.24,1)';
 
-  function reduced() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function reduced() { return !!(document.documentElement && document.documentElement.getAttribute('data-motion') === 'reduced') || !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
   function el(tag, attrs, parent) {
     var n = document.createElementNS(NS, tag), k;
     if (attrs) for (k in attrs) if (attrs[k] !== undefined && attrs[k] !== null) n.setAttribute(k, attrs[k]);

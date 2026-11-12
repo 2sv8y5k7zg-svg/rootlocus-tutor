@@ -16,6 +16,7 @@
 
 ## 미리보기 실행
 `python3 tools/build.py`로 묶은 `dist/rootlocus-tutor.html`을 브라우저로 열면 됩니다(인터넷 없이도 동작, AI 기능만 꺼짐).
+현재 디자인과 확인 범위는 `docs/design-system.md`에 정리했습니다. 첫 화면에서 **학습 시작**을 누르면 식 입력으로 이동하며, **움직임 줄이기** 설정은 브라우저에 저장됩니다.
 `python3 tools/smoke.py`는 헤드리스 Chrome으로 모든 예제·단계를 눌러 오류를 확인합니다.
 윈도우에서는 `python3` 대신 `python`을 씁니다.
 
