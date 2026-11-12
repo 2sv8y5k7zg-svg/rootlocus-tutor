@@ -75,7 +75,7 @@ with sync_playwright() as p:
     check('K zero survives step round trip', pg.inner_text('#k-val') == '0')
     pg.focus('#k-slider')
     pg.keyboard.press('ArrowRight')
-    check('keyboard K changes actual value', pg.get_attribute('#k-slider','aria-valuetext') != 'K = 0')
+    check('keyboard K changes actual value', pg.inner_text('#k-val') != '0' and pg.get_attribute('#k-slider','aria-valuetext').startswith('K = '))
     pg.click('.kq[data-k="0"]')
     capture(pg, 'lesson', True)
     # Actual DOM clicks without Playwright's animation waits exercise same-tick races.
