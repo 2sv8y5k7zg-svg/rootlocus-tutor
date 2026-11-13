@@ -12,7 +12,8 @@
     var hero = document.getElementById('screen-welcome');
     var input = document.getElementById('screen-start');
     var media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    var frame = 0, tick = 0, time = 0, w = 0, h = 0, px = 0, py = 0, progress = 0;
+    var frame = 0, tick = 0, time = 0, w = 0, h = 0, progress = 0;
+    var scale = 1, centerY = 0, ripples = [], lastPointer = null, lastRipple = 0;
     var reduced = function () { return media.matches || document.documentElement.dataset.motion === 'reduced'; };
     // Precompute the surface: a toroidal sheet with a three-fold twist.
     var curves = [], rows = 32, samples = 144;
@@ -28,15 +29,25 @@
     function draw() {
       if (!ctx) return;
       ctx.clearRect(0, 0, w, h);
-      var scale = Math.min(w * 0.32, h * 0.34, 315);
-      var ax = 0.96 + Math.sin(time * 0.17) * 0.24 + py * 0.09;
-      var az = -0.38 + time * 0.045 + px * 0.07;
+      var ax = 0.96 + Math.sin(time * 0.12) * 0.14;
+      var az = -0.38 + Math.sin(time * 0.08) * 0.24;
       var ca = Math.cos(ax), sa = Math.sin(ax), cz = Math.cos(az), sz = Math.sin(az);
       function project(p) {
         var y = p[1] * ca - p[2] * sa, z = p[1] * sa + p[2] * ca;
         var x = p[0] * cz - y * sz; y = p[0] * sz + y * cz;
         var perspective = 3.8 / (3.8 - z);
-        return [w * 0.5 + x * scale * perspective, h * 0.43 + y * scale * perspective, z];
+        var sx = w * 0.5 + x * scale * perspective, sy = centerY + y * scale * perspective;
+        var ox = 0, oy = 0;
+        for (var n = 0; n < ripples.length; n++) {
+          var wave = ripples[n], age = time - wave.born;
+          var dx = (sx - wave.x) / scale, dy = (sy - wave.y) / scale;
+          var distance = Math.sqrt(dx * dx + dy * dy), front = distance - age * 0.48;
+          var swell = Math.sin(front * 9 - age * 1.2) * Math.exp(-front * front / 0.32) *
+            Math.exp(-age * 0.8) * (1 - Math.exp(-age * 5)) * wave.strength;
+          ox += dx / Math.max(distance, 0.2) * swell;
+          oy += (dy / Math.max(distance, 0.2) * 0.6 + 0.35) * swell;
+        }
+        return [sx + ox * scale, sy + oy * scale, z];
       }
       for (var r = 0; r < curves.length; r++) {
         ctx.beginPath();
@@ -63,6 +74,7 @@
       // Cap expensive drawing at about 30Hz; never catch up after tab suspension.
       if (!tick || now - tick >= 32) {
         time += tick ? Math.min(64, now - tick) / 1000 : 0;
+        ripples = ripples.filter(function (wave) { return time - wave.born < 6; });
         tick = now; draw();
       }
       frame = requestAnimationFrame(animate);
@@ -75,8 +87,6 @@
       var startY = input.getBoundingClientRect().top + window.scrollY;
       progress = Math.max(0, Math.min(1, window.scrollY / Math.max(1, startY - 36)));
       scene.style.setProperty('--journey', progress.toFixed(4));
-      scene.style.setProperty('--drift-x', (px * 12).toFixed(1) + 'px');
-      scene.style.setProperty('--drift-y', (py * 8).toFixed(1) + 'px');
       var visible = !input.hidden && input.getBoundingClientRect().top < h * 0.82;
       if (visible || reduced()) input.classList.add('is-revealed');
       else if (progress < 0.08 && !input.contains(document.activeElement)) input.classList.remove('is-revealed');
@@ -88,6 +98,13 @@
     }
     function resize() {
       w = window.innerWidth; h = window.innerHeight;
+      // Radius <= 1.32; perspective sphere envelope < 1.42. Ripple margin included in 1.55.
+      // Fit the entire envelope between navigation and CTA, not just the initial orientation.
+      var top = document.querySelector('.top').offsetHeight + 24;
+      var bottom = document.getElementById('btn-begin').getBoundingClientRect().top + window.scrollY - 32;
+      centerY = (top + bottom) / 2;
+      scale = Math.max(1, Math.min((w - 48) / 3.1, (bottom - top) / 3.1, 300));
+      ripples = []; lastPointer = null;
       var ratio = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = Math.round(w * ratio); canvas.height = Math.round(h * ratio);
       if (ctx) ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -95,15 +112,32 @@
     }
     sync = function () {
       cancelAnimationFrame(scrollFrame); scrollFrame = 0;
-      if (document.hidden) { cancelAnimationFrame(frame); frame = 0; tick = 0; return; }
-      if (reduced()) { px = 0; py = 0; draw(); input.classList.add('is-revealed'); }
+      if (document.hidden) { cancelAnimationFrame(frame); frame = 0; tick = 0; ripples = []; return; }
+      // Refit after returning from a lesson that was resized while the intro was hidden.
+      if (!hero.hidden) {
+        var top = document.querySelector('.top').offsetHeight + 24;
+        var bottom = document.getElementById('btn-begin').getBoundingClientRect().top + window.scrollY - 32;
+        centerY = (top + bottom) / 2;
+        scale = Math.max(1, Math.min((w - 48) / 3.1, (bottom - top) / 3.1, 300));
+      }
+      if (reduced()) { ripples = []; draw(); input.classList.add('is-revealed'); }
       update();
     };
     hero.addEventListener('pointermove', function (e) {
       if (e.pointerType === 'touch' || reduced()) return;
-      px = e.clientX / w - 0.5; py = e.clientY / h - 0.5; schedule();
+      var now = performance.now(), point = { x:e.clientX, y:e.clientY, at:now };
+      if (lastPointer) {
+        var distance = Math.hypot(point.x - lastPointer.x, point.y - lastPointer.y);
+        if (now - lastRipple > 110 && distance > 12) {
+          var speed = distance / Math.max(16, now - lastPointer.at) * 1000;
+          ripples.push({ x:point.x, y:point.y, born:time, strength:0.018 + Math.min(1, speed / 900) * 0.012 });
+          if (ripples.length > 3) ripples.shift();
+          lastRipple = now; lastPointer = point;
+        }
+      } else lastPointer = point;
     }, { passive: true });
-    hero.addEventListener('pointerleave', function () { px = 0; py = 0; schedule(); });
+    // Let existing waves dissipate; leaving must never snap the surface back.
+    hero.addEventListener('pointerleave', function () { lastPointer = null; });
     input.addEventListener('focusin', function () {
       if (input.getBoundingClientRect().top < h * 0.9) input.classList.add('is-revealed');
     });

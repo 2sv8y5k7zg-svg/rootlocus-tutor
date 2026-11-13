@@ -7,7 +7,7 @@ const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const { pathToFileURL } = require('url');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const root = path.resolve(__dirname, '..'), html = path.join(root, 'dist/rootlocus-tutor.html');
-const out = path.join(root, 'docs/shots/mathematical-journey');
+const out = path.join(root, 'docs/shots/fluid-study');
 fs.mkdirSync(out, { recursive: true });
 const checks = [], errors = [], requests = [], layouts = [];
 function check(name, ok) { if (!ok) throw Error(name); checks.push(name); }
@@ -47,7 +47,7 @@ async function main() {
     check('intro has no visible title or marketing copy', await page.locator('#screen-welcome').innerText() === '근궤적 탐구 시작\n학습 시작 ↓' || await page.locator('#screen-welcome h1').evaluate(e=>getComputedStyle(e).clipPath==='inset(50%)'));
     check('integrated CTA has no filled rectangle', await page.locator('#btn-begin').evaluate(e=>getComputedStyle(e).backgroundColor==='rgba(0, 0, 0, 0)' && getComputedStyle(e).borderTopWidth==='0px'));
     await page.mouse.move(1100,700); await sleep(page,100);
-    check('pointer adds shallow background depth', await page.locator('#atmosphere').evaluate(e=>parseFloat(e.style.getPropertyValue('--drift-x'))>0));
+    check('pointer leaves text and background untilted', await page.locator('#atmosphere').evaluate(e=>!e.style.getPropertyValue('--drift-x')));
     // Capture the genuine midpoint, then settled view, from the same file.
     await page.click('#btn-begin'); await sleep(page,250);
     const mid = await page.evaluate(()=>scrollY);

@@ -28,7 +28,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
     result.rendererSeconds={};for(const key of ['TaskDuration','ScriptDuration','LayoutDuration','RecalcStyleDuration']) result.rendererSeconds[key]=after.metrics.find(m=>m.name===key).value-before.metrics.find(m=>m.name===key).value;
     result.browser=browser.version();result.viewport=[1440,1000];result.sha256=crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
     result.condition='Headless Chrome, file:// offline, brought to front, 60 intro frames then synthetic CTA click; not real input-latency or physical-device smoothness validation';
-    fs.writeFileSync(path.resolve(__dirname,'../docs/shots/mathematical-journey/performance.json'),JSON.stringify(result,null,2));
+    fs.writeFileSync(path.resolve(__dirname,'../docs/shots/fluid-study/performance.json'),JSON.stringify(result,null,2));
     console.log(JSON.stringify({summary:result.summary,states:result.states,rendererSeconds:result.rendererSeconds}));
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

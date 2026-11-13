@@ -10,7 +10,7 @@
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
   var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: null, paused: false, tfText: '', thread: {} };
-  var graph, previewGraph, exGraph, resetWelcomeMotion = function () {};
+  var graph, previewGraph, previewTour, exGraph, resetWelcomeMotion = function () {};
   var EXAMPLE_INPUTS = [
     { label: '노트 예제', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
     { label: '허수축 교차', input: 'K/(s(s+1)(s+2))' },
@@ -53,6 +53,7 @@
       window.scrollTo({ top: top, behavior: reducedMotion() ? 'instant' : 'smooth' });
     }
     resetWelcomeMotion();
+    if (previewTour) previewTour.sync();
   }
   function enterInput() {
     graph.stop();
@@ -78,6 +79,7 @@
     $('#btn-motion').setAttribute('aria-pressed', String(reduce));
     ST.setPref('reduce-motion', reduce);
     resetWelcomeMotion();
+    if (previewTour) previewTour.sync();
     if (reduce && S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
   }
   function bindWelcomeMotion() {
@@ -99,7 +101,7 @@
       $('#tf-input').setAttribute('aria-invalid', 'true');
       msg.className = 'msg bad';
       msg.textContent = p.message;
-      previewGraph.res = null; previewGraph.svg.innerHTML = '';
+      previewTour.input(null);
       return;
     }
     var res = RL.locus.analyze(p.N, p.D, { branches: false });
@@ -109,7 +111,7 @@
       $('#tf-input').setAttribute('aria-invalid', 'true');
       msg.className = 'msg bad';
       msg.textContent = res.error.message;
-      previewGraph.res = null; previewGraph.svg.innerHTML = '';
+      previewTour.input(null);
       return;
     }
     $('#tf-input').setAttribute('aria-invalid', 'false');
@@ -119,11 +121,10 @@
     msg.className = 'msg' + (warn ? ' warn' : '');
     msg.textContent = p.note + warn + ' 분자·분모·괄호·부호가 맞으면 학습을 시작하세요.';
     btn.disabled = false;
-    previewGraph.setProblem(res);
-    previewGraph.show(2, false);
+    previewTour.input(res);
   }
 
-  function setExample(input) { $('#tf-input').value = input; onInput(); }
+  function setExample(input, initial) { if (!initial) previewTour.follow(); $('#tf-input').value = input; onInput(); }
 
   // ── 사진으로 입력 ───────────────────────────
   var photoCtl = null, photoURL = null;
@@ -155,6 +156,7 @@
         if (request.signal.aborted || request !== photoCtl) return;
         if (/읽을 수 없음/.test(text)) { st.textContent = 'AI가 식을 읽지 못했습니다. 더 밝고 가까운 사진으로 다시 시도하거나 직접 입력해 주세요.'; $('#photo-send').disabled = false; return; }
         $('#tf-input').value = text;
+        previewTour.follow();
         onInput();
         st.textContent = 'AI가 읽은 식을 입력칸에 넣었습니다. 분자·분모·괄호·부호·지수를 확인하고 고쳐 주세요.';
         $('#tf-input').focus();
@@ -437,6 +439,7 @@
         var r = list[+b.getAttribute('data-k')], act = b.getAttribute('data-act');
         $('#records').hidden = true;
         $('#tf-input').value = r.input;
+        previewTour.follow();
         onInput();
         if (!S.parsed) { enterInput(); return; }
         startLesson(act === 'resume' ? Math.max(0, r.lastStep - 1) : act === 'result' ? 7 : 0);
@@ -469,12 +472,17 @@
     applyTheme(ST.getPref('theme', ''));
     graph = new RL.Graph($('#main-graph'));
     previewGraph = new RL.Graph($('#preview-graph'));
+    previewTour = new RL.PreviewTour(previewGraph, EXAMPLE_INPUTS);
+    var copy = RL.welcomeCopy.choose(new Date().getHours(), ST.load().length > 0);
+    $('#input-greeting').textContent = copy.greeting;
+    $('#input-title').textContent = copy.prompt;
     exGraph = new RL.Graph($('#ex-graph'));
     graph.onRef = light;
     $('#examples').innerHTML = EXAMPLE_INPUTS.map(function (e) { return '<button class="chip ex" data-in="' + M.esc(e.input) + '">' + e.label + '</button>'; }).join('');
     $$('#examples .ex').forEach(function (b) { b.onclick = function () { setExample(b.getAttribute('data-in')); }; });
     var inp = $('#tf-input'), timer = 0;
     inp.addEventListener('input', function () {
+      previewTour.follow(); previewTour.input(null);
       clearTimeout(timer);
       S.parsed = null;
       $('#btn-start').disabled = true;
@@ -528,14 +536,12 @@
       clearTimeout(rt);
       rt = setTimeout(function () {
         if (S.steps && !$('#screen-lesson').hidden) { graph.fit(); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K); }
-        else if (previewGraph.res) { previewGraph.fit(); previewGraph.show(2, false); }
+        else { previewTour.resize(); previewTour.sync(); }
       }, 160);
     });
-    setExample(EXAMPLE_INPUTS[0].input);
+    setExample(EXAMPLE_INPUTS[0].input, true);
     AI.init().then(function () {
       $('#photo-help').textContent = AI.available() && AI.state.images ? '사진을 선택한 뒤 전송에 동의하면 식으로 옮겨 드립니다.' : '현재 사진 자동 인식은 연결되어 있지 않습니다. 사진을 띄워 놓고 직접 입력할 수 있습니다.';
-      $('#ai-status').textContent = AI.available() ? 'AI 연결됨 (' + AI.state.provider + ' 미리보기)' : 'AI 연결 없음: 정적 힌트로 동작';
-      $('#ai-status').className = 'ai-status' + (AI.available() ? ' on' : '');
       if (S.steps && !$('#screen-lesson').hidden) renderCoach(S.steps[S.cur]);
     });
   }

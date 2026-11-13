@@ -33,10 +33,13 @@
   </section>
 
   <main id="screen-start" class="screen start">
-    <section class="start-left">
-      <button id="btn-welcome" class="ghost sm back-welcome">← 처음으로</button><p class="eyebrow">01 / YOUR EQUATION</p>
-      <h1>어떤 식을<br> 탐구해 볼까요?</h1>
+    <header class="input-header">
+      <button id="btn-welcome" class="ghost sm back-welcome">← 처음으로</button>
+      <p id="input-greeting" class="greeting">반갑습니다.</p>
+      <h1 id="input-title" tabindex="-1">어떤 식으로 시작해 볼까요?</h1>
       <p class="lede">전달함수를 입력하거나 예제를 골라 주세요. 식을 확인하면 아홉 단계의 탐구가 시작됩니다.</p>
+    </header>
+    <section class="start-left" aria-label="전달함수 입력">
       <label for="tf-input" class="field-label">개루프 전달함수 <i class="mv">G</i>(<i class="mv">s</i>)<i class="mv">H</i>(<i class="mv">s</i>)</label>
       <div class="input-row">
         <input id="tf-input" aria-describedby="tf-msg photo-help" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="예: K(s+2)/((s+3)(s^2+2s+2))">
@@ -50,7 +53,6 @@
       <div class="ex-row"><span class="ex-label">예제</span><div id="examples" class="chips"></div></div>
       <div class="start-actions">
         <button id="btn-start" class="primary lg">근궤적 탐구 시작</button>
-        <span id="ai-status" class="ai-status">AI 연결 확인 중…</span>
       </div>
       <details class="scope">
         <summary>지원하는 식</summary>
@@ -63,11 +65,15 @@
         </ul>
       </details>
     </section>
-    <section class="start-right" aria-label="입력한 식의 극점과 영점"><p class="eyebrow">PREVIEW / S-PLANE</p>
+    <section class="start-right" aria-label="근궤적 미리보기">
+      <div class="preview-heading"><div><p class="eyebrow">ROOT LOCUS / PREVIEW</p><p id="preview-caption">예제 둘러보기</p></div><button id="preview-play" class="ghost sm" aria-pressed="false">잠시 멈춤</button></div>
+      <div id="preview-equation" class="preview-equation"></div>
       <div class="plane-card">
         <svg id="preview-graph" class="plane" role="img" aria-label="극점과 영점 미리보기"></svg>
-        <p class="cap"><span class="k-pole">×</span> 극점(<i class="mv">K</i> = 0 출발) &ensp;<span class="k-zero">○</span> 영점(<i class="mv">K</i> → ∞ 도착)</p>
+        <p class="cap"><span class="k-pole">×</span> 극점(<i class="mv">K</i> = 0 출발) &ensp;<span class="k-zero">○</span> 영점(<i class="mv">K</i> → ∞ 도착)<br><span class="k-locus">—</span> 근궤적 &ensp;● 폐루프 극점</p>
       </div>
+      <p id="preview-phase" class="preview-phase">극점과 영점에서 시작합니다.</p>
+      <button id="preview-tour" class="ghost sm" hidden>예제 둘러보기</button>
     </section>
   </main>
 
