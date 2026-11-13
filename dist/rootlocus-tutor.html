@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta name="rootlocus-source-sha256" content="c4f794ee15a87350266955260262e304bc2b050bfe58c4962b20dcae6ef4a7a7">
+<meta name="rootlocus-source-sha256" content="4f2c079b156f89d719ad81a05b35b2e6a43f084fbe8558c2e6bf8ac8781a253f">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>근궤적 AI 튜터</title>
@@ -357,6 +357,27 @@ body.sheet-open { overflow: hidden; }
 .k-locus { color:var(--locus); }
 @media(max-width:980px) { .screen.start { gap:24px; } .start-left,.start-right { padding:18px; } .input-row { flex-wrap:wrap; } }
 @media(max-width:760px) { .input-header { padding-top:42px; } .start-right { margin-top:0; } .start-right .plane { height:320px; } .input-header .lede { max-width:36em; } }
+
+/* Direct exploration replaces the separate AI coaching surface. */
+.screen.lesson { grid-template-areas:'steps steps' 'graph explain'; }
+.point-inspector { border-top:1px solid var(--line); margin-top:18px; padding-top:16px; }
+.point-inspector>p { margin:0; font-size:.82rem; }
+.point-detail { display:grid; grid-template-columns:minmax(150px,210px) minmax(0,1fr); gap:20px; align-items:center; }
+.point-detail svg { width:100%; height:auto; color:var(--muted); }
+.point-detail h3 { margin:0 0 10px; font-size:.92rem; }
+.point-detail dl { display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; margin:0; font-size:.83rem; }
+.point-detail dt { color:var(--muted); }.point-detail dd { margin:0; font-family:var(--font-mono); }
+.point-detail p { font-size:.76rem; color:var(--muted); margin:10px 0 0; }
+.point-vector { stroke:var(--accent); stroke-width:2; }.point-axis { stroke:var(--line); stroke-width:1; }
+.point-projection { stroke:var(--asym); stroke-dasharray:4 4; fill:none; }
+.pole-value { font:inherit; color:var(--fg); padding:3px 6px; border:0; border-bottom:1px dotted var(--muted); border-radius:3px; background:transparent; min-height:32px; }
+#main-graph [role="button"] { cursor:pointer; }
+#main-graph [aria-pressed="true"] { filter:drop-shadow(0 0 5px var(--accent)); }
+.practice { margin-top:24px; border-top:1px solid var(--line); padding-top:12px; }
+.practice summary { cursor:pointer; min-height:44px; color:var(--muted); }
+.practice .check { margin-top:0; }
+@media(max-width:980px) { .screen.lesson { grid-template-areas:'steps' 'graph' 'explain'; } }
+@media(max-width:480px) { .point-detail { grid-template-columns:1fr; gap:6px; } .point-detail svg { max-width:200px; margin:auto; } }
 </style>
 
 </head>
@@ -412,7 +433,8 @@ body.sheet-open { overflow: hidden; }
           <li>분모 4차 이하, 분자 차수 ≤ 분모 차수, 실수 계수</li>
           <li><i class="mv">K</i>는 식 전체에 한 번 곱해진 꼴. 식에 <i class="mv">K</i>가 없으면 전체에 곱한 것으로 봅니다.</li>
           <li>쓸 수 있는 글자: <code>s</code> <code>K</code> 숫자 <code>+ − * / ^</code> 괄호. 예: <code>K(s+1)/(s^2(s+9))</code></li>
-          <li>극점·영점 상쇄, 시간 지연, K ≤ 0(양의 피드백)은 계산하지 않고 이유를 안내합니다.</li>
+          <li>과학적 표기 <code>2.5e-3</code>도 쓸 수 있습니다. 극단적인 계수·지나치게 복잡한 식은 수치 오류를 막기 위해 안내 후 중단합니다.</li>
+          <li>극점·영점 상쇄, 시간 지연, K &lt; 0(양의 피드백)은 지원하지 않습니다. K = 0은 지원합니다.</li>
         </ul>
       </details>
     </section>
@@ -432,12 +454,12 @@ body.sheet-open { overflow: hidden; }
     <aside class="rail" id="rail" aria-label="단계별 풀이">
       <nav class="stepper" id="stepper" aria-label="단계 이동"></nav>
       <article id="step-body" class="step-body"></article>
-      <section id="coach" class="coach" aria-label="힌트와 질문"></section>
     </aside>
     <section class="stage" aria-label="s평면 그래프">
       <div class="stage-head"><span id="stage-tf" class="stage-tf"></span><span id="stage-note" class="stage-note"></span></div>
-      <div class="plane-wrap"><svg id="main-graph" class="plane" role="img" aria-label="s평면 근궤적"></svg></div>
+      <div class="plane-wrap"><svg id="main-graph" class="plane" role="group" aria-label="s평면 근궤적 · 점을 선택하면 파라미터 표시"></svg></div>
       <section id="k-controls" aria-label="K 변화 조작" hidden></section>
+      <section id="point-inspector" class="point-inspector" aria-label="선택한 점의 파라미터"><p class="muted">그래프의 점 또는 극점 값을 눌러 좌표와 파라미터를 살펴보세요.</p></section>
       <div class="graph-legend" aria-label="그래프 범례"><span><b class="k-pole">×</b> 극점</span><span><b class="k-zero">○</b> 영점</span><span><b class="legend-locus">━</b> 근궤적</span><span><b class="legend-asym">┄</b> 점근선</span><span><b>●</b> 폐루프 극점</span><span><b class="legend-key">●</b> 핵심 점</span></div>
       <div class="controls" role="toolbar" aria-label="재생 조절">
         <button id="btn-prev" class="ghost">이전</button>
@@ -1002,6 +1024,14 @@ body.sheet-open { overflow: hidden; }
   function classify(rs) {
     var tol = 1e-7 * scaleOf(rs), mr = maxRe(rs);
     if (mr > tol) return 'unstable';
+    // A repeated pole on the imaginary axis gives t^q exp(jωt), q >= 1.
+    // Simple axis poles can be marginal; repeated axis poles are unbounded.
+    for (var i = 0; i < rs.length; i++) {
+      if (Math.abs(rs[i].re) > tol) continue;
+      for (var j = i + 1; j < rs.length; j++) {
+        if (Math.abs(rs[j].re) <= tol && C.dist(rs[i], rs[j]) <= tol) return 'unstable';
+      }
+    }
     if (mr >= -tol) return 'marginal';
     return 'stable';
   }
@@ -1338,8 +1368,12 @@ body.sheet-open { overflow: hidden; }
     while (i < s.length) {
       ch = s.charAt(i);
       if (ch === ' ' || ch === '\t' || ch === '\n') { i++; continue; }
-      m = /^(\d+\.?\d*|\.\d+)/.exec(s.slice(i));
-      if (m) { tokens.push({ t: 'num', v: parseFloat(m[1]), pos: i }); i += m[1].length; continue; }
+      m = /^(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/.exec(s.slice(i));
+      if (m) {
+        var number = Number(m[0]);
+        if (!isFinite(number) || (number === 0 && /[1-9]/.test(m[0].split(/[eE]/)[0]))) throw new ParseError('숫자가 계산 가능한 크기를 벗어났습니다. 단위와 계수를 조정해 주세요.', i);
+        tokens.push({ t: 'num', v: number, pos: i }); i += m[0].length; continue;
+      }
       if (ch === 's' || ch === 'S') { tokens.push({ t: 's', pos: i }); i++; continue; }
       if (ch === 'K' || ch === 'k') { tokens.push({ t: 'K', pos: i }); i++; continue; }
       if ('+-*/^()'.indexOf(ch) >= 0) { tokens.push({ t: ch, pos: i }); i++; continue; }
@@ -1349,19 +1383,42 @@ body.sheet-open { overflow: hidden; }
   }
 
   // 값 = { n: 분자 다항식, d: 분모 다항식, k: K의 거듭제곱 }
-  function val(n, d, k) { return { n: n, d: d || [1], k: k || 0 }; }
-  function isZeroVal(a) { return P.isZero(a.n); }
+  function val(n, d, k) {
+    d = d || [1];
+    if (n.length > 65 || d.length > 65) throw new ParseError('중간 전개식이 너무 큽니다. 식을 정리해서 입력해 주세요.', -1);
+    if (!n.concat(d).every(Number.isFinite)) throw new ParseError('계수 계산이 수치 범위를 벗어났습니다. 단위와 계수를 조정해 주세요.', -1);
+    return { n: n, d: d, k: k || 0 };
+  }
+  function isZeroVal(a) { return a.n.every(function (x) { return x === 0; }); }
+  // Check before poly.trim: an overflowing leading coefficient must not disappear.
+  function checkedPoly(p) {
+    if (!p.every(Number.isFinite)) throw new ParseError('계수 계산이 수치 범위를 벗어났습니다. 단위와 계수를 조정해 주세요.', -1);
+    var nonzero = p.filter(function (x) { return x !== 0; }).map(Math.abs);
+    if (nonzero.length && Math.min.apply(null, nonzero) < Math.max.apply(null, nonzero) * 1e-12) throw new ParseError('계수 크기 차이가 현재 수치 정밀도 범위를 벗어납니다. 단위를 바꾸거나 식을 정리해 주세요.', -1);
+    return P.trim(p);
+  }
+  function product(a, b) {
+    if (a.length + b.length > 66) throw new ParseError('중간 전개식이 너무 큽니다. 식을 정리해서 입력해 주세요.', -1);
+    var p = new Array(a.length + b.length - 1).fill(0);
+    for (var i = 0; i < a.length; i++) for (var j = 0; j < b.length; j++) p[i + j] += a[i] * b[j];
+    return checkedPoly(p);
+  }
+  function sum(a, b, sign) {
+    var n = Math.max(a.length, b.length), p = [];
+    for (var i = 0; i < n; i++) p.push((a[i - n + a.length] || 0) + sign * (b[i - n + b.length] || 0));
+    return checkedPoly(p);
+  }
   function add(a, b, sign, pos) {
     if (isZeroVal(a)) return sign > 0 ? b : val(P.scale(b.n, -1), b.d, b.k);
     if (isZeroVal(b)) return a;
     if (a.k !== b.k) throw new ParseError('K는 식 전체에 한 번만 곱해진 꼴이어야 합니다. 예: K(s+2)/(s(s+1))', pos);
-    var n = sign > 0 ? P.add(P.mul(a.n, b.d), P.mul(b.n, a.d)) : P.sub(P.mul(a.n, b.d), P.mul(b.n, a.d));
-    return val(n, P.mul(a.d, b.d), a.k);
+    var n = sum(product(a.n, b.d), product(b.n, a.d), sign);
+    return val(n, product(a.d, b.d), a.k);
   }
-  function mul(a, b) { return val(P.mul(a.n, b.n), P.mul(a.d, b.d), a.k + b.k); }
+  function mul(a, b) { return val(product(a.n, b.n), product(a.d, b.d), a.k + b.k); }
   function div(a, b, pos) {
     if (isZeroVal(b)) throw new ParseError('0으로 나누는 부분이 있습니다.', pos);
-    return val(P.mul(a.n, b.d), P.mul(a.d, b.n), a.k - b.k);
+    return val(product(a.n, b.d), product(a.d, b.n), a.k - b.k);
   }
 
   function Parser(tokens) { this.tk = tokens; this.i = 0; }
@@ -1422,22 +1479,27 @@ body.sheet-open { overflow: hidden; }
 
   // 반환: { ok, N, D, kMode: 'explicit' | 'implicit', note } 또는 { ok: false, message, pos }
   function parse(src) {
+    if (String(src || '').length > 2048) return { ok: false, message: '식이 너무 깁니다. 2048자 이내로 정리해 주세요.', pos: -1 };
     var s = clean(src);
     if (!/\S/.test(s)) return { ok: false, message: '전달함수를 입력해 주세요.', pos: -1 };
     try {
-      var p = new Parser(tokenize(s));
+      var tokens = tokenize(s);
+      if (tokens.length > 512) throw new ParseError('식이 너무 복잡합니다. 괄호와 항을 정리해 주세요.', -1);
+      var p = new Parser(tokens);
       var v = p.expr();
       if (p.i < p.tk.length) throw new ParseError('"' + p.tk[p.i].t + '" 근처를 해석하지 못했습니다. 괄호 짝을 확인해 주세요.', p.tk[p.i].pos);
       if (v.k > 1) return { ok: false, message: 'K가 두 번 이상 곱해져 있습니다. K는 식 전체에 한 번만 곱해 주세요.', pos: -1 };
       if (v.k < 0) return { ok: false, message: 'K가 분모에 있습니다. 이 프로그램은 K가 분자 쪽에 곱해진 꼴만 다룹니다.', pos: -1 };
-      var N = P.trim(v.n), D = P.trim(v.d);
-      if (P.isZero(D)) return { ok: false, message: '분모가 0입니다.', pos: -1 };
+      var N = checkedPoly(v.n), D = checkedPoly(v.d);
+      if (D.every(function (x) { return x === 0; })) return { ok: false, message: '분모가 0입니다.', pos: -1 };
       // 분모 최고차항을 1로 맞춥니다 (그 상수는 분자로 옮겨 K와 함께 곱해짐)
       var lead = D[0], i;
       if (lead !== 1) {
         for (i = 0; i < D.length; i++) D[i] = D[i] / lead;
         for (i = 0; i < N.length; i++) N[i] = N[i] / lead;
       }
+      if (!N.concat(D).every(Number.isFinite)) throw new ParseError('계수 정규화가 수치 범위를 벗어났습니다. 단위와 계수를 조정해 주세요.', -1);
+      if (N.some(function (x) { return x !== 0; }) && P.isZero(N)) throw new ParseError('정규화한 분자 계수가 현재 수치 정밀도보다 작습니다. 단위와 이득 크기를 조정해 주세요.', -1);
       return {
         ok: true, N: N, D: D, kMode: v.k === 1 ? 'explicit' : 'implicit',
         note: v.k === 1 ? '식에 있는 K를 이득 K로 보고, 나머지를 N(s)/D(s)로 나눴습니다.' : '식에 K가 없어서, 식 전체에 K를 곱한 것으로 봅니다.'
@@ -3042,6 +3104,60 @@ body.sheet-open { overflow: hidden; }
   RL.PreviewTour = PreviewTour;
 })(window.RL = window.RL || {});
 
+/* ===== app/js/point-inspector.js ===== */
+/* Coordinates come from the current engine result. The small diagram explains
+ * complex-plane geometry; it is not a simulated transfer-function response. */
+(function (RL) {
+  'use strict';
+  function PointInspector(graph) {
+    var self=this, box=document.getElementById('point-inspector'), selected=null, sign=1;
+    function resolve(ref) {
+      if(!graph.res || !ref) return null;
+      var res=graph.res, i=+ref.slice(1), item, title, K, pole=false;
+      if(ref.slice(0,2)==='cl') { item=graph.clPos && graph.clPos[+ref.slice(2)]; title='폐루프 극점'; pole=true; }
+      else if(ref[0]==='p') { item=res.poles[i] && res.poles[i].s; title='개루프 극점 ×'; pole=true; }
+      else if(ref[0]==='z') { item=res.zeros[i] && res.zeros[i].s; title='영점 ○'; }
+      else if(ref[0]==='b') { var b=RL.content.validBreaks(res)[i]; if(b){item=b.c.s;title=RL.content.breakLabel(b.c);K=b.c.K;} }
+      else if(ref[0]==='x') { var x=RL.content.crossingsPos(res)[i]; if(x){item={re:0,im:x.c.omega};title='허수축 교차';K=x.c.K;} }
+      else if(ref==='c' && res.asymptotes) { item={re:res.asymptotes.centroid,im:0};title='점근선 중심'; }
+      if(!item) return null;
+      return {re:item.re,im:(/^[bxa]/.test(ref)?Math.abs(item.im)*sign:item.im),title:title,K:K,pole:pole};
+    }
+    function paint() {
+      var p=resolve(selected); if(!p)return;
+      var norm=Math.hypot(p.re,p.im), x=110+(norm?p.re/norm*70:0),y=100-(norm?p.im/norm*70:0);
+      var f=RL.format.numShort, text=RL.format.cnum(p,3), zeta=norm?-p.re/norm:null;
+      box.innerHTML='<div class="point-detail"><svg viewBox="0 0 220 200" role="img" aria-label="원점에서 선택한 점까지의 벡터와 실수부·허수부 투영">'+
+        '<path class="point-axis" d="M20 100H200 M110 20V180"/><text x="190" y="94" fill="currentColor" font-size="12">σ</text><text x="118" y="24" fill="currentColor" font-size="12">jω</text>'+
+        '<path class="point-projection" d="M'+x+' 100V'+y+'H110"/><line class="point-vector" x1="110" y1="100" x2="'+x+'" y2="'+y+'"/>'+
+        '<circle cx="'+x+'" cy="'+y+'" r="5" fill="var(--accent)"/><text x="110" y="195" text-anchor="middle" fill="currentColor" font-size="11">원점에서의 거리 |s| = '+f(norm)+'</text></svg>'+
+        '<div><h3>'+p.title+' · '+text+'</h3><dl><div><dt>실수부 σ</dt><dd>'+f(p.re)+'</dd></div><div><dt>허수부 ω</dt><dd>'+f(p.im)+'</dd></div>'+
+        (p.pole?'<div><dt>고유진동수 ωn</dt><dd>'+f(norm)+'</dd></div><div><dt>감쇠비 ζ</dt><dd>'+(zeta===null?'정의되지 않음':f(zeta))+'</dd></div>':'')+
+        (p.K!==undefined?'<div><dt>이 점의 K</dt><dd>'+f(p.K)+'</dd></div>':'')+'</dl><p>'+
+        (p.pole?(selected.slice(0,2)==='cl'?'현재 K에서의 극점입니다. ':'개루프 극점의 기하학적 값이며 폐루프 안정 판정은 아닙니다. ')+ 'ωn = |s|, ζ = −σ/|s|. 원점에서는 감쇠비가 정의되지 않습니다.':'점의 복소평면 좌표를 표시합니다. 영점·핵심 점에는 극점의 감쇠비를 적용하지 않습니다.')+
+        '</p></div></div>';
+      graph.svg.querySelectorAll('[data-point]').forEach(function(n){n.setAttribute('aria-pressed',String(n.dataset.point===selected));});
+    }
+    this.select=function(ref,node){
+      sign=1;
+      if(node && /^[bxa]/.test(ref)) {var t=node.transform && node.transform.baseVal.consolidate();if(t && t.matrix.f>graph.Y(0))sign=-1;}
+      if(!resolve(ref))return;selected=ref;paint();
+      if(box.getBoundingClientRect().bottom>innerHeight) box.scrollIntoView({block:'nearest',behavior:document.documentElement.dataset.motion==='reduced'||matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+    };
+    this.refresh=function(){if(selected)paint();};
+    this.reset=function(){selected=null;box.innerHTML='<p class="muted">그래프의 점 또는 극점 값을 눌러 좌표와 파라미터를 살펴보세요.</p>';};
+    this.bind=function(){
+      if(graph.cl)graph.cl.forEach(function(n,i){if(n.isConnected)n.dataset.point='cl'+i;});
+      graph.svg.querySelectorAll('[data-ref]').forEach(function(n){if(resolve(n.dataset.ref))n.dataset.point=n.dataset.ref;});
+      graph.svg.querySelectorAll('[data-point]').forEach(function(n){var p=resolve(n.dataset.point);if(!p)return;n.setAttribute('role','button');n.setAttribute('tabindex','0');n.setAttribute('aria-pressed',String(selected===n.dataset.point));n.setAttribute('aria-label',p.title+' '+RL.format.cnum(p,3)+' 파라미터 보기');});
+    };
+    this.dominant=function(){if(!graph.clPos || !graph.clPos.length)return;var i=0;graph.clPos.forEach(function(p,j){if(p.re>graph.clPos[i].re+1e-8 || (Math.abs(p.re-graph.clPos[i].re)<1e-8 && p.im>graph.clPos[i].im))i=j;});self.select('cl'+i);};
+    document.getElementById('screen-lesson').addEventListener('click',function(e){var n=e.target.closest('[data-point],.ref[data-ref],tr[data-ref]');if(n)self.select(n.dataset.point||n.dataset.ref,n);});
+    graph.svg.addEventListener('keydown',function(e){var n=e.target.closest('[data-point]');if(n&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();self.select(n.dataset.point,n);}});
+  }
+  RL.PointInspector=PointInspector;
+})(window.RL=window.RL||{});
+
 /* ===== app/js/main.js ===== */
 /*
  * main.js — 화면 흐름
@@ -3055,7 +3171,7 @@ body.sheet-open { overflow: hidden; }
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
   var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: null, paused: false, tfText: '', thread: {} };
-  var graph, previewGraph, previewTour, exGraph, resetWelcomeMotion = function () {};
+  var graph, previewGraph, previewTour, inspector, exGraph, resetWelcomeMotion = function () {};
   var EXAMPLE_INPUTS = [
     { label: '노트 예제', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
     { label: '허수축 교차', input: 'K/(s(s+1)(s+2))' },
@@ -3252,9 +3368,10 @@ body.sheet-open { overflow: hidden; }
     $('#btn-next').disabled = i === S.steps.length - 1;
     $('#btn-next').textContent = i === S.steps.length - 1 ? '마지막 단계' : '다음';
     renderStep(step, animate);
-    renderCoach(step);
+    renderPractice(step);
     $('#stage-note').textContent = step.graphNote;
     graph.show(step.num, animate);
+    inspector.reset(); inspector.bind();
     if (step.num === 9) setK(S.K === null ? defaultK() : S.K);
     ST.upsert({ id: S.recId, input: $('#tf-input').value, tf: S.tfText, date: nowText(), lastStep: i + 1, done: i === S.steps.length - 1 });
     var rail = $('#rail');
@@ -3331,64 +3448,32 @@ body.sheet-open { overflow: hidden; }
     var sl = $('#k-slider');
     sl.value = tFromK(S.K === null ? defaultK() : S.K);
     sl.oninput = function () { setK(kFromT(+sl.value)); };
-    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K, true); }; });
+    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K, true); inspector.dominant(); }; });
   }
   function setK(K, resetTrail) {
     S.K = K;
     var out = graph.setK(K, resetTrail);
     if (!out) return;
+    inspector.bind(); inspector.refresh();
     var st = RL.routh.classify(out.poles);
     var v = $('#k-val'); if (v) v.textContent = kText(K);
     var slider = $('#k-slider'); if (slider) slider.setAttribute('aria-valuetext', 'K = ' + kText(K) + ', ' + STATUS_KO[st]);
     var pill = $('#k-status'); if (pill) { pill.textContent = (st === 'stable' ? '✓ ' : st === 'marginal' ? '△ ' : '! ') + STATUS_KO[st]; pill.className = 'pill ' + st; }
     var pl = $('#k-poles');
-    if (pl) pl.innerHTML = '폐루프 극점: ' + out.poles.map(function (z) { return '<span class="nm">' + F.cnum(z, 3) + '</span>'; }).join(', ');
+    if (pl) pl.innerHTML = '폐루프 극점: ' + out.poles.map(function (z) { return '<button type="button" class="pole-value" data-point="cl' + out.poles.indexOf(z) + '">' + F.cnum(z, 3) + '</button>'; }).join(', ');
     var zt = $('#k-zeta');
     if (zt) zt.innerHTML = out.info ? '주된 복소 극점: ' + M.mv('ω') + '<sub>n</sub> = ' + F.dec(out.info.wn, 3) + ', &ensp;' + M.mv('ζ') + ' = ' + F.dec(out.info.zeta, 3) + (out.info.zeta <= 0 ? ' (감쇠 없음 또는 음수 → 불안정 쪽)' : '') : '복소 극점이 없어 진동하지 않습니다 (실수 극점만).';
   }
 
-  // ── 코치(힌트·질문·내 답·AI) ────────────────
-  function renderCoach(step) {
-    var box = $('#coach'), aiOn = AI.available();
-    var badge = aiOn ? '<span class="badge on">AI 연결됨 · ' + AI.state.provider + ' 미리보기</span>' : '<span class="badge">AI 없이 정적 힌트로 동작</span>';
-    var h = '<div class="coach-head"><h3>막히면 한 단계씩 열어 보세요</h3>' + badge + '</div>';
-    h += '<div class="ladder" role="group" aria-label="힌트 단계">' + ['개념', '힌트', '공식·대입', '전체 풀이'].map(function (t, k) {
-      return '<button class="lv" data-lv="' + (k + 1) + '"><span>' + (k + 1) + '</span>' + t + '</button>';
-    }).join('') + '</div><div id="ladder-out" class="ladder-out"></div>';
-    if (step.questions.length) h += '<p class="qs-title">이 단계에서 생각해 볼 질문</p><div class="chips qs">' + step.questions.map(function (q, k) { return '<button class="chip q" data-q="' + k + '">' + q.q + '</button>'; }).join('') + '</div><div id="q-out"></div>';
-    if (step.check) h += '<form id="check-form" class="check"><label for="check-in">' + step.check.prompt + '</label><div class="row"><input id="check-in" inputmode="decimal" autocomplete="off" placeholder="예: ' + (step.check.tol ? '−1.5 또는 −3/2' : '3') + '"><button class="primary sm" type="submit">내 답 확인</button></div><div id="check-out" class="check-out" aria-live="polite"></div></form>';
-    if (aiOn) h += '<form id="ask-form" class="ask"><label for="ask-in">AI에게 질문하기</label><textarea id="ask-in" rows="2" placeholder="예: 점근선 중심이 왜 이 값인지 모르겠어요"></textarea><div class="row"><button class="primary sm" type="submit">보내기</button><button type="button" id="ask-stop" class="ghost sm" hidden>멈추기</button></div></form>';
-    else h += '<p class="muted sm">AI에게 직접 묻기는 AI가 연결된 화면(claude.ai 미리보기 또는 공개 홈페이지)에서 켜집니다.</p>';
-    h += '<div id="thread" class="thread" aria-live="polite"></div>';
-    if (step.example) h += '<button id="btn-example" class="ghost wide">간단한 예시로 원리 먼저 보기 →</button>';
-    box.innerHTML = h;
-    $$('.lv', box).forEach(function (b) { b.onclick = function () { openLadder(step, +b.getAttribute('data-lv')); }; });
-    $$('.q', box).forEach(function (b) { b.onclick = function () { openQuestion(step, +b.getAttribute('data-q')); }; });
-    var cf = $('#check-form');
-    if (cf) cf.onsubmit = function (e) { e.preventDefault(); gradeAnswer(step); };
-    var af = $('#ask-form');
-    if (af) af.onsubmit = function (e) { e.preventDefault(); var q = $('#ask-in').value.trim(); if (q) askAI(step, { level: 2, question: q }); };
-    var ex = $('#btn-example');
-    if (ex) ex.onclick = function () { openExample(step.example, step); };
-    var prev = S.thread[step.num];
-    if (prev) $('#thread').innerHTML = prev;
-  }
-
-  function openLadder(step, lv) {
-    var out = $('#ladder-out'), h = '', k;
-    for (k = 0; k < lv; k++) h += '<div class="lad-card enter" style="--d:' + (k === lv - 1 ? 0 : 0) + 'ms"><span class="tag">' + (k + 1) + '단계 · ' + ['개념', '힌트', '공식·대입', '전체 풀이'][k] + '</span><p>' + step.ladder[k] + '</p></div>';
-    if (AI.available()) h += '<button class="ghost sm ai-lv" data-lv="' + lv + '">AI에게 ' + lv + '단계를 내 상황에 맞게 설명 듣기</button>';
-    out.innerHTML = h;
-    $$('.lv').forEach(function (b) { b.classList.toggle('on', +b.getAttribute('data-lv') <= lv); });
-    var ab = $('.ai-lv', out);
-    if (ab) ab.onclick = function () { askAI(step, { level: lv, question: '이 단계를 ' + lv + '단계 수준으로 설명해 주세요.' }); };
-  }
-
-  function openQuestion(step, k) {
-    var q = step.questions[k], out = $('#q-out');
-    out.innerHTML = '<div class="lad-card enter"><span class="tag">' + q.q + '</span><p>' + q.a + '</p>' + (AI.available() ? '<button class="ghost sm" id="q-more">이 질문을 AI에게 더 묻기</button>' : '') + '</div>';
-    var more = $('#q-more');
-    if (more) more.onclick = function () { askAI(step, { level: 2, question: q.q + ' (화면의 기본 설명: ' + q.a + ') 이 문제에 맞춰 더 쉽게 설명해 주세요.' }); };
+  // Optional local practice remains compact; no AI hint/chat panel.
+  function renderPractice(step) {
+    if (!step.check && !step.example) return;
+    var h = '<details class="practice"><summary>직접 확인하기</summary>';
+    if (step.check) h += '<form id="check-form" class="check"><label for="check-in">' + step.check.prompt + '</label><div class="row"><input id="check-in" inputmode="decimal" autocomplete="off"><button class="ghost sm" type="submit">내 답 확인</button></div><div id="check-out" aria-live="polite"></div></form>';
+    if (step.example) h += '<button id="btn-example" class="ghost sm">간단한 예시 보기</button>';
+    $('#step-body').insertAdjacentHTML('beforeend', h + '</details>');
+    var form = $('#check-form'); if (form) form.onsubmit = function (e) { e.preventDefault(); gradeAnswer(step); };
+    var ex = $('#btn-example'); if (ex) ex.onclick = function () { openExample(step.example, step); };
   }
 
   function parseAnswer(s) {
@@ -3405,37 +3490,7 @@ body.sheet-open { overflow: hidden; }
     S.lastCheck = { answer: raw, ok: ok };
     if (ok) { out.className = 'check-out ok'; out.innerHTML = '맞습니다. 그래프에서 같은 값을 찾아 확인해 보세요.'; return; }
     out.className = 'check-out bad';
-    out.innerHTML = '계산 결과와 다릅니다. 어디서 달라졌는지 바로 정답을 보기보다 힌트 2단계부터 열어 보세요.' +
-      (AI.available() ? '<label for="how-in" class="sm">어떻게 계산했는지 적어 주시면 AI가 함께 봅니다</label><textarea id="how-in" rows="2" placeholder="예: Σ극점을 −3 −1 −1로 더했어요"></textarea><button type="button" class="ghost sm" id="how-send">AI에게 내 풀이 보여 주기</button>' : '');
-    var hs = $('#how-send');
-    if (hs) hs.onclick = function () { askAI(step, { level: 2, question: '제 답은 ' + raw + '입니다. 이렇게 계산했어요: ' + ($('#how-in').value || '(설명 없음)'), check: { answer: raw, ok: false } }); };
-  }
-
-  var askCtl = null;
-  function askAI(step, o) {
-    if (!AI.available()) return;
-    var th = $('#thread'), facts = {}, i;
-    for (i = 0; i < step.num; i++) facts[(i + 1) + '단계 ' + S.steps[i].title] = S.steps[i].facts;
-    var ctx = { tf: S.tfText, stepNum: step.num, stepTitle: step.title, facts: facts, level: o.level, question: o.question, check: o.check };
-    var item = document.createElement('div');
-    item.className = 'ai-msg';
-    item.innerHTML = '<div class="ai-q">' + M.esc(o.question.length > 120 ? o.question.slice(0, 120) + '…' : o.question) + '</div><div class="ai-a"><span class="muted">생각하는 중…</span></div><div class="ai-meta"></div>';
-    th.appendChild(item);
-    item.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' });
-    if (askCtl) askCtl.abort();
-    askCtl = new AbortController();
-    var stop = $('#ask-stop'); if (stop) { stop.hidden = false; stop.onclick = function () { askCtl.abort(); }; }
-    var a = $('.ai-a', item), meta = $('.ai-meta', item);
-    AI.ask(ctx, function (u) { a.textContent = u.text; }, askCtl.signal).then(function (r) {
-      a.textContent = r.text;
-      var chk = AI.checkNumbers(r.text, S.allNums, o.question);
-      meta.innerHTML = '<span class="by">AI · ' + AI.state.provider + '</span>' + (chk.ok ? '<span class="numck ok">숫자 검사 통과 (' + chk.count + '개)</span>' : '<span class="numck bad">검증값에 없는 숫자: ' + chk.bad.map(function (x) { return F.dec(x, 3); }).join(', ') + ' — 위의 계산 결과로 확인해 주세요</span>');
-      if (r.truncated) meta.innerHTML += '<span class="muted sm">답이 길어 중간에 끊겼습니다.</span>';
-    }, function (e) {
-      var m = AI.errMsg(e);
-      if (e && e.text) a.textContent = e.text; else a.innerHTML = '<span class="muted">' + (m || '멈췄습니다.') + '</span>';
-      if (!AI.available()) renderCoach(step);
-    }).then(function () { if (stop) stop.hidden = true; S.thread[step.num] = th.innerHTML; });
+    out.textContent = '계산 결과와 다릅니다. 위의 공식과 대입 과정을 다시 확인해 보세요.';
   }
 
   // ── 간단한 예시 → 원래 문제로 복귀 ──────────
@@ -3458,14 +3513,8 @@ body.sheet-open { overflow: hidden; }
     exGraph.stop();
     $('#example').hidden = true;
     document.body.classList.remove('sheet-open');
-    var th = $('#thread');
-    var card = document.createElement('div');
-    card.className = 'lad-card back enter';
-    card.innerHTML = '<span class="tag">원래 문제로 돌아왔습니다</span><p>그렇다면 이 문제는 어떻게 될까요? 방금 본 원리를 ' + M.mv('G') + M.mv('H') + ' = ' + tfHTML(S.res) + '에 그대로 적용해 보세요.' + (step.check ? ' 아래 칸에 답을 넣어 확인할 수 있습니다.' : '') + '</p>';
-    th.appendChild(card);
-    S.thread[step.num] = th.innerHTML;
-    var ci = $('#check-in');
-    if (ci) { ci.focus(); ci.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' }); } else { card.tabIndex = -1; card.focus(); card.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' }); }
+    var target = $('#btn-example') || $('#step-body');
+    target.focus({ preventScroll: true });
   }
 
   // ── 학습 기록 ───────────────────────────────
@@ -3523,6 +3572,7 @@ body.sheet-open { overflow: hidden; }
     $('#input-title').textContent = copy.prompt;
     exGraph = new RL.Graph($('#ex-graph'));
     graph.onRef = light;
+    inspector = new RL.PointInspector(graph);
     $('#examples').innerHTML = EXAMPLE_INPUTS.map(function (e) { return '<button class="chip ex" data-in="' + M.esc(e.input) + '">' + e.label + '</button>'; }).join('');
     $$('#examples .ex').forEach(function (b) { b.onclick = function () { setExample(b.getAttribute('data-in')); }; });
     var inp = $('#tf-input'), timer = 0;
@@ -3580,14 +3630,14 @@ body.sheet-open { overflow: hidden; }
     window.addEventListener('resize', function () {
       clearTimeout(rt);
       rt = setTimeout(function () {
-        if (S.steps && !$('#screen-lesson').hidden) { graph.fit(); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K); }
+        if (S.steps && !$('#screen-lesson').hidden) { graph.fit(); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K); inspector.bind(); inspector.refresh(); }
         else { previewTour.resize(); previewTour.sync(); }
       }, 160);
     });
     setExample(EXAMPLE_INPUTS[0].input, true);
     AI.init().then(function () {
       $('#photo-help').textContent = AI.available() && AI.state.images ? '사진을 선택한 뒤 전송에 동의하면 식으로 옮겨 드립니다.' : '현재 사진 자동 인식은 연결되어 있지 않습니다. 사진을 띄워 놓고 직접 입력할 수 있습니다.';
-      if (S.steps && !$('#screen-lesson').hidden) renderCoach(S.steps[S.cur]);
+
     });
   }
 
