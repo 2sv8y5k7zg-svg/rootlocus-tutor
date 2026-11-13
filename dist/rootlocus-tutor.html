@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta name="rootlocus-source-sha256" content="3c0159cab9a8d39d0bd1e67193fe6ac74b5cc6fb96a4bad85704186ae07dfe02">
+<meta name="rootlocus-source-sha256" content="c4f794ee15a87350266955260262e304bc2b050bfe58c4962b20dcae6ef4a7a7">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>근궤적 AI 튜터</title>
@@ -88,7 +88,7 @@ body[data-scene="journey"] .top { border-color:#ffffff08; }
 .top-actions .ghost { border-color:transparent; color:var(--muted); }
 .top-actions .ghost:hover { border-color:var(--line); }
 /* Equation workspace */
-.screen.start { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:70px; align-items:center; max-width:1160px; margin:0 auto; padding:70px 0 90px; }
+.screen.start { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px 32px; align-items:stretch; max-width:1160px; margin:0 auto; padding:32px 0 50px; }
 .start-left { display:flex; flex-direction:column; gap:18px; min-width:0; }
 .back-welcome { align-self:flex-start; padding-left:0; border:0; color:var(--muted); }
 .start-left h1 { font:400 clamp(32px,3.3vw,49px)/1.3 var(--font-editorial); letter-spacing:-.05em; margin:0 0 4px; }
@@ -327,6 +327,36 @@ body.sheet-open { overflow: hidden; }
 :root[data-motion="reduced"] .start-left, :root[data-motion="reduced"] .start-right { opacity:1!important; filter:none!important; transform:none!important; }
 #btn-motion[aria-pressed="true"] { color:var(--accent); border-color:#bef74b52; }
 @media(max-width:600px) { .top { height:auto; min-height:74px; flex-wrap:wrap; padding-block:12px; gap:8px; }.top-actions { margin-left:auto; }#btn-motion { font-size:.68rem; } }
+
+/* Shared heading and equal, bounded study surfaces. */
+.input-header { grid-column:1/-1; text-align:center; position:relative; padding:4px 0 10px; }
+.input-header .back-welcome { position:absolute; left:0; top:0; }
+.input-header .greeting { color:var(--muted); font-size:.85rem; margin:4px 0 12px; }
+.input-header h1 { font:400 clamp(27px,3vw,40px)/1.35 var(--font-editorial); letter-spacing:-.045em; margin:0 0 14px; }
+.input-header .lede { max-width:none; margin:0; font-size:.9rem; }
+.start-left,.start-right { border:1px solid var(--line); border-radius:var(--r); padding:24px; background:#111611b3; }
+.start-left { gap:13px; }
+#tf-input { padding:13px; flex-basis:220px; }
+.start-left .preview { padding:15px; min-height:72px; }
+.start-left .msg { font-size:.78rem; }
+.start-left .chip { padding:6px 11px; }
+.start-actions { margin-top:auto; padding-top:5px; }
+.start-right { display:flex; flex-direction:column; gap:12px; }
+.preview-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.preview-heading .eyebrow { margin:0 0 6px; }
+#preview-caption { margin:0; font-size:.85rem; }
+.preview-equation { min-height:22px; font: .8rem/1.5 var(--font-mono); color:var(--muted); overflow-wrap:anywhere; }
+.start-right .plane-card { padding:0; border:0; background:transparent; flex:1; }
+.start-right .plane { height:350px; aspect-ratio:auto; }
+.preview-phase { margin:0; min-height:24px; font-size:.8rem; color:var(--muted); }
+#preview-graph,.preview-equation { transition:opacity 1500ms ease; }
+.preview-fading #preview-graph,.preview-fading .preview-equation { opacity:0; }
+.screen.start { align-content:start; }
+/* The persistent legend carries these labels without overlapping adjacent poles. */
+#preview-graph .lbl.pole,#preview-graph .lbl.zero { display:none; }
+.k-locus { color:var(--locus); }
+@media(max-width:980px) { .screen.start { gap:24px; } .start-left,.start-right { padding:18px; } .input-row { flex-wrap:wrap; } }
+@media(max-width:760px) { .input-header { padding-top:42px; } .start-right { margin-top:0; } .start-right .plane { height:320px; } .input-header .lede { max-width:36em; } }
 </style>
 
 </head>
@@ -354,10 +384,13 @@ body.sheet-open { overflow: hidden; }
   </section>
 
   <main id="screen-start" class="screen start">
-    <section class="start-left">
-      <button id="btn-welcome" class="ghost sm back-welcome">← 처음으로</button><p class="eyebrow">01 / YOUR EQUATION</p>
-      <h1>어떤 식을<br> 탐구해 볼까요?</h1>
+    <header class="input-header">
+      <button id="btn-welcome" class="ghost sm back-welcome">← 처음으로</button>
+      <p id="input-greeting" class="greeting">반갑습니다.</p>
+      <h1 id="input-title" tabindex="-1">어떤 식으로 시작해 볼까요?</h1>
       <p class="lede">전달함수를 입력하거나 예제를 골라 주세요. 식을 확인하면 아홉 단계의 탐구가 시작됩니다.</p>
+    </header>
+    <section class="start-left" aria-label="전달함수 입력">
       <label for="tf-input" class="field-label">개루프 전달함수 <i class="mv">G</i>(<i class="mv">s</i>)<i class="mv">H</i>(<i class="mv">s</i>)</label>
       <div class="input-row">
         <input id="tf-input" aria-describedby="tf-msg photo-help" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="예: K(s+2)/((s+3)(s^2+2s+2))">
@@ -371,7 +404,6 @@ body.sheet-open { overflow: hidden; }
       <div class="ex-row"><span class="ex-label">예제</span><div id="examples" class="chips"></div></div>
       <div class="start-actions">
         <button id="btn-start" class="primary lg">근궤적 탐구 시작</button>
-        <span id="ai-status" class="ai-status">AI 연결 확인 중…</span>
       </div>
       <details class="scope">
         <summary>지원하는 식</summary>
@@ -384,11 +416,15 @@ body.sheet-open { overflow: hidden; }
         </ul>
       </details>
     </section>
-    <section class="start-right" aria-label="입력한 식의 극점과 영점"><p class="eyebrow">PREVIEW / S-PLANE</p>
+    <section class="start-right" aria-label="근궤적 미리보기">
+      <div class="preview-heading"><div><p class="eyebrow">ROOT LOCUS / PREVIEW</p><p id="preview-caption">예제 둘러보기</p></div><button id="preview-play" class="ghost sm" aria-pressed="false">잠시 멈춤</button></div>
+      <div id="preview-equation" class="preview-equation"></div>
       <div class="plane-card">
         <svg id="preview-graph" class="plane" role="img" aria-label="극점과 영점 미리보기"></svg>
-        <p class="cap"><span class="k-pole">×</span> 극점(<i class="mv">K</i> = 0 출발) &ensp;<span class="k-zero">○</span> 영점(<i class="mv">K</i> → ∞ 도착)</p>
+        <p class="cap"><span class="k-pole">×</span> 극점(<i class="mv">K</i> = 0 출발) &ensp;<span class="k-zero">○</span> 영점(<i class="mv">K</i> → ∞ 도착)<br><span class="k-locus">—</span> 근궤적 &ensp;● 폐루프 극점</p>
       </div>
+      <p id="preview-phase" class="preview-phase">극점과 영점에서 시작합니다.</p>
+      <button id="preview-tour" class="ghost sm" hidden>예제 둘러보기</button>
     </section>
   </main>
 
@@ -2735,7 +2771,8 @@ body.sheet-open { overflow: hidden; }
     var hero = document.getElementById('screen-welcome');
     var input = document.getElementById('screen-start');
     var media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    var frame = 0, tick = 0, time = 0, w = 0, h = 0, px = 0, py = 0, progress = 0;
+    var frame = 0, tick = 0, time = 0, w = 0, h = 0, progress = 0;
+    var scale = 1, centerY = 0, ripples = [], lastPointer = null, lastRipple = 0;
     var reduced = function () { return media.matches || document.documentElement.dataset.motion === 'reduced'; };
     // Precompute the surface: a toroidal sheet with a three-fold twist.
     var curves = [], rows = 32, samples = 144;
@@ -2751,15 +2788,25 @@ body.sheet-open { overflow: hidden; }
     function draw() {
       if (!ctx) return;
       ctx.clearRect(0, 0, w, h);
-      var scale = Math.min(w * 0.32, h * 0.34, 315);
-      var ax = 0.96 + Math.sin(time * 0.17) * 0.24 + py * 0.09;
-      var az = -0.38 + time * 0.045 + px * 0.07;
+      var ax = 0.96 + Math.sin(time * 0.12) * 0.14;
+      var az = -0.38 + Math.sin(time * 0.08) * 0.24;
       var ca = Math.cos(ax), sa = Math.sin(ax), cz = Math.cos(az), sz = Math.sin(az);
       function project(p) {
         var y = p[1] * ca - p[2] * sa, z = p[1] * sa + p[2] * ca;
         var x = p[0] * cz - y * sz; y = p[0] * sz + y * cz;
         var perspective = 3.8 / (3.8 - z);
-        return [w * 0.5 + x * scale * perspective, h * 0.43 + y * scale * perspective, z];
+        var sx = w * 0.5 + x * scale * perspective, sy = centerY + y * scale * perspective;
+        var ox = 0, oy = 0;
+        for (var n = 0; n < ripples.length; n++) {
+          var wave = ripples[n], age = time - wave.born;
+          var dx = (sx - wave.x) / scale, dy = (sy - wave.y) / scale;
+          var distance = Math.sqrt(dx * dx + dy * dy), front = distance - age * 0.48;
+          var swell = Math.sin(front * 9 - age * 1.2) * Math.exp(-front * front / 0.32) *
+            Math.exp(-age * 0.8) * (1 - Math.exp(-age * 5)) * wave.strength;
+          ox += dx / Math.max(distance, 0.2) * swell;
+          oy += (dy / Math.max(distance, 0.2) * 0.6 + 0.35) * swell;
+        }
+        return [sx + ox * scale, sy + oy * scale, z];
       }
       for (var r = 0; r < curves.length; r++) {
         ctx.beginPath();
@@ -2786,6 +2833,7 @@ body.sheet-open { overflow: hidden; }
       // Cap expensive drawing at about 30Hz; never catch up after tab suspension.
       if (!tick || now - tick >= 32) {
         time += tick ? Math.min(64, now - tick) / 1000 : 0;
+        ripples = ripples.filter(function (wave) { return time - wave.born < 6; });
         tick = now; draw();
       }
       frame = requestAnimationFrame(animate);
@@ -2798,8 +2846,6 @@ body.sheet-open { overflow: hidden; }
       var startY = input.getBoundingClientRect().top + window.scrollY;
       progress = Math.max(0, Math.min(1, window.scrollY / Math.max(1, startY - 36)));
       scene.style.setProperty('--journey', progress.toFixed(4));
-      scene.style.setProperty('--drift-x', (px * 12).toFixed(1) + 'px');
-      scene.style.setProperty('--drift-y', (py * 8).toFixed(1) + 'px');
       var visible = !input.hidden && input.getBoundingClientRect().top < h * 0.82;
       if (visible || reduced()) input.classList.add('is-revealed');
       else if (progress < 0.08 && !input.contains(document.activeElement)) input.classList.remove('is-revealed');
@@ -2811,6 +2857,13 @@ body.sheet-open { overflow: hidden; }
     }
     function resize() {
       w = window.innerWidth; h = window.innerHeight;
+      // Radius <= 1.32; perspective sphere envelope < 1.42. Ripple margin included in 1.55.
+      // Fit the entire envelope between navigation and CTA, not just the initial orientation.
+      var top = document.querySelector('.top').offsetHeight + 24;
+      var bottom = document.getElementById('btn-begin').getBoundingClientRect().top + window.scrollY - 32;
+      centerY = (top + bottom) / 2;
+      scale = Math.max(1, Math.min((w - 48) / 3.1, (bottom - top) / 3.1, 300));
+      ripples = []; lastPointer = null;
       var ratio = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = Math.round(w * ratio); canvas.height = Math.round(h * ratio);
       if (ctx) ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -2818,15 +2871,32 @@ body.sheet-open { overflow: hidden; }
     }
     sync = function () {
       cancelAnimationFrame(scrollFrame); scrollFrame = 0;
-      if (document.hidden) { cancelAnimationFrame(frame); frame = 0; tick = 0; return; }
-      if (reduced()) { px = 0; py = 0; draw(); input.classList.add('is-revealed'); }
+      if (document.hidden) { cancelAnimationFrame(frame); frame = 0; tick = 0; ripples = []; return; }
+      // Refit after returning from a lesson that was resized while the intro was hidden.
+      if (!hero.hidden) {
+        var top = document.querySelector('.top').offsetHeight + 24;
+        var bottom = document.getElementById('btn-begin').getBoundingClientRect().top + window.scrollY - 32;
+        centerY = (top + bottom) / 2;
+        scale = Math.max(1, Math.min((w - 48) / 3.1, (bottom - top) / 3.1, 300));
+      }
+      if (reduced()) { ripples = []; draw(); input.classList.add('is-revealed'); }
       update();
     };
     hero.addEventListener('pointermove', function (e) {
       if (e.pointerType === 'touch' || reduced()) return;
-      px = e.clientX / w - 0.5; py = e.clientY / h - 0.5; schedule();
+      var now = performance.now(), point = { x:e.clientX, y:e.clientY, at:now };
+      if (lastPointer) {
+        var distance = Math.hypot(point.x - lastPointer.x, point.y - lastPointer.y);
+        if (now - lastRipple > 110 && distance > 12) {
+          var speed = distance / Math.max(16, now - lastPointer.at) * 1000;
+          ripples.push({ x:point.x, y:point.y, born:time, strength:0.018 + Math.min(1, speed / 900) * 0.012 });
+          if (ripples.length > 3) ripples.shift();
+          lastRipple = now; lastPointer = point;
+        }
+      } else lastPointer = point;
     }, { passive: true });
-    hero.addEventListener('pointerleave', function () { px = 0; py = 0; schedule(); });
+    // Let existing waves dissipate; leaving must never snap the surface back.
+    hero.addEventListener('pointerleave', function () { lastPointer = null; });
     input.addEventListener('focusin', function () {
       if (input.getBoundingClientRect().top < h * 0.9) input.classList.add('is-revealed');
     });
@@ -2837,6 +2907,139 @@ body.sheet-open { overflow: hidden; }
     resize(); sync();
   }
   RL.atmosphere = { init: init, sync: function () { sync(); } };
+})(window.RL = window.RL || {});
+
+/* ===== app/js/welcome-copy.js ===== */
+/* Device-local time only; no network, location permission or inferred emotions. */
+(function (RL) {
+  'use strict';
+  function choose(hour, returning, random) {
+    random = random || Math.random;
+    var greetings = ['반갑습니다.'];
+    if (hour >= 5 && hour < 11) greetings.push('좋은 아침입니다.');
+    else if (hour >= 11 && hour < 17) greetings.push('좋은 오후입니다.');
+    else if (hour >= 17 && hour < 22) greetings.push('좋은 저녁입니다.');
+    else greetings.push('편안한 밤입니다.');
+    if (returning) greetings.push('다시 만나 반갑습니다.');
+    var prompts = ['어떤 식으로 시작해 볼까요?', '식 하나에서 시작해 볼까요?', '준비한 식을 입력해 주세요.', '어떤 궤적을 만나볼까요?'];
+    return { greeting:greetings[Math.floor(random() * greetings.length)], prompt:prompts[Math.floor(random() * prompts.length)] };
+  }
+  RL.welcomeCopy = { choose:choose };
+})(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
+/* ===== app/js/preview-tour.js ===== */
+/* Engine-generated example tour. Each scene takes 20s; user input takes priority.
+ * Pause, reduced motion, offscreen and hidden-page states share one clock.
+ */
+(function (RL) {
+  'use strict';
+  function PreviewTour(graph, examples) {
+    var self = this, svg = graph.svg, panel = document.querySelector('.start-right');
+    var caption = document.getElementById('preview-caption'), equation = document.getElementById('preview-equation');
+    var phaseText = document.getElementById('preview-phase'), play = document.getElementById('preview-play');
+    var tour = document.getElementById('preview-tour'), media = matchMedia('(prefers-reduced-motion: reduce)');
+    var mode = 'tour', paused = false, frame = 0, previous = 0, elapsed = 0, phase = -1, current = null;
+    var bag = [], last = -1, fade = false, lastK = 0, lastReduced = null, inputResult = null;
+    function reduced() { return media.matches || document.documentElement.dataset.motion === 'reduced'; }
+    function visible() {
+      var rect = panel.getBoundingClientRect();
+      return !document.hidden && !document.getElementById('screen-start').hidden && rect.bottom > 0 && rect.top < innerHeight;
+    }
+    function animations(run) {
+      svg.getAnimations({subtree:true}).forEach(function (a) { if (run) a.play(); else a.pause(); });
+    }
+    function cancel() { cancelAnimationFrame(frame); frame = 0; previous = 0; animations(false); }
+    function controls() {
+      play.hidden = mode !== 'tour'; tour.hidden = mode === 'tour';
+      play.textContent = reduced() ? '다음 예제' : paused ? '계속 보기' : '잠시 멈춤';
+      play.setAttribute('aria-pressed', String(paused));
+      panel.dataset.previewMode = mode;
+    }
+    function nextIndex() {
+      if (!bag.length) {
+        for (var i = 0; i < examples.length; i++) bag.push(i);
+        for (var j = bag.length - 1; j > 0; j--) {
+          var k = Math.floor(Math.random() * (j + 1)), tmp = bag[j]; bag[j] = bag[k]; bag[k] = tmp;
+        }
+        if (bag[bag.length - 1] === last && bag.length > 1) { var swap = bag[0]; bag[0] = bag[bag.length - 1]; bag[bag.length - 1] = swap; }
+      }
+      last = bag.pop(); return last;
+    }
+    function scene() {
+      var ex = examples[nextIndex()], parsed = RL.parser.parse(ex.input);
+      current = RL.locus.analyze(parsed.N, parsed.D);
+      graph.stop(); graph.setProblem(current);
+      caption.textContent = '예제 둘러보기 · ' + ex.label;
+      equation.textContent = ex.input;
+      svg.setAttribute('aria-label', ex.label + ' 근궤적 예제 (입력한 식과 별개)');
+      elapsed = 0; phase = -1; lastK = 0; fade = false; panel.classList.remove('preview-fading');
+      if (reduced()) { graph.show(8, false); phaseText.textContent = '완성된 근궤적 · 움직임 줄이기'; }
+      else showPhase(0);
+    }
+    function showPhase(next) {
+      phase = next;
+      var steps = [2, 4, 8, 9], labels = ['극점과 영점에서 시작합니다.', '점근선으로 향하는 방향을 살펴봅니다.', '계산된 가지를 천천히 이어 봅니다.', 'K 변화에 따라 폐루프 극점이 이동합니다.'];
+      graph.show(steps[next], next !== 3);
+      svg.getAnimations({subtree:true}).forEach(function (a) { a.playbackRate = 0.55; });
+      phaseText.textContent = labels[next];
+    }
+    function tick(now) {
+      frame = 0;
+      if (mode !== 'tour' || paused || reduced() || !visible()) { cancel(); return; }
+      if (!current) scene();
+      elapsed += previous ? Math.min(80, now - previous) : 0; previous = now;
+      var next = elapsed < 3500 ? 0 : elapsed < 7500 ? 1 : elapsed < 13000 ? 2 : 3;
+      if (phase !== next) showPhase(next);
+      if (phase === 3 && now - lastK > 50) {
+        var notable = RL.content.notableK(current), upper = notable.length ? notable[notable.length - 1].K * 1.25 : 8;
+        var t = Math.min(1, (elapsed - 13000) / 5000), eased = t * t * (3 - 2 * t), K = upper * eased;
+        graph.setK(K, true); phaseText.textContent = 'K = ' + RL.format.numShort(K) + ' · 폐루프 극점의 이동'; lastK = now;
+      }
+      if (elapsed >= 18500 && !fade) { fade = true; panel.classList.add('preview-fading'); }
+      if (elapsed >= 20000) scene();
+      frame = requestAnimationFrame(tick);
+    }
+    this.sync = function () {
+      controls();
+      var r = reduced();
+      if (r !== lastReduced) {
+        lastReduced = r;
+        if (mode === 'tour' && current) {
+          graph.show(8, false); phaseText.textContent = r ? '완성된 근궤적 · 움직임 줄이기' : '완성된 근궤적';
+          elapsed = 18500; phase = 3; fade = false; panel.classList.remove('preview-fading');
+        }
+      }
+      if (mode !== 'tour' || paused || r || !visible()) {
+        cancel();
+        if (r && mode === 'tour' && !current && visible()) scene();
+        return;
+      }
+      if (!frame) { previous = 0; animations(true); frame = requestAnimationFrame(tick); }
+    };
+    this.follow = function () {
+      mode = 'input'; cancel(); graph.stop(); panel.classList.remove('preview-fading'); controls();
+    };
+    this.input = function (res) {
+      inputResult = res;
+      if (mode !== 'input') return;
+      caption.textContent = '입력한 식 · 극점과 영점'; equation.textContent = '';
+      svg.setAttribute('aria-label', '입력한 식의 극점과 영점');
+      graph.stop();
+      if (!res) { graph.res = null; svg.innerHTML = ''; phaseText.textContent = '식을 확인하면 미리보기가 나타납니다.'; return; }
+      graph.setProblem(res); graph.show(2, false); phaseText.textContent = '입력한 식을 확인하고 탐구를 시작해 보세요.';
+    };
+    this.resize = function () {
+      if (mode === 'input') { self.input(inputResult); return; }
+      if (current) { graph.setProblem(current); graph.show(8, false); elapsed = 18500; phase = 3; }
+    };
+    play.onclick = function () { if (reduced()) scene(); else paused = !paused; self.sync(); };
+    tour.onclick = function () { mode = 'tour'; paused = false; current = null; bag = []; self.sync(); };
+    new IntersectionObserver(function () { self.sync(); }, {threshold:[0,0.1]}).observe(panel);
+    document.addEventListener('visibilitychange', self.sync);
+    media.addEventListener('change', self.sync);
+    controls();
+  }
+  RL.PreviewTour = PreviewTour;
 })(window.RL = window.RL || {});
 
 /* ===== app/js/main.js ===== */
@@ -2852,7 +3055,7 @@ body.sheet-open { overflow: hidden; }
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
   var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: null, paused: false, tfText: '', thread: {} };
-  var graph, previewGraph, exGraph, resetWelcomeMotion = function () {};
+  var graph, previewGraph, previewTour, exGraph, resetWelcomeMotion = function () {};
   var EXAMPLE_INPUTS = [
     { label: '노트 예제', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
     { label: '허수축 교차', input: 'K/(s(s+1)(s+2))' },
@@ -2895,6 +3098,7 @@ body.sheet-open { overflow: hidden; }
       window.scrollTo({ top: top, behavior: reducedMotion() ? 'instant' : 'smooth' });
     }
     resetWelcomeMotion();
+    if (previewTour) previewTour.sync();
   }
   function enterInput() {
     graph.stop();
@@ -2920,6 +3124,7 @@ body.sheet-open { overflow: hidden; }
     $('#btn-motion').setAttribute('aria-pressed', String(reduce));
     ST.setPref('reduce-motion', reduce);
     resetWelcomeMotion();
+    if (previewTour) previewTour.sync();
     if (reduce && S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
   }
   function bindWelcomeMotion() {
@@ -2941,7 +3146,7 @@ body.sheet-open { overflow: hidden; }
       $('#tf-input').setAttribute('aria-invalid', 'true');
       msg.className = 'msg bad';
       msg.textContent = p.message;
-      previewGraph.res = null; previewGraph.svg.innerHTML = '';
+      previewTour.input(null);
       return;
     }
     var res = RL.locus.analyze(p.N, p.D, { branches: false });
@@ -2951,7 +3156,7 @@ body.sheet-open { overflow: hidden; }
       $('#tf-input').setAttribute('aria-invalid', 'true');
       msg.className = 'msg bad';
       msg.textContent = res.error.message;
-      previewGraph.res = null; previewGraph.svg.innerHTML = '';
+      previewTour.input(null);
       return;
     }
     $('#tf-input').setAttribute('aria-invalid', 'false');
@@ -2961,11 +3166,10 @@ body.sheet-open { overflow: hidden; }
     msg.className = 'msg' + (warn ? ' warn' : '');
     msg.textContent = p.note + warn + ' 분자·분모·괄호·부호가 맞으면 학습을 시작하세요.';
     btn.disabled = false;
-    previewGraph.setProblem(res);
-    previewGraph.show(2, false);
+    previewTour.input(res);
   }
 
-  function setExample(input) { $('#tf-input').value = input; onInput(); }
+  function setExample(input, initial) { if (!initial) previewTour.follow(); $('#tf-input').value = input; onInput(); }
 
   // ── 사진으로 입력 ───────────────────────────
   var photoCtl = null, photoURL = null;
@@ -2997,6 +3201,7 @@ body.sheet-open { overflow: hidden; }
         if (request.signal.aborted || request !== photoCtl) return;
         if (/읽을 수 없음/.test(text)) { st.textContent = 'AI가 식을 읽지 못했습니다. 더 밝고 가까운 사진으로 다시 시도하거나 직접 입력해 주세요.'; $('#photo-send').disabled = false; return; }
         $('#tf-input').value = text;
+        previewTour.follow();
         onInput();
         st.textContent = 'AI가 읽은 식을 입력칸에 넣었습니다. 분자·분모·괄호·부호·지수를 확인하고 고쳐 주세요.';
         $('#tf-input').focus();
@@ -3279,6 +3484,7 @@ body.sheet-open { overflow: hidden; }
         var r = list[+b.getAttribute('data-k')], act = b.getAttribute('data-act');
         $('#records').hidden = true;
         $('#tf-input').value = r.input;
+        previewTour.follow();
         onInput();
         if (!S.parsed) { enterInput(); return; }
         startLesson(act === 'resume' ? Math.max(0, r.lastStep - 1) : act === 'result' ? 7 : 0);
@@ -3311,12 +3517,17 @@ body.sheet-open { overflow: hidden; }
     applyTheme(ST.getPref('theme', ''));
     graph = new RL.Graph($('#main-graph'));
     previewGraph = new RL.Graph($('#preview-graph'));
+    previewTour = new RL.PreviewTour(previewGraph, EXAMPLE_INPUTS);
+    var copy = RL.welcomeCopy.choose(new Date().getHours(), ST.load().length > 0);
+    $('#input-greeting').textContent = copy.greeting;
+    $('#input-title').textContent = copy.prompt;
     exGraph = new RL.Graph($('#ex-graph'));
     graph.onRef = light;
     $('#examples').innerHTML = EXAMPLE_INPUTS.map(function (e) { return '<button class="chip ex" data-in="' + M.esc(e.input) + '">' + e.label + '</button>'; }).join('');
     $$('#examples .ex').forEach(function (b) { b.onclick = function () { setExample(b.getAttribute('data-in')); }; });
     var inp = $('#tf-input'), timer = 0;
     inp.addEventListener('input', function () {
+      previewTour.follow(); previewTour.input(null);
       clearTimeout(timer);
       S.parsed = null;
       $('#btn-start').disabled = true;
@@ -3370,14 +3581,12 @@ body.sheet-open { overflow: hidden; }
       clearTimeout(rt);
       rt = setTimeout(function () {
         if (S.steps && !$('#screen-lesson').hidden) { graph.fit(); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K); }
-        else if (previewGraph.res) { previewGraph.fit(); previewGraph.show(2, false); }
+        else { previewTour.resize(); previewTour.sync(); }
       }, 160);
     });
-    setExample(EXAMPLE_INPUTS[0].input);
+    setExample(EXAMPLE_INPUTS[0].input, true);
     AI.init().then(function () {
       $('#photo-help').textContent = AI.available() && AI.state.images ? '사진을 선택한 뒤 전송에 동의하면 식으로 옮겨 드립니다.' : '현재 사진 자동 인식은 연결되어 있지 않습니다. 사진을 띄워 놓고 직접 입력할 수 있습니다.';
-      $('#ai-status').textContent = AI.available() ? 'AI 연결됨 (' + AI.state.provider + ' 미리보기)' : 'AI 연결 없음: 정적 힌트로 동작';
-      $('#ai-status').className = 'ai-status' + (AI.available() ? ' on' : '');
       if (S.steps && !$('#screen-lesson').hidden) renderCoach(S.steps[S.cur]);
     });
   }
