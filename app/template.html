@@ -61,7 +61,8 @@
           <li>분모 4차 이하, 분자 차수 ≤ 분모 차수, 실수 계수</li>
           <li><i class="mv">K</i>는 식 전체에 한 번 곱해진 꼴. 식에 <i class="mv">K</i>가 없으면 전체에 곱한 것으로 봅니다.</li>
           <li>쓸 수 있는 글자: <code>s</code> <code>K</code> 숫자 <code>+ − * / ^</code> 괄호. 예: <code>K(s+1)/(s^2(s+9))</code></li>
-          <li>극점·영점 상쇄, 시간 지연, K ≤ 0(양의 피드백)은 계산하지 않고 이유를 안내합니다.</li>
+          <li>과학적 표기 <code>2.5e-3</code>도 쓸 수 있습니다. 극단적인 계수·지나치게 복잡한 식은 수치 오류를 막기 위해 안내 후 중단합니다.</li>
+          <li>극점·영점 상쇄, 시간 지연, K &lt; 0(양의 피드백)은 지원하지 않습니다. K = 0은 지원합니다.</li>
         </ul>
       </details>
     </section>
@@ -81,12 +82,12 @@
     <aside class="rail" id="rail" aria-label="단계별 풀이">
       <nav class="stepper" id="stepper" aria-label="단계 이동"></nav>
       <article id="step-body" class="step-body"></article>
-      <section id="coach" class="coach" aria-label="힌트와 질문"></section>
     </aside>
     <section class="stage" aria-label="s평면 그래프">
       <div class="stage-head"><span id="stage-tf" class="stage-tf"></span><span id="stage-note" class="stage-note"></span></div>
-      <div class="plane-wrap"><svg id="main-graph" class="plane" role="img" aria-label="s평면 근궤적"></svg></div>
+      <div class="plane-wrap"><svg id="main-graph" class="plane" role="group" aria-label="s평면 근궤적 · 점을 선택하면 파라미터 표시"></svg></div>
       <section id="k-controls" aria-label="K 변화 조작" hidden></section>
+      <section id="point-inspector" class="point-inspector" aria-label="선택한 점의 파라미터"><p class="muted">그래프의 점 또는 극점 값을 눌러 좌표와 파라미터를 살펴보세요.</p></section>
       <div class="graph-legend" aria-label="그래프 범례"><span><b class="k-pole">×</b> 극점</span><span><b class="k-zero">○</b> 영점</span><span><b class="legend-locus">━</b> 근궤적</span><span><b class="legend-asym">┄</b> 점근선</span><span><b>●</b> 폐루프 극점</span><span><b class="legend-key">●</b> 핵심 점</span></div>
       <div class="controls" role="toolbar" aria-label="재생 조절">
         <button id="btn-prev" class="ghost">이전</button>

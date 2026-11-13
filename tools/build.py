@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 JS = ['js/complex.js', 'js/poly.js', 'js/format.js', 'js/routh.js', 'js/locus.js',
       'app/js/parser.js', 'app/js/mathview.js', 'app/js/content.js', 'app/js/graph.js',
       'app/js/ai.js', 'app/js/store.js', 'app/js/atmosphere.js', 'app/js/welcome-copy.js',
-      'app/js/preview-tour.js', 'app/js/main.js']
+      'app/js/preview-tour.js', 'app/js/point-inspector.js', 'app/js/main.js']
 
 tpl = (ROOT / 'app' / 'template.html').read_text(encoding='utf-8')
 css = (ROOT / 'app' / 'app.css').read_text(encoding='utf-8')

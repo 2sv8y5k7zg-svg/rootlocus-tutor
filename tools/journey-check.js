@@ -7,7 +7,7 @@ const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const { pathToFileURL } = require('url');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const root = path.resolve(__dirname, '..'), html = path.join(root, 'dist/rootlocus-tutor.html');
-const out = path.join(root, 'docs/shots/fluid-study');
+const out = path.join(root, 'docs/shots/point-study');
 fs.mkdirSync(out, { recursive: true });
 const checks = [], errors = [], requests = [], layouts = [];
 function check(name, ok) { if (!ok) throw Error(name); checks.push(name); }
@@ -100,11 +100,10 @@ async function main() {
     check('OS reduced motion stops canvas', stopped===await frames());
     await page.click('#btn-begin'); await page.click('#btn-start'); await page.locator('.st').nth(2).click();
     check('OS reduction also stops graph animation', await page.locator('#main-graph').evaluate(e=>e.getAnimations({subtree:true}).length)===0);
-    await page.locator('.lv').nth(2).click();
-    check('offline static hints remain', (await page.innerText('#ladder-out')).length>20);
-    await page.locator('.st').nth(3).click(); await page.locator('.lv').nth(2).click();
-    await page.locator('.q').first().click();
-    check('static question explanation remains', (await page.innerText('#q-out')).length>10);
+    check('AI coaching panel removed', await page.locator('#coach,#ask-form,.ladder').count()===0);
+    await page.locator('.st').nth(3).click();
+    check('offline explanation remains', (await page.innerText('#step-body')).length>100);
+    await page.click('.practice summary');
     await page.click('#btn-example'); await page.keyboard.press('Shift+Tab');
     check('example dialog traps keyboard focus', await page.locator('#example').evaluate(e=>e.contains(document.activeElement)));
     await page.click('#ex-back');

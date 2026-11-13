@@ -348,3 +348,24 @@ body.sheet-open { overflow: hidden; }
 .k-locus { color:var(--locus); }
 @media(max-width:980px) { .screen.start { gap:24px; } .start-left,.start-right { padding:18px; } .input-row { flex-wrap:wrap; } }
 @media(max-width:760px) { .input-header { padding-top:42px; } .start-right { margin-top:0; } .start-right .plane { height:320px; } .input-header .lede { max-width:36em; } }
+
+/* Direct exploration replaces the separate AI coaching surface. */
+.screen.lesson { grid-template-areas:'steps steps' 'graph explain'; }
+.point-inspector { border-top:1px solid var(--line); margin-top:18px; padding-top:16px; }
+.point-inspector>p { margin:0; font-size:.82rem; }
+.point-detail { display:grid; grid-template-columns:minmax(150px,210px) minmax(0,1fr); gap:20px; align-items:center; }
+.point-detail svg { width:100%; height:auto; color:var(--muted); }
+.point-detail h3 { margin:0 0 10px; font-size:.92rem; }
+.point-detail dl { display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; margin:0; font-size:.83rem; }
+.point-detail dt { color:var(--muted); }.point-detail dd { margin:0; font-family:var(--font-mono); }
+.point-detail p { font-size:.76rem; color:var(--muted); margin:10px 0 0; }
+.point-vector { stroke:var(--accent); stroke-width:2; }.point-axis { stroke:var(--line); stroke-width:1; }
+.point-projection { stroke:var(--asym); stroke-dasharray:4 4; fill:none; }
+.pole-value { font:inherit; color:var(--fg); padding:3px 6px; border:0; border-bottom:1px dotted var(--muted); border-radius:3px; background:transparent; min-height:32px; }
+#main-graph [role="button"] { cursor:pointer; }
+#main-graph [aria-pressed="true"] { filter:drop-shadow(0 0 5px var(--accent)); }
+.practice { margin-top:24px; border-top:1px solid var(--line); padding-top:12px; }
+.practice summary { cursor:pointer; min-height:44px; color:var(--muted); }
+.practice .check { margin-top:0; }
+@media(max-width:980px) { .screen.lesson { grid-template-areas:'steps' 'graph' 'explain'; } }
+@media(max-width:480px) { .point-detail { grid-template-columns:1fr; gap:6px; } .point-detail svg { max-width:200px; margin:auto; } }

@@ -10,7 +10,7 @@
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
   var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: null, paused: false, tfText: '', thread: {} };
-  var graph, previewGraph, previewTour, exGraph, resetWelcomeMotion = function () {};
+  var graph, previewGraph, previewTour, inspector, exGraph, resetWelcomeMotion = function () {};
   var EXAMPLE_INPUTS = [
     { label: '노트 예제', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
     { label: '허수축 교차', input: 'K/(s(s+1)(s+2))' },
@@ -207,9 +207,10 @@
     $('#btn-next').disabled = i === S.steps.length - 1;
     $('#btn-next').textContent = i === S.steps.length - 1 ? '마지막 단계' : '다음';
     renderStep(step, animate);
-    renderCoach(step);
+    renderPractice(step);
     $('#stage-note').textContent = step.graphNote;
     graph.show(step.num, animate);
+    inspector.reset(); inspector.bind();
     if (step.num === 9) setK(S.K === null ? defaultK() : S.K);
     ST.upsert({ id: S.recId, input: $('#tf-input').value, tf: S.tfText, date: nowText(), lastStep: i + 1, done: i === S.steps.length - 1 });
     var rail = $('#rail');
@@ -286,64 +287,32 @@
     var sl = $('#k-slider');
     sl.value = tFromK(S.K === null ? defaultK() : S.K);
     sl.oninput = function () { setK(kFromT(+sl.value)); };
-    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K, true); }; });
+    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K, true); inspector.dominant(); }; });
   }
   function setK(K, resetTrail) {
     S.K = K;
     var out = graph.setK(K, resetTrail);
     if (!out) return;
+    inspector.bind(); inspector.refresh();
     var st = RL.routh.classify(out.poles);
     var v = $('#k-val'); if (v) v.textContent = kText(K);
     var slider = $('#k-slider'); if (slider) slider.setAttribute('aria-valuetext', 'K = ' + kText(K) + ', ' + STATUS_KO[st]);
     var pill = $('#k-status'); if (pill) { pill.textContent = (st === 'stable' ? '✓ ' : st === 'marginal' ? '△ ' : '! ') + STATUS_KO[st]; pill.className = 'pill ' + st; }
     var pl = $('#k-poles');
-    if (pl) pl.innerHTML = '폐루프 극점: ' + out.poles.map(function (z) { return '<span class="nm">' + F.cnum(z, 3) + '</span>'; }).join(', ');
+    if (pl) pl.innerHTML = '폐루프 극점: ' + out.poles.map(function (z) { return '<button type="button" class="pole-value" data-point="cl' + out.poles.indexOf(z) + '">' + F.cnum(z, 3) + '</button>'; }).join(', ');
     var zt = $('#k-zeta');
     if (zt) zt.innerHTML = out.info ? '주된 복소 극점: ' + M.mv('ω') + '<sub>n</sub> = ' + F.dec(out.info.wn, 3) + ', &ensp;' + M.mv('ζ') + ' = ' + F.dec(out.info.zeta, 3) + (out.info.zeta <= 0 ? ' (감쇠 없음 또는 음수 → 불안정 쪽)' : '') : '복소 극점이 없어 진동하지 않습니다 (실수 극점만).';
   }
 
-  // ── 코치(힌트·질문·내 답·AI) ────────────────
-  function renderCoach(step) {
-    var box = $('#coach'), aiOn = AI.available();
-    var badge = aiOn ? '<span class="badge on">AI 연결됨 · ' + AI.state.provider + ' 미리보기</span>' : '<span class="badge">AI 없이 정적 힌트로 동작</span>';
-    var h = '<div class="coach-head"><h3>막히면 한 단계씩 열어 보세요</h3>' + badge + '</div>';
-    h += '<div class="ladder" role="group" aria-label="힌트 단계">' + ['개념', '힌트', '공식·대입', '전체 풀이'].map(function (t, k) {
-      return '<button class="lv" data-lv="' + (k + 1) + '"><span>' + (k + 1) + '</span>' + t + '</button>';
-    }).join('') + '</div><div id="ladder-out" class="ladder-out"></div>';
-    if (step.questions.length) h += '<p class="qs-title">이 단계에서 생각해 볼 질문</p><div class="chips qs">' + step.questions.map(function (q, k) { return '<button class="chip q" data-q="' + k + '">' + q.q + '</button>'; }).join('') + '</div><div id="q-out"></div>';
-    if (step.check) h += '<form id="check-form" class="check"><label for="check-in">' + step.check.prompt + '</label><div class="row"><input id="check-in" inputmode="decimal" autocomplete="off" placeholder="예: ' + (step.check.tol ? '−1.5 또는 −3/2' : '3') + '"><button class="primary sm" type="submit">내 답 확인</button></div><div id="check-out" class="check-out" aria-live="polite"></div></form>';
-    if (aiOn) h += '<form id="ask-form" class="ask"><label for="ask-in">AI에게 질문하기</label><textarea id="ask-in" rows="2" placeholder="예: 점근선 중심이 왜 이 값인지 모르겠어요"></textarea><div class="row"><button class="primary sm" type="submit">보내기</button><button type="button" id="ask-stop" class="ghost sm" hidden>멈추기</button></div></form>';
-    else h += '<p class="muted sm">AI에게 직접 묻기는 AI가 연결된 화면(claude.ai 미리보기 또는 공개 홈페이지)에서 켜집니다.</p>';
-    h += '<div id="thread" class="thread" aria-live="polite"></div>';
-    if (step.example) h += '<button id="btn-example" class="ghost wide">간단한 예시로 원리 먼저 보기 →</button>';
-    box.innerHTML = h;
-    $$('.lv', box).forEach(function (b) { b.onclick = function () { openLadder(step, +b.getAttribute('data-lv')); }; });
-    $$('.q', box).forEach(function (b) { b.onclick = function () { openQuestion(step, +b.getAttribute('data-q')); }; });
-    var cf = $('#check-form');
-    if (cf) cf.onsubmit = function (e) { e.preventDefault(); gradeAnswer(step); };
-    var af = $('#ask-form');
-    if (af) af.onsubmit = function (e) { e.preventDefault(); var q = $('#ask-in').value.trim(); if (q) askAI(step, { level: 2, question: q }); };
-    var ex = $('#btn-example');
-    if (ex) ex.onclick = function () { openExample(step.example, step); };
-    var prev = S.thread[step.num];
-    if (prev) $('#thread').innerHTML = prev;
-  }
-
-  function openLadder(step, lv) {
-    var out = $('#ladder-out'), h = '', k;
-    for (k = 0; k < lv; k++) h += '<div class="lad-card enter" style="--d:' + (k === lv - 1 ? 0 : 0) + 'ms"><span class="tag">' + (k + 1) + '단계 · ' + ['개념', '힌트', '공식·대입', '전체 풀이'][k] + '</span><p>' + step.ladder[k] + '</p></div>';
-    if (AI.available()) h += '<button class="ghost sm ai-lv" data-lv="' + lv + '">AI에게 ' + lv + '단계를 내 상황에 맞게 설명 듣기</button>';
-    out.innerHTML = h;
-    $$('.lv').forEach(function (b) { b.classList.toggle('on', +b.getAttribute('data-lv') <= lv); });
-    var ab = $('.ai-lv', out);
-    if (ab) ab.onclick = function () { askAI(step, { level: lv, question: '이 단계를 ' + lv + '단계 수준으로 설명해 주세요.' }); };
-  }
-
-  function openQuestion(step, k) {
-    var q = step.questions[k], out = $('#q-out');
-    out.innerHTML = '<div class="lad-card enter"><span class="tag">' + q.q + '</span><p>' + q.a + '</p>' + (AI.available() ? '<button class="ghost sm" id="q-more">이 질문을 AI에게 더 묻기</button>' : '') + '</div>';
-    var more = $('#q-more');
-    if (more) more.onclick = function () { askAI(step, { level: 2, question: q.q + ' (화면의 기본 설명: ' + q.a + ') 이 문제에 맞춰 더 쉽게 설명해 주세요.' }); };
+  // Optional local practice remains compact; no AI hint/chat panel.
+  function renderPractice(step) {
+    if (!step.check && !step.example) return;
+    var h = '<details class="practice"><summary>직접 확인하기</summary>';
+    if (step.check) h += '<form id="check-form" class="check"><label for="check-in">' + step.check.prompt + '</label><div class="row"><input id="check-in" inputmode="decimal" autocomplete="off"><button class="ghost sm" type="submit">내 답 확인</button></div><div id="check-out" aria-live="polite"></div></form>';
+    if (step.example) h += '<button id="btn-example" class="ghost sm">간단한 예시 보기</button>';
+    $('#step-body').insertAdjacentHTML('beforeend', h + '</details>');
+    var form = $('#check-form'); if (form) form.onsubmit = function (e) { e.preventDefault(); gradeAnswer(step); };
+    var ex = $('#btn-example'); if (ex) ex.onclick = function () { openExample(step.example, step); };
   }
 
   function parseAnswer(s) {
@@ -360,37 +329,7 @@
     S.lastCheck = { answer: raw, ok: ok };
     if (ok) { out.className = 'check-out ok'; out.innerHTML = '맞습니다. 그래프에서 같은 값을 찾아 확인해 보세요.'; return; }
     out.className = 'check-out bad';
-    out.innerHTML = '계산 결과와 다릅니다. 어디서 달라졌는지 바로 정답을 보기보다 힌트 2단계부터 열어 보세요.' +
-      (AI.available() ? '<label for="how-in" class="sm">어떻게 계산했는지 적어 주시면 AI가 함께 봅니다</label><textarea id="how-in" rows="2" placeholder="예: Σ극점을 −3 −1 −1로 더했어요"></textarea><button type="button" class="ghost sm" id="how-send">AI에게 내 풀이 보여 주기</button>' : '');
-    var hs = $('#how-send');
-    if (hs) hs.onclick = function () { askAI(step, { level: 2, question: '제 답은 ' + raw + '입니다. 이렇게 계산했어요: ' + ($('#how-in').value || '(설명 없음)'), check: { answer: raw, ok: false } }); };
-  }
-
-  var askCtl = null;
-  function askAI(step, o) {
-    if (!AI.available()) return;
-    var th = $('#thread'), facts = {}, i;
-    for (i = 0; i < step.num; i++) facts[(i + 1) + '단계 ' + S.steps[i].title] = S.steps[i].facts;
-    var ctx = { tf: S.tfText, stepNum: step.num, stepTitle: step.title, facts: facts, level: o.level, question: o.question, check: o.check };
-    var item = document.createElement('div');
-    item.className = 'ai-msg';
-    item.innerHTML = '<div class="ai-q">' + M.esc(o.question.length > 120 ? o.question.slice(0, 120) + '…' : o.question) + '</div><div class="ai-a"><span class="muted">생각하는 중…</span></div><div class="ai-meta"></div>';
-    th.appendChild(item);
-    item.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' });
-    if (askCtl) askCtl.abort();
-    askCtl = new AbortController();
-    var stop = $('#ask-stop'); if (stop) { stop.hidden = false; stop.onclick = function () { askCtl.abort(); }; }
-    var a = $('.ai-a', item), meta = $('.ai-meta', item);
-    AI.ask(ctx, function (u) { a.textContent = u.text; }, askCtl.signal).then(function (r) {
-      a.textContent = r.text;
-      var chk = AI.checkNumbers(r.text, S.allNums, o.question);
-      meta.innerHTML = '<span class="by">AI · ' + AI.state.provider + '</span>' + (chk.ok ? '<span class="numck ok">숫자 검사 통과 (' + chk.count + '개)</span>' : '<span class="numck bad">검증값에 없는 숫자: ' + chk.bad.map(function (x) { return F.dec(x, 3); }).join(', ') + ' — 위의 계산 결과로 확인해 주세요</span>');
-      if (r.truncated) meta.innerHTML += '<span class="muted sm">답이 길어 중간에 끊겼습니다.</span>';
-    }, function (e) {
-      var m = AI.errMsg(e);
-      if (e && e.text) a.textContent = e.text; else a.innerHTML = '<span class="muted">' + (m || '멈췄습니다.') + '</span>';
-      if (!AI.available()) renderCoach(step);
-    }).then(function () { if (stop) stop.hidden = true; S.thread[step.num] = th.innerHTML; });
+    out.textContent = '계산 결과와 다릅니다. 위의 공식과 대입 과정을 다시 확인해 보세요.';
   }
 
   // ── 간단한 예시 → 원래 문제로 복귀 ──────────
@@ -413,14 +352,8 @@
     exGraph.stop();
     $('#example').hidden = true;
     document.body.classList.remove('sheet-open');
-    var th = $('#thread');
-    var card = document.createElement('div');
-    card.className = 'lad-card back enter';
-    card.innerHTML = '<span class="tag">원래 문제로 돌아왔습니다</span><p>그렇다면 이 문제는 어떻게 될까요? 방금 본 원리를 ' + M.mv('G') + M.mv('H') + ' = ' + tfHTML(S.res) + '에 그대로 적용해 보세요.' + (step.check ? ' 아래 칸에 답을 넣어 확인할 수 있습니다.' : '') + '</p>';
-    th.appendChild(card);
-    S.thread[step.num] = th.innerHTML;
-    var ci = $('#check-in');
-    if (ci) { ci.focus(); ci.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' }); } else { card.tabIndex = -1; card.focus(); card.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' }); }
+    var target = $('#btn-example') || $('#step-body');
+    target.focus({ preventScroll: true });
   }
 
   // ── 학습 기록 ───────────────────────────────
@@ -478,6 +411,7 @@
     $('#input-title').textContent = copy.prompt;
     exGraph = new RL.Graph($('#ex-graph'));
     graph.onRef = light;
+    inspector = new RL.PointInspector(graph);
     $('#examples').innerHTML = EXAMPLE_INPUTS.map(function (e) { return '<button class="chip ex" data-in="' + M.esc(e.input) + '">' + e.label + '</button>'; }).join('');
     $$('#examples .ex').forEach(function (b) { b.onclick = function () { setExample(b.getAttribute('data-in')); }; });
     var inp = $('#tf-input'), timer = 0;
@@ -535,14 +469,14 @@
     window.addEventListener('resize', function () {
       clearTimeout(rt);
       rt = setTimeout(function () {
-        if (S.steps && !$('#screen-lesson').hidden) { graph.fit(); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K); }
+        if (S.steps && !$('#screen-lesson').hidden) { graph.fit(); graph.show(S.cur + 1, false); if (S.cur === 8) setK(S.K); inspector.bind(); inspector.refresh(); }
         else { previewTour.resize(); previewTour.sync(); }
       }, 160);
     });
     setExample(EXAMPLE_INPUTS[0].input, true);
     AI.init().then(function () {
       $('#photo-help').textContent = AI.available() && AI.state.images ? '사진을 선택한 뒤 전송에 동의하면 식으로 옮겨 드립니다.' : '현재 사진 자동 인식은 연결되어 있지 않습니다. 사진을 띄워 놓고 직접 입력할 수 있습니다.';
-      if (S.steps && !$('#screen-lesson').hidden) renderCoach(S.steps[S.cur]);
+
     });
   }
 
