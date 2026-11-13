@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta name="rootlocus-source-sha256" content="fd9ae3c477e884d45d6588b18487fcbcfd1571e5ffea6bf3c1187b53a671af44">
+<meta name="rootlocus-source-sha256" content="3c0159cab9a8d39d0bd1e67193fe6ac74b5cc6fb96a4bad85704186ae07dfe02">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>근궤적 AI 튜터</title>
@@ -12,7 +12,7 @@
 :root {
   --bg:#090b0a; --surface:#151817; --surface2:#1d2220; --line:#363e3a; --grid:#252d29;
   --fg:#f3f5ef; --muted:#b1b8ab; --faint:#9ba593;
-  --accent:#bef74b; --accent-ink:#152007; --focus:#d7f7a4; --pole:#efb49a; --zero:#9acbe8;
+  --accent:#c6e6a4; --accent-ink:#152007; --focus:#d7f7a4; --pole:#efb49a; --zero:#9acbe8;
   --locus:#bef74b; --asym:#a8aeaa; --key:#ecd38d; --rej:#9da697;
   --ok:#b8d8cb; --warn:#e7c77e; --bad:#ffadad; --rhp:#ffaaaa08; --glass:#11160fec;
   --font-body:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans CJK KR',system-ui,sans-serif;
@@ -43,7 +43,7 @@ button:hover:not(:disabled) { background:#263021; border-color:#77876b; }
 button:active:not(:disabled) { transform:translateY(1px); }
 button:disabled { opacity:.45; cursor:default; }
 button.primary { background:var(--accent); border-color:transparent; color:var(--accent-ink); font-weight:700; }
-button.primary:hover:not(:disabled) { background:#cef97d; }
+button.primary:hover:not(:disabled) { background:#d9edc4; }
 button.ghost { background:transparent; }
 button.ghost:hover:not(:disabled) { background:#ffffff0a; }
 button.sm { font-size:.84rem; padding:8px 14px; }
@@ -61,25 +61,34 @@ button.wide { width:100%; text-align:left; }
 .top-actions .ghost { border-radius:999px; }
 .eyebrow { font:500 .66rem/1.7 var(--font-mono); letter-spacing:.18em; color:var(--muted); margin:0; }
 .status-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); vertical-align:middle; margin-right:8px; }
-/* Quiet entry: editorial type, generous space, one action, low ambient light. */
-.welcome { position:relative; isolation:isolate; overflow:hidden; min-height:calc(100svh - 86px); display:grid; grid-template-rows:1fr auto; --drift-x:0px; --drift-y:0px; }
-.welcome-art { position:absolute; z-index:-1; inset:0; pointer-events:none; overflow:hidden; }
-.light-haze,.light-core { position:absolute; transition:transform 540ms var(--ease); }
-.light-haze { width:1300px; height:650px; left:calc(50% - 650px); bottom:-360px; background:radial-gradient(ellipse,#92d74638,transparent 70%); transform:translate(calc(var(--drift-x) * .55),calc(var(--drift-y) * .55)); }
-.light-core { width:820px; height:370px; left:calc(50% - 410px); bottom:-245px; background:radial-gradient(ellipse,#b8fa637a,transparent 68%); transform:perspective(900px) translate(var(--drift-x),var(--drift-y)) rotateY(var(--tilt,0deg)); }
-.welcome-content { align-self:center; text-align:center; padding:62px 16px 100px; }
-.welcome .eyebrow { font-size:.62rem; letter-spacing:.26em; color:#a5b09b; }
-.welcome h1 { margin:30px 0 26px; font:400 clamp(48px,5.5vw,78px)/1.3 var(--font-editorial); letter-spacing:-.055em; }
-.welcome h1 em { color:var(--fg); font-style:normal; }
-.welcome-sub { margin:0; color:#aeb6a4; font-size:.92rem; line-height:1.9; letter-spacing:-.025em; }
-.mobile-break { display:none; }
-#btn-begin { margin-top:34px; padding:13px 24px; min-width:156px; border-radius:999px; }
-#btn-begin span { display:inline-block; margin-left:28px; font-size:1.2em; transition:transform var(--motion-fast); }
-#btn-begin:hover span { transform:translate(2px,-2px); }
-.welcome-bottom { display:flex; justify-content:center; align-items:center; gap:24px; margin:0; padding:24px 0 32px; color:#a4ad9a; font-size:.7rem; letter-spacing:.03em; }
-.welcome-bottom i { color:#4f5a43; font-style:normal; }
+/* One continuous mathematical atmosphere; decoration is separate from data. */
+.app { position:relative; z-index:1; }
+.sr-only { position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+.atmosphere { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; --journey:0; --drift-x:0px; --drift-y:0px; transition:opacity 650ms; }
+.ambient-wash { position:absolute; width:130vw; height:100vh; left:-15vw; top:30vh; background:radial-gradient(ellipse at center,#739e5328,transparent 65%); transform:translate(calc(var(--journey) * -22vw),calc(var(--journey) * -32vh)); }
+.ambient-horizon { position:absolute; width:110vw; height:70vh; left:-5vw; bottom:-40vh; background:radial-gradient(ellipse at center,#b9ec7352,transparent 67%); transform:translate(calc(var(--journey) * 28vw),calc(var(--journey) * -45vh)); opacity:calc(1 - var(--journey) * .55); }
+#math-field { width:100%; height:100%; opacity:calc(1 - var(--journey) * .96); transform:translate(var(--drift-x),calc(var(--drift-y) - var(--journey) * 24vh)) scale(calc(1 - var(--journey) * .18)); }
+.atmosphere-veil { position:absolute; inset:0; background:linear-gradient(180deg,transparent,#090b0a8c 70%); opacity:var(--journey); }
+body[data-scene="lesson"] .atmosphere { opacity:0; visibility:hidden; }
+.welcome { position:relative; min-height:calc(100svh - 86px); }
+.welcome-content { position:absolute; top:70%; width:100%; text-align:center; }
+#btn-begin { position:relative; isolation:isolate; border:0; border-radius:12px; background:transparent; color:#e0edcf; min-width:190px; min-height:94px; padding:18px 30px; font-size:.95rem; letter-spacing:.14em; font-weight:400; }
+#btn-begin::before { content:''; position:absolute; z-index:-1; inset:-20px -50px; background:radial-gradient(ellipse,#b8ee5820,transparent 65%); opacity:.6; transition:opacity 450ms,transform 650ms var(--ease); }
+#btn-begin::after { content:''; position:absolute; height:1px; width:80px; left:calc(50% - 40px); top:52px; background:linear-gradient(90deg,transparent,#d6eabf65,transparent); }
+#btn-begin span { display:block; font-size:1.3rem; margin-top:13px; color:#b8cd9d; transition:transform 450ms var(--ease); }
+#btn-begin:hover { background:transparent; color:#fff; }
+#btn-begin:hover::before { opacity:1; transform:scale(1.22); }
+#btn-begin:hover span { transform:translateY(5px); }
+.screen.start { scroll-margin-top:36px; min-height:100svh; }
+.start-left,.start-right { transition:opacity 850ms var(--ease),transform 1000ms var(--ease),filter 850ms var(--ease); }
+.start-right { transition-delay:110ms; }
+.scene-ready .start:not(.is-revealed) .start-left,.scene-ready .start:not(.is-revealed) .start-right { opacity:.08; transform:translateY(45px); filter:blur(7px); }
+.start.is-revealed .start-left,.start.is-revealed .start-right { opacity:1; transform:none; filter:none; }
+body[data-scene="journey"] .top { border-color:#ffffff08; }
+.top-actions .ghost { border-color:transparent; color:var(--muted); }
+.top-actions .ghost:hover { border-color:var(--line); }
 /* Equation workspace */
-.screen.start { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:70px; align-items:center; max-width:1160px; margin:0 auto; padding:42px 0 70px; }
+.screen.start { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:70px; align-items:center; max-width:1160px; margin:0 auto; padding:70px 0 90px; }
 .start-left { display:flex; flex-direction:column; gap:18px; min-width:0; }
 .back-welcome { align-self:flex-start; padding-left:0; border:0; color:var(--muted); }
 .start-left h1 { font:400 clamp(32px,3.3vw,49px)/1.3 var(--font-editorial); letter-spacing:-.05em; margin:0 0 4px; }
@@ -87,7 +96,7 @@ button.wide { width:100%; text-align:left; }
 .lede { margin:0 0 10px; max-width:46ch; color:var(--muted); font-size:.92rem; }
 .field-label { font-size:.87rem; font-weight:600; }
 .input-row { display:flex; gap:8px; flex-wrap:wrap; }
-#tf-input { min-width:0; flex:1 1 300px; padding:18px; border:1px solid #63704f; border-radius:var(--r-sm); background:#11160e; font:1rem/1.65 var(--font-mono); }
+#tf-input { min-width:0; flex:1 1 300px; padding:18px; border:1px solid #73826570; border-radius:var(--r-sm); background:#131a15b8; font:1rem/1.65 var(--font-mono); }
 #tf-input:focus { outline:2px solid var(--focus); outline-offset:3px; }
 #tf-input[aria-invalid="true"] { border-color:var(--bad); }
 .photo-help { margin:-6px 0 0; color:var(--muted); font-size:.76rem; }
@@ -100,7 +109,7 @@ button.wide { width:100%; text-align:left; }
 .ai-status { font-size:.76rem; color:var(--muted); }.ai-status.on { color:var(--ok); }
 .scope { font-size:.83rem; color:var(--muted); }.scope summary { cursor:pointer; color:var(--fg); min-height:44px; padding-top:10px; }.scope ul { margin:8px 0 0; padding-left:20px; }
 .start-right { min-width:0; }.start-right>.eyebrow { margin-bottom:20px; }
-.plane-card { padding:16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); }
+.plane-card { padding:16px; background:#151817dc; border:1px solid var(--line); border-radius:var(--r); }
 .plane-card .plane { width:100%; aspect-ratio:1; display:block; }
 .cap { font-size:.76rem; color:var(--muted); margin:10px 0 0; }.k-pole { color:var(--pole); }.k-zero { color:var(--zero); }
 .photo { display:flex; gap:14px; padding:16px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); }.photo .thumb { width:90px; height:90px; object-fit:cover; border-radius:8px; }.photo-body { min-width:0; }.photo p { font-size:.82rem; margin:0 0 12px; }
@@ -289,9 +298,6 @@ body.sheet-open { overflow: hidden; }
 .enter { animation:rise var(--motion-panel) var(--ease) both; }
 .still .enter { animation:none; }
 .screen-arrive { animation:reveal var(--motion-screen) var(--ease) both; }
-.welcome-content>.eyebrow { animation:rise 440ms var(--ease) both; }
-.welcome-content h1 { animation:rise 500ms var(--ease) 50ms both; }
-.welcome-sub { animation:rise 500ms var(--ease) 100ms both; }
 @keyframes rise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
 @keyframes reveal { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
 @media(min-width:1200px) { .coach { max-width:100%; }.coach .ladder { max-width:600px; } }
@@ -301,7 +307,7 @@ body.sheet-open { overflow: hidden; }
 }
 @media(max-width:760px) {
   .app { padding-inline:max(18px,env(safe-area-inset-left)); }.top { height:74px; }.name { font-size:.82rem; }.top-actions button { padding:7px 10px; font-size:.75rem; }
-  .welcome { min-height:calc(100svh - 74px); }.welcome-content { padding:60px 0 88px; }.welcome h1 { font-size:clamp(43px,7.5vw,62px); }.welcome-sub { font-size:.84rem; }.mobile-break { display:block; }
+  .welcome { min-height:calc(100svh - 74px); }.welcome-content { top:69%; }
   .screen.start { display:flex; flex-direction:column; align-items:stretch; padding-top:24px; max-width:620px; }.start-right .plane { max-height:340px; }.start-right { margin-top:14px; }
   .st { min-height:44px; }.st-t { display:none; }.stepper { gap:3px; }.st-n { font-size:.83rem; }
   .stage { padding:18px; }.plane-wrap { height:365px; }.step-body,.coach { padding:22px; }.sheet-body { grid-template-columns:minmax(0,1fr); }
@@ -313,18 +319,22 @@ body.sheet-open { overflow: hidden; }
 }
 @media(prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
-  .light-haze,.light-core { transform:none!important; }
+  .start-left,.start-right { opacity:1!important; filter:none!important; transform:none!important; }
 }
 
 /* 사용자가 직접 선택한 동작 줄이기: OS 설정과 동일한 시각적 처리. */
 :root[data-motion="reduced"] *, :root[data-motion="reduced"] *::before, :root[data-motion="reduced"] *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
-:root[data-motion="reduced"] .light-haze, :root[data-motion="reduced"] .light-core { transform:none!important; }
+:root[data-motion="reduced"] .start-left, :root[data-motion="reduced"] .start-right { opacity:1!important; filter:none!important; transform:none!important; }
 #btn-motion[aria-pressed="true"] { color:var(--accent); border-color:#bef74b52; }
 @media(max-width:600px) { .top { height:auto; min-height:74px; flex-wrap:wrap; padding-block:12px; gap:8px; }.top-actions { margin-left:auto; }#btn-motion { font-size:.68rem; } }
 </style>
 
 </head>
-<body>
+<body data-scene="journey">
+<div id="atmosphere" class="atmosphere" aria-hidden="true">
+  <div class="ambient-wash"></div><div class="ambient-horizon"></div>
+  <canvas id="math-field"></canvas><div class="atmosphere-veil"></div>
+</div>
 <div class="app" id="app">
   <header class="top">
     <a class="brand" href="#" id="brand" aria-label="근궤적 AI 튜터 처음 화면"><span class="logo" aria-hidden="true"><i>×</i><i>○</i></span><span class="name">근궤적 AI 튜터</span></a>
@@ -336,21 +346,14 @@ body.sheet-open { overflow: hidden; }
     </div>
   </header>
 
-  <main id="screen-welcome" class="screen welcome" aria-labelledby="welcome-title">
-    <div class="welcome-art" aria-hidden="true">
-      <div class="light-haze"></div><div class="light-core"></div>
-    </div>
+  <section id="screen-welcome" class="screen welcome" aria-labelledby="welcome-title">
     <div class="welcome-content">
-      <p class="eyebrow">ROOT LOCUS STUDY</p>
-      <h1 id="welcome-title" tabindex="-1">이번엔 어떻게<br><em>그려볼까요?</em></h1>
-      <p class="welcome-sub">식을 입력하고, 근궤적이 만들어지는<br class="mobile-break"> 과정을 따라가 보세요.</p>
-      <button id="btn-begin" class="primary lg">학습 시작 <span aria-hidden="true">↗</span></button>
-
+      <h1 id="welcome-title" class="sr-only" tabindex="-1">근궤적 탐구 시작</h1>
+      <button id="btn-begin" class="begin-journey" aria-controls="screen-start">학습 시작 <span aria-hidden="true">↓</span></button>
     </div>
-    <footer class="welcome-bottom"><span>식 입력</span><i aria-hidden="true">—</i><span>단계별 풀이</span><i aria-hidden="true">—</i><span>K 변화 탐구</span></footer>
-  </main>
+  </section>
 
-  <main id="screen-start" class="screen start" hidden>
+  <main id="screen-start" class="screen start">
     <section class="start-left">
       <button id="btn-welcome" class="ghost sm back-welcome">← 처음으로</button><p class="eyebrow">01 / YOUR EQUATION</p>
       <h1>어떤 식을<br> 탐구해 볼까요?</h1>
@@ -2717,6 +2720,125 @@ body.sheet-open { overflow: hidden; }
   RL.store = { load: load, upsert: upsert, remove: remove, getPref: getPref, setPref: setPref };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
 
+/* ===== app/js/atmosphere.js ===== */
+/* Decorative parametric surface, never root-locus data.
+ * One bounded canvas, no assets/network. Only the visible intro animates.
+ * Scroll uses native document flow; reduced motion renders a still surface.
+ */
+(function (RL) {
+  'use strict';
+  var sync = function () {};
+  function init() {
+    document.body.classList.add('scene-ready');
+    var scene = document.getElementById('atmosphere');
+    var canvas = document.getElementById('math-field'), ctx = canvas.getContext('2d');
+    var hero = document.getElementById('screen-welcome');
+    var input = document.getElementById('screen-start');
+    var media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var frame = 0, tick = 0, time = 0, w = 0, h = 0, px = 0, py = 0, progress = 0;
+    var reduced = function () { return media.matches || document.documentElement.dataset.motion === 'reduced'; };
+    // Precompute the surface: a toroidal sheet with a three-fold twist.
+    var curves = [], rows = 32, samples = 144;
+    for (var j = 0; j < rows; j++) {
+      var points = [], v = j / rows * Math.PI * 2;
+      for (var i = 0; i <= samples; i++) {
+        var u = i / samples * Math.PI * 2, tube = v + 3 * u;
+        var radius = 1 + 0.32 * Math.cos(tube);
+        points.push([radius * Math.cos(u), radius * Math.sin(u), 0.32 * Math.sin(tube)]);
+      }
+      curves.push(points);
+    }
+    function draw() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, w, h);
+      var scale = Math.min(w * 0.32, h * 0.34, 315);
+      var ax = 0.96 + Math.sin(time * 0.17) * 0.24 + py * 0.09;
+      var az = -0.38 + time * 0.045 + px * 0.07;
+      var ca = Math.cos(ax), sa = Math.sin(ax), cz = Math.cos(az), sz = Math.sin(az);
+      function project(p) {
+        var y = p[1] * ca - p[2] * sa, z = p[1] * sa + p[2] * ca;
+        var x = p[0] * cz - y * sz; y = p[0] * sz + y * cz;
+        var perspective = 3.8 / (3.8 - z);
+        return [w * 0.5 + x * scale * perspective, h * 0.43 + y * scale * perspective, z];
+      }
+      for (var r = 0; r < curves.length; r++) {
+        ctx.beginPath();
+        for (var q = 0; q < curves[r].length; q++) {
+          var p = project(curves[r][q]);
+          if (!q) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
+        }
+        var gleam = 0.12 + 0.14 * (0.5 + 0.5 * Math.sin(r * 0.35 + time * 0.3));
+        ctx.strokeStyle = 'rgba(195,226,174,' + gleam + ')';
+        ctx.lineWidth = r % 8 === 0 ? 1 : 0.65; ctx.stroke();
+      }
+      // Sparse travelling points suggest trajectories, without axes or numerical claims.
+      for (var s = 0; s < 5; s++) {
+        var index = Math.floor(((time * 0.018 + s / 5) % 1) * samples);
+        var dot = project(curves[s * 6][index]);
+        ctx.beginPath(); ctx.arc(dot[0], dot[1], 1.4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(226,247,208,0.8)'; ctx.fill();
+      }
+    }
+    function active() { return ctx && !document.hidden && !hero.hidden && progress < 0.98 && !reduced(); }
+    function animate(now) {
+      frame = 0;
+      if (!active()) return;
+      // Cap expensive drawing at about 30Hz; never catch up after tab suspension.
+      if (!tick || now - tick >= 32) {
+        time += tick ? Math.min(64, now - tick) / 1000 : 0;
+        tick = now; draw();
+      }
+      frame = requestAnimationFrame(animate);
+    }
+    function wake() {
+      if (active()) { if (!frame) { tick = 0; frame = requestAnimationFrame(animate); } }
+      else { cancelAnimationFrame(frame); frame = 0; tick = 0; }
+    }
+    function update() {
+      var startY = input.getBoundingClientRect().top + window.scrollY;
+      progress = Math.max(0, Math.min(1, window.scrollY / Math.max(1, startY - 36)));
+      scene.style.setProperty('--journey', progress.toFixed(4));
+      scene.style.setProperty('--drift-x', (px * 12).toFixed(1) + 'px');
+      scene.style.setProperty('--drift-y', (py * 8).toFixed(1) + 'px');
+      var visible = !input.hidden && input.getBoundingClientRect().top < h * 0.82;
+      if (visible || reduced()) input.classList.add('is-revealed');
+      else if (progress < 0.08 && !input.contains(document.activeElement)) input.classList.remove('is-revealed');
+      wake();
+    }
+    var scrollFrame = 0;
+    function schedule() {
+      if (!scrollFrame) scrollFrame = requestAnimationFrame(function () { scrollFrame = 0; update(); });
+    }
+    function resize() {
+      w = window.innerWidth; h = window.innerHeight;
+      var ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.round(w * ratio); canvas.height = Math.round(h * ratio);
+      if (ctx) ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      draw(); update();
+    }
+    sync = function () {
+      cancelAnimationFrame(scrollFrame); scrollFrame = 0;
+      if (document.hidden) { cancelAnimationFrame(frame); frame = 0; tick = 0; return; }
+      if (reduced()) { px = 0; py = 0; draw(); input.classList.add('is-revealed'); }
+      update();
+    };
+    hero.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'touch' || reduced()) return;
+      px = e.clientX / w - 0.5; py = e.clientY / h - 0.5; schedule();
+    }, { passive: true });
+    hero.addEventListener('pointerleave', function () { px = 0; py = 0; schedule(); });
+    input.addEventListener('focusin', function () {
+      if (input.getBoundingClientRect().top < h * 0.9) input.classList.add('is-revealed');
+    });
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', resize, { passive: true });
+    document.addEventListener('visibilitychange', sync);
+    media.addEventListener('change', sync);
+    resize(); sync();
+  }
+  RL.atmosphere = { init: init, sync: function () { sync(); } };
+})(window.RL = window.RL || {});
+
 /* ===== app/js/main.js ===== */
 /*
  * main.js — 화면 흐름
@@ -2756,25 +2878,32 @@ body.sheet-open { overflow: hidden; }
     return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
   }
 
-  // 화면을 즉시 전환한 뒤 가벼운 등장 효과를 준다. 숨겨진 화면은 클릭·탭 대상에서 제외된다.
+  // 첫 화면과 입력은 같은 문서의 세로 공간. 학습만 별도 화면으로 전환한다.
   function showScreen(id) {
+    var lesson = id === 'screen-lesson';
+    document.body.dataset.scene = lesson ? 'lesson' : 'journey';
+    $('#screen-welcome').hidden = lesson;
+    $('#screen-start').hidden = lesson;
+    $('#screen-lesson').hidden = !lesson;
+    $('#screen-lesson').classList.remove('screen-arrive');
+    if (lesson) {
+      window.scrollTo(0, 0);
+      void $('#screen-lesson').offsetWidth;
+      $('#screen-lesson').classList.add('screen-arrive');
+    } else {
+      var top = id === 'screen-start' ? $('#screen-start').getBoundingClientRect().top + window.scrollY - 36 : 0;
+      window.scrollTo({ top: top, behavior: reducedMotion() ? 'instant' : 'smooth' });
+    }
     resetWelcomeMotion();
-    ['screen-welcome', 'screen-start', 'screen-lesson'].forEach(function (name) {
-      var screen = document.getElementById(name);
-      screen.hidden = name !== id;
-      screen.classList.remove('screen-arrive');
-    });
-    var next = document.getElementById(id);
-    void next.offsetWidth;
-    next.classList.add('screen-arrive');
-    window.scrollTo(0, 0);
   }
   function enterInput() {
     graph.stop();
     showScreen('screen-start');
     $('#btn-home').hidden = true;
     onInput();
-    $('#tf-input').focus({ preventScroll: true });
+    var target = window.matchMedia('(pointer: coarse)').matches ? $('#screen-start h1') : $('#tf-input');
+    if (target.tagName === 'H1') target.tabIndex = -1;
+    target.focus({ preventScroll: true });
   }
   function welcome() {
     graph.stop();
@@ -2793,39 +2922,10 @@ body.sheet-open { overflow: hidden; }
     resetWelcomeMotion();
     if (reduce && S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
   }
-  // 포인터 이벤트를 프레임당 한 번만 반영한다. 터치 스크롤은 막지 않는다.
   function bindWelcomeMotion() {
-    var area = $('#screen-welcome'), frame = 0, x = 0, y = 0, depth = 0;
-    function paint() {
-      frame = 0;
-      if (area.hidden || document.hidden || reducedMotion()) return;
-      area.style.setProperty('--drift-x', (x * 28).toFixed(1) + 'px');
-      area.style.setProperty('--drift-y', (y * 20 + depth).toFixed(1) + 'px');
-      area.style.setProperty('--tilt', (x * 3).toFixed(2) + 'deg');
-    }
-    function schedule() { if (!frame) frame = requestAnimationFrame(paint); }
-    resetWelcomeMotion = function () {
-      cancelAnimationFrame(frame); frame = 0; x = 0; y = 0; depth = 0;
-      area.style.setProperty('--drift-x', '0px');
-      area.style.setProperty('--drift-y', '0px');
-      area.style.setProperty('--tilt', '0deg');
-    };
-    area.addEventListener('pointermove', function (e) {
-      if (reducedMotion() || e.pointerType === 'touch' || area.hidden || document.hidden) return;
-      var rect = area.getBoundingClientRect();
-      x = (e.clientX - rect.left) / rect.width - 0.5;
-      y = (e.clientY - rect.top) / rect.height - 0.5;
-      schedule();
-    }, { passive: true });
-    area.addEventListener('pointerleave', resetWelcomeMotion);
-    // 짧은 화면에서 실제 스크롤이 생긴 경우에만 빛의 깊이를 조금 바꾼다.
-    window.addEventListener('scroll', function () {
-      if (area.hidden || document.hidden || reducedMotion()) return;
-      depth = Math.min(12, window.scrollY * 0.06); schedule();
-    }, { passive: true });
-    document.addEventListener('visibilitychange', resetWelcomeMotion);
+    RL.atmosphere.init();
+    resetWelcomeMotion = RL.atmosphere.sync;
     window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function () {
-      resetWelcomeMotion();
       if (reducedMotion() && S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
     });
   }
