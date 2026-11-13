@@ -37,10 +37,7 @@ def launch_browser(p):
 def on_console(m):
     if m.type != 'error':
         return
-    if 'Failed to load resource' in m.text:  # 인터넷이 없으면 글꼴(Google Fonts)만 못 불러옴 — 동작에는 영향 없음
-        notes.append(m.text)
-    else:
-        errors.append('console: ' + m.text)
+    errors.append('console: ' + m.text)
 
 
 with sync_playwright() as p:
@@ -53,12 +50,15 @@ with sync_playwright() as p:
     pg.click('#btn-begin')
     pg.wait_for_timeout(600)
     n_ex = pg.locator('#examples .ex').count()
+    assert n_ex == 6, '예제 선택자가 바뀌어 검사를 건너뛰면 안 됩니다'
     for e in range(n_ex):
         pg.locator('#examples .ex').nth(e).click()
         pg.wait_for_timeout(250)
         pg.click('#btn-start')
         for s in range(9):
             pg.wait_for_timeout(350)
+            assert pg.locator('[aria-current="step"]').get_attribute('data-i') == str(s)
+            assert pg.locator('#step-body h2').inner_text().strip()
             if s < 8:
                 pg.click('#btn-next')
         # 9단계 슬라이더와 빠른 버튼
@@ -100,6 +100,8 @@ with sync_playwright() as p:
         pg.fill('#tf-input', bad)
         pg.wait_for_timeout(300)
         msgs.append((bad, pg.inner_text('#tf-msg'), pg.is_disabled('#btn-start')))
+        assert pg.is_disabled('#btn-start')
+        assert pg.get_attribute('#tf-input', 'aria-invalid') == 'true'
     # 3) 휴대폰 크기 (밝은 화면)
     mp = br.new_page(viewport={'width': 390, 'height': 844}, color_scheme='light', device_scale_factor=2)
     mp.on('pageerror', lambda e: errors.append('mobile pageerror: ' + str(e)))
@@ -112,6 +114,7 @@ with sync_playwright() as p:
     mp.wait_for_timeout(2600)
     mp.screenshot(path=str(shots / 'mobile-step5.png'), full_page=False)
     overflow = mp.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+    assert overflow == 0
     br.close()
 
 print('예제 수:', n_ex)
@@ -126,4 +129,3 @@ print('오류:', len(errors))
 for e in errors[:20]:
     print('  ', e)
 sys.exit(1 if errors else 0)
-

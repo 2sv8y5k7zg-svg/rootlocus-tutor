@@ -185,6 +185,14 @@
   function classify(rs) {
     var tol = 1e-7 * scaleOf(rs), mr = maxRe(rs);
     if (mr > tol) return 'unstable';
+    // A repeated pole on the imaginary axis gives t^q exp(jωt), q >= 1.
+    // Simple axis poles can be marginal; repeated axis poles are unbounded.
+    for (var i = 0; i < rs.length; i++) {
+      if (Math.abs(rs[i].re) > tol) continue;
+      for (var j = i + 1; j < rs.length; j++) {
+        if (Math.abs(rs[j].re) <= tol && C.dist(rs[i], rs[j]) <= tol) return 'unstable';
+      }
+    }
     if (mr >= -tol) return 'marginal';
     return 'stable';
   }

@@ -1,0 +1,108 @@
+{
+  "sha256": "26376e4b75ad8b78e5dbf3d266cd41ae5f1a6728c4b9ff7dac7790ce8a9b9623",
+  "browser": "157.0.8103.78",
+  "checks": [
+    "local greeting 7",
+    "local greeting 14",
+    "local greeting 19",
+    "local greeting 1",
+    "returning greeting requires history",
+    "surface fits nav/CTA and width 876,812",
+    "surface fits nav/CTA and width 1440,900",
+    "surface fits nav/CTA and width 1194,834",
+    "surface fits nav/CTA and width 834,1194",
+    "surface fits nav/CTA and width 390,844",
+    "surface fits nav/CTA and width 360,740",
+    "equal panel widths and aligned top/bottom",
+    "desktop CTA fits viewport",
+    "AI status beside CTA removed",
+    "separate tour clearly labeled",
+    "actual engine branches drawn",
+    "pause holds phase",
+    "pause holds SVG animations",
+    "slow tour advances to different example",
+    "editing immediately takes control",
+    "input preview matches two actual poles",
+    "tour cannot overwrite user input",
+    "greeting remains stable during visit",
+    "reduced motion offers explicit next example",
+    "shuffle bag covers all six examples",
+    "reduced tour stays still",
+    "no runtime errors"
+  ],
+  "bounds": [
+    {
+      "size": [
+        876,
+        812
+      ],
+      "minX": 252.4188715250657,
+      "minY": 213.82596448760358,
+      "maxX": 642.650446796544,
+      "maxY": 512.7518680863161,
+      "top": 86,
+      "bottom": 594.1875
+    },
+    {
+      "size": [
+        1440,
+        900
+      ],
+      "minX": 508.2835041071007,
+      "minY": 227.97198307691323,
+      "maxX": 952.5344423011246,
+      "maxY": 567.6257663539161,
+      "top": 86,
+      "bottom": 655.796875
+    },
+    {
+      "size": [
+        1194,
+        834
+      ],
+      "minX": 404.3845126919528,
+      "minY": 217.36336604201884,
+      "maxX": 808.6278684307329,
+      "maxY": 526.473821850418,
+      "top": 86,
+      "bottom": 609.59375
+    },
+    {
+      "size": [
+        834,
+        1194
+      ],
+      "minX": 121.22498686025153,
+      "minY": 275.2246360923323,
+      "maxX": 742.6811624212685,
+      "maxY": 750.9237917362543,
+      "top": 86,
+      "bottom": 861.59375
+    },
+    {
+      "size": [
+        390,
+        844
+      ],
+      "minX": 54.33171784144045,
+      "minY": 243.1744468539968,
+      "maxX": 349.785879013136,
+      "maxY": 469.25911091649226,
+      "top": 74,
+      "bottom": 605.296875
+    },
+    {
+      "size": [
+        360,
+        740
+      ],
+      "minX": 51.64342651713615,
+      "minY": 215.4033879194357,
+      "maxX": 321.2082221018594,
+      "maxY": 421.65606390627363,
+      "top": 74,
+      "bottom": 533.53125
+    }
+  ],
+  "errors": []
+}
