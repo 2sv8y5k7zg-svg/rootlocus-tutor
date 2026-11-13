@@ -36,25 +36,32 @@
     return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
   }
 
-  // 화면을 즉시 전환한 뒤 가벼운 등장 효과를 준다. 숨겨진 화면은 클릭·탭 대상에서 제외된다.
+  // 첫 화면과 입력은 같은 문서의 세로 공간. 학습만 별도 화면으로 전환한다.
   function showScreen(id) {
+    var lesson = id === 'screen-lesson';
+    document.body.dataset.scene = lesson ? 'lesson' : 'journey';
+    $('#screen-welcome').hidden = lesson;
+    $('#screen-start').hidden = lesson;
+    $('#screen-lesson').hidden = !lesson;
+    $('#screen-lesson').classList.remove('screen-arrive');
+    if (lesson) {
+      window.scrollTo(0, 0);
+      void $('#screen-lesson').offsetWidth;
+      $('#screen-lesson').classList.add('screen-arrive');
+    } else {
+      var top = id === 'screen-start' ? $('#screen-start').getBoundingClientRect().top + window.scrollY - 36 : 0;
+      window.scrollTo({ top: top, behavior: reducedMotion() ? 'instant' : 'smooth' });
+    }
     resetWelcomeMotion();
-    ['screen-welcome', 'screen-start', 'screen-lesson'].forEach(function (name) {
-      var screen = document.getElementById(name);
-      screen.hidden = name !== id;
-      screen.classList.remove('screen-arrive');
-    });
-    var next = document.getElementById(id);
-    void next.offsetWidth;
-    next.classList.add('screen-arrive');
-    window.scrollTo(0, 0);
   }
   function enterInput() {
     graph.stop();
     showScreen('screen-start');
     $('#btn-home').hidden = true;
     onInput();
-    $('#tf-input').focus({ preventScroll: true });
+    var target = window.matchMedia('(pointer: coarse)').matches ? $('#screen-start h1') : $('#tf-input');
+    if (target.tagName === 'H1') target.tabIndex = -1;
+    target.focus({ preventScroll: true });
   }
   function welcome() {
     graph.stop();
@@ -73,39 +80,10 @@
     resetWelcomeMotion();
     if (reduce && S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
   }
-  // 포인터 이벤트를 프레임당 한 번만 반영한다. 터치 스크롤은 막지 않는다.
   function bindWelcomeMotion() {
-    var area = $('#screen-welcome'), frame = 0, x = 0, y = 0, depth = 0;
-    function paint() {
-      frame = 0;
-      if (area.hidden || document.hidden || reducedMotion()) return;
-      area.style.setProperty('--drift-x', (x * 28).toFixed(1) + 'px');
-      area.style.setProperty('--drift-y', (y * 20 + depth).toFixed(1) + 'px');
-      area.style.setProperty('--tilt', (x * 3).toFixed(2) + 'deg');
-    }
-    function schedule() { if (!frame) frame = requestAnimationFrame(paint); }
-    resetWelcomeMotion = function () {
-      cancelAnimationFrame(frame); frame = 0; x = 0; y = 0; depth = 0;
-      area.style.setProperty('--drift-x', '0px');
-      area.style.setProperty('--drift-y', '0px');
-      area.style.setProperty('--tilt', '0deg');
-    };
-    area.addEventListener('pointermove', function (e) {
-      if (reducedMotion() || e.pointerType === 'touch' || area.hidden || document.hidden) return;
-      var rect = area.getBoundingClientRect();
-      x = (e.clientX - rect.left) / rect.width - 0.5;
-      y = (e.clientY - rect.top) / rect.height - 0.5;
-      schedule();
-    }, { passive: true });
-    area.addEventListener('pointerleave', resetWelcomeMotion);
-    // 짧은 화면에서 실제 스크롤이 생긴 경우에만 빛의 깊이를 조금 바꾼다.
-    window.addEventListener('scroll', function () {
-      if (area.hidden || document.hidden || reducedMotion()) return;
-      depth = Math.min(12, window.scrollY * 0.06); schedule();
-    }, { passive: true });
-    document.addEventListener('visibilitychange', resetWelcomeMotion);
+    RL.atmosphere.init();
+    resetWelcomeMotion = RL.atmosphere.sync;
     window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function () {
-      resetWelcomeMotion();
       if (reducedMotion() && S.steps && !$('#screen-lesson').hidden) go(S.cur, false);
     });
   }

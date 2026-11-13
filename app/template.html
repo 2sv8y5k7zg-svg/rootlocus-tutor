@@ -9,7 +9,11 @@
 <style>/*__CSS__*/</style>
 
 </head>
-<body>
+<body data-scene="journey">
+<div id="atmosphere" class="atmosphere" aria-hidden="true">
+  <div class="ambient-wash"></div><div class="ambient-horizon"></div>
+  <canvas id="math-field"></canvas><div class="atmosphere-veil"></div>
+</div>
 <div class="app" id="app">
   <header class="top">
     <a class="brand" href="#" id="brand" aria-label="근궤적 AI 튜터 처음 화면"><span class="logo" aria-hidden="true"><i>×</i><i>○</i></span><span class="name">근궤적 AI 튜터</span></a>
@@ -21,21 +25,14 @@
     </div>
   </header>
 
-  <main id="screen-welcome" class="screen welcome" aria-labelledby="welcome-title">
-    <div class="welcome-art" aria-hidden="true">
-      <div class="light-haze"></div><div class="light-core"></div>
-    </div>
+  <section id="screen-welcome" class="screen welcome" aria-labelledby="welcome-title">
     <div class="welcome-content">
-      <p class="eyebrow">ROOT LOCUS STUDY</p>
-      <h1 id="welcome-title" tabindex="-1">이번엔 어떻게<br><em>그려볼까요?</em></h1>
-      <p class="welcome-sub">식을 입력하고, 근궤적이 만들어지는<br class="mobile-break"> 과정을 따라가 보세요.</p>
-      <button id="btn-begin" class="primary lg">학습 시작 <span aria-hidden="true">↗</span></button>
-
+      <h1 id="welcome-title" class="sr-only" tabindex="-1">근궤적 탐구 시작</h1>
+      <button id="btn-begin" class="begin-journey" aria-controls="screen-start">학습 시작 <span aria-hidden="true">↓</span></button>
     </div>
-    <footer class="welcome-bottom"><span>식 입력</span><i aria-hidden="true">—</i><span>단계별 풀이</span><i aria-hidden="true">—</i><span>K 변화 탐구</span></footer>
-  </main>
+  </section>
 
-  <main id="screen-start" class="screen start" hidden>
+  <main id="screen-start" class="screen start">
     <section class="start-left">
       <button id="btn-welcome" class="ghost sm back-welcome">← 처음으로</button><p class="eyebrow">01 / YOUR EQUATION</p>
       <h1>어떤 식을<br> 탐구해 볼까요?</h1>
