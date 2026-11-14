@@ -1,5 +1,5 @@
 {
- "date": "2026-11-09T06:27:08.439Z",
+ "date": "2026-11-14T12:39:09.441Z",
  "report": [
   {
    "id": "T01",
@@ -1149,6 +1149,1570 @@
      "name": "허수축 교차",
      "ok": true,
      "detail": ""
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T16",
+   "title": "K/((s+1)(s+3))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−2:breakaway"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T17",
+   "title": "K/(s(s+3)(s+6))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−1.268:breakaway, −4.732:negativeK"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=4.2426, K=162.0000"
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T18",
+   "title": "K(s+3)/(s(s+1))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−0.551:breakaway, −5.449:breakin"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T19",
+   "title": "K/((s+1)(s+2)(s+3))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−1.423:breakaway, −2.577:negativeK"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=3.3166, K=60.0000"
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T20",
+   "title": "K/(s(s+1)(s+2)(s+3))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−0.382:breakaway, −3/2:negativeK, −2.618:breakaway"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=1.0000, K=10.0000"
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T21",
+   "title": "K(s+1)/(s(s+2)(s+3))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−0.767 + j0.793:complexK, −2.466:breakaway"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T22",
+   "title": "K/(s(s^2+2s+2))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−2/3 + j√2/3:complexK"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": "departure -45.000"
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=1.4142, K=4.0000"
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T23",
+   "title": "K/((s+2)(s^2+2s+5))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−4/3 + j√11/3:complexK"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": "departure 26.565"
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=3.0000, K=26.0000"
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T24",
+   "title": "K/(s^2(s+4))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "0:start, −8/3:negativeK"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": "departure 90.000/-90.000"
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T25",
+   "title": "K(s+1)/(s^2(s+4))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "0:start, −7/4 + j√15/4:complexK"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": "departure 90.000/-90.000"
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T26",
+   "title": "K(s+2)/(s^2+2s+3)",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−0.268:negativeK, −3.732:breakin"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": "departure 144.736"
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T27",
+   "title": "K/((s+1)^2(s+3))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−1:start, −7/3:negativeK"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": "departure 90.000/-90.000"
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=2.6458, K=32.0000"
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T28",
+   "title": "K(s+2)(s+3)/(s(s+1))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 없음",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−0.634:breakaway, −2.366:breakin"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.59% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T29",
+   "title": "K/((s^2+2s+2)(s^2+2s+5))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−1 + j√10/2:complexBreak, −1:negativeK"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": "departure 90.000, departure -90.000"
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=1.8708, K=16.2500"
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T30",
+   "title": "K(s-1)/((s+1)(s+2))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "3.449:negativeK, −1.449:negativeK"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=0.0000, K=2.0000"
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T31",
+   "title": "K/((s-1)(s+2))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "−1/2:breakaway"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=0.0000, K=2.0000"
+    },
+    {
+     "name": "안정한 K 범위(Routh 부등식 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 부호 변화 = 우반면 극점 수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K별 폐루프 극점(numpy 대조)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "K=0에서 극점에서 출발",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 끊기거나 건너뛰지 않음",
+     "ok": true,
+     "detail": "최대 간격 0.60% (기준 0.65%)"
+    },
+    {
+     "name": "K→∞: 영점 도착 / 나머지는 무한대로",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "가지가 이탈점·교차점을 지남",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "id": "T32",
+   "title": "K(s+1)/(s(s-1))",
+   "pass": true,
+   "checks": [
+    {
+     "name": "극점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "detail": "0.414:breakaway, −2.414:breakin"
+    },
+    {
+     "name": "실수축 이탈점이 궤적 구간 안",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "detail": "ω=1.0000, K=1.0000"
     },
     {
      "name": "안정한 K 범위(Routh 부등식 대조)",
