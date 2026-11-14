@@ -26,14 +26,15 @@
 | js/ | 계산 엔진: complex, poly(근 찾기·중근), format(정확값 표기), routh(Routh 표·교차·안정 범위), locus(실수축·점근선·이탈점·출발각·가지) |
 | app/js/ | 화면: parser(식 해석), mathview(수식 HTML), content(9단계 내용·힌트), graph(s평면·움직임), ai(AI 연결부·숫자 검사), store(브라우저 기록), main(화면 흐름) |
 | app/template.html, app/app.css | 페이지 뼈대와 스타일 (색 = 의미: 극점·영점·근궤적·점근선·핵심 점) |
-| tests/ | problems.json(검증 문제 17개), expected.json(기준 정답), run-tests.js |
-| tools/ | reference.py(sympy 기준 정답), overlay.py(python-control 비교 그림), make_crosscheck.py(교차검증 표), build.py(한 파일로 묶기), smoke.py(헤드리스 브라우저 점검) |
+| tests/ | problems.json(검증 문제 34개), expected.json(기준 정답), run-tests.js |
+| tools/ | reference.py(sympy 기준 정답), overlay.py(python-control 비교 그림), make_crosscheck.py(교차검증 표), make_benchmark.py(일반 AI 오답률 측정 자료), check_answer_table.py(정답표 독립 검증), build.py(한 파일로 묶기), smoke.py(헤드리스 브라우저 점검) |
 | dist/ | 묶은 결과 rootlocus-tutor.html (인터넷 없이도 동작, AI만 꺼짐) |
-| docs/ | 할일.md, 시작-준비.md, AI-사용기록.md, 교차검증_표.md, 비교 그림, 화면 캡처 |
+| docs/ | 진행-상황.md(인수인계: 새 세션은 이것부터), 할일.md, 시작-준비.md, AI-사용기록.md, 교차검증_표.md, 비교 그림, 화면 캡처 |
+| 검증/ | 일반 AI 오답률 측정 자료(make_benchmark.py가 만듦): AI-오답률-측정.md(조건·채점 기준·정답표), AI-오답률-정답표.csv, AI-오답률-질문.txt(문제별 질문 문장) |
 | AGENTS.md | ChatGPT·Codex용 공동 작업 안내 (이 파일과 규칙이 같음) |
 
 ## 명령어
-- 엔진 검사: `node tests/run-tests.js` (현재 17/17 문제, 225/225 항목 통과)
+- 엔진 검사: `node tests/run-tests.js` (현재 34/34 문제, 514/514 항목 통과)
 - 기준 정답 다시 계산: `python3 tools/reference.py` (sympy, numpy 필요)
 - 묶기: `python3 tools/build.py` → dist/rootlocus-tutor.html
 - 화면 점검: `python3 tools/smoke.py` (playwright 필요. 브라우저는 Playwright Chromium → Edge → Chrome 순서로 찾음)
@@ -57,4 +58,5 @@
 - Streamlit은 쓰지 않는다(움직임·속도·디자인 제약).
 - 미리보기(claude.ai 아티팩트)에서는 AI를 Claude가 맡았다. 공개판은 ai.js 연결부만 Gemini 중계로 바꾼다.
 
-할 일 목록과 완료 기준은 docs/할일.md에 있다. 작업을 시작할 때 그 파일의 맨 위 항목부터 진행한다.
+작업을 시작할 때 docs/진행-상황.md를 먼저 읽는다(지금 무엇을 하던 중인지, 정해진 것과 안 정해진 것). 작업을 끝낼 때 그 파일을 고쳐 PR에 넣는다.
+할 일 목록과 완료 기준은 docs/할일.md에 있다. 진행-상황.md에 급한 일이 없으면 할일.md의 맨 위 항목부터 진행한다.
