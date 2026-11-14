@@ -1,6 +1,16 @@
 # 일반 AI 오답률 측정 (예선 PPT 3장 근거)
 
-이 파일은 `python3 tools/make_benchmark.py`가 만듭니다. 정답표의 숫자는 tests/expected.json(sympy 기준 정답)에서 가져온 값이라 손으로 고치지 않습니다.
+정답표의 숫자는 sympy 기준 정답이라 손으로 고치지 않습니다.
+
+## 정답표 검증 방법 (지금 저장소만으로 가능)
+```
+pip install sympy numpy
+python3 tools/check_answer_table.py          # 30문제 전체
+python3 tools/check_answer_table.py T17 T29  # 일부만
+```
+- 정답표의 '전달함수' 칸만 읽어 `tools/reference.py`(sympy + numpy, 엔진과 코드 공유 없음)로 다시 계산하고, 항목 1~5와 실수축 구간 숫자가 정답표에 들어 있는지 비교합니다. 끝에 `결과: 30/30 일치`가 나오면 통과입니다.
+- tests/problems.json에는 아직 T01~T15(T14 제외)만 있습니다. T16~T32의 문제 정의와 이 문서·정답표를 자동으로 만드는 `tools/make_benchmark.py`는 예선 PPT 뒤에 추가합니다. 그 전까지는 정답표를 바꾸면 위 검사로 확인합니다.
+- 2026-11-14 KST 확인: 30/30 일치. 값 두 개를 일부러 틀리게 바꾸면 두 문제 모두 불일치로 잡히는 것도 확인했습니다.
 
 ## 무엇을 재나
 근궤적 문제 30개를 일반 AI에 같은 문장으로 묻고, 항목별로 맞았는지 기록합니다. 결과는 나온 그대로 씁니다. AI가 많이 맞히면 그 숫자를 그대로 적고, 근거 문장을 "그림이 틀린다" 쪽으로 바꿉니다.
