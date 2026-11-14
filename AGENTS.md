@@ -26,7 +26,7 @@ Claude Code는 같은 규칙을 CLAUDE.md에서 읽습니다. 규칙을 바꿀 �
 | tools/ | reference.py(sympy 기준 정답), overlay.py(python-control 비교 그림), make_crosscheck.py(교차검증 표), make_benchmark.py(일반 AI 오답률 측정 자료), check_answer_table.py(정답표 독립 검증), build.py(한 파일로 묶기), smoke.py(헤드리스 브라우저 점검) |
 | dist/ | 묶은 결과 rootlocus-tutor.html (인터넷 없이도 동작, AI만 꺼짐) |
 | docs/ | 진행-상황.md(인수인계: 새 세션은 이것부터), 할일.md, 시작-준비.md, AI-사용기록.md, 교차검증_표.md, 비교 그림, 화면 캡처 |
-| 검증/ | 일반 AI 오답률 측정 자료(make_benchmark.py가 만듦): AI-오답률-측정.md(조건·채점 기준·정답표), AI-오답률-정답표.csv, AI-오답률-질문.txt(문제별 질문 문장) |
+| 검증/ | 일반 AI 오답률 측정 자료(make_benchmark.py가 만듦): AI-오답률-측정.md(조건·채점 기준·정답표), AI-오답률-정답표.csv, AI-오답률-질문.txt(문제별 질문 문장). 사람이 물어 얻은 결과: AI-오답률-결과-예비-2026-11-14.md, 캡처/ |
 
 ## 명령어 (윈도우는 python, 맥·리눅스는 python3)
 - 엔진 검사: `node tests/run-tests.js` → 지금 34/34 문제, 514/514 항목 통과
