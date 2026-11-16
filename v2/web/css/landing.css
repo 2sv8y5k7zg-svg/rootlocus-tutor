@@ -1,0 +1,78 @@
+/* landing.css — 랜딩 페이지. 어둡고 조용한 공간에서 시작해 밝은 학습 공간으로 넘어간다.
+   --bg 변수를 스크롤에 맞춰 GSAP이 바꾼다 (Scene 4에서 어두움 → 밝음). */
+body.landing { --bg: var(--obsidian); --fg: var(--porcelain); background: var(--bg); color: var(--fg); overflow-x: hidden; }
+
+/* 오브젝트 캔버스: 화면 뒤에 고정. 글자 선택·클릭을 막지 않도록 pointer-events 없음 */
+#stage { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+
+.lnav { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center;
+  padding: 22px clamp(20px, 4vw, 48px); mix-blend-mode: difference; color: #fff; }
+.lbrand { font-weight: 600; letter-spacing: -.01em; }
+.lstart { text-decoration: none; font-size: 14px; border: 1px solid rgba(255, 255, 255, .5); padding: 7px 14px; border-radius: 99px; }
+.lstart:hover { background: rgba(255, 255, 255, .12); }
+
+.scene { position: relative; z-index: 1; }
+.eyebrow { font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: var(--ice); margin: 0 0 22px; opacity: .85; }
+.eyebrow.dark { color: var(--ice-deep); }
+
+/* Scene 1 */
+.hero { min-height: 100vh; display: grid; align-items: end; padding: 0 clamp(20px, 6vw, 96px) 14vh; }
+.hero h1 { font-size: clamp(40px, 7.2vw, 104px); line-height: 1.02; letter-spacing: -.045em; font-weight: 600; margin: 0 0 22px; }
+.hero .sub { max-width: 520px; font-size: clamp(15px, 1.4vw, 18px); color: rgba(245, 244, 240, .68); margin: 0; }
+.scroll-cue { position: absolute; right: clamp(20px, 6vw, 96px); bottom: 14vh; width: 1px; height: 64px; background: rgba(245, 244, 240, .18); overflow: hidden; }
+.scroll-cue span { position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--ice); animation: cue 2.4s cubic-bezier(.6, 0, .2, 1) infinite; }
+@keyframes cue { to { top: 100%; } }
+
+/* Scene 2 */
+.morph { min-height: 160vh; display: grid; align-items: center; padding: 0 clamp(20px, 6vw, 96px); }
+.morph-line { font-size: clamp(28px, 4.2vw, 60px); line-height: 1.15; letter-spacing: -.03em; font-weight: 500; margin: 0; max-width: 12em; }
+.morph-line em { font-style: normal; color: var(--ice); }
+
+/* Scene 3: GSAP이 이 구간을 화면에 고정(pin)한다 */
+.story { height: 100vh; }
+.story-pin { height: 100vh; display: grid; align-content: center; padding: 0 clamp(20px, 6vw, 96px); }
+.story-words { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(8px, 1.6vh, 18px); }
+.story-words li { display: grid; gap: 4px; opacity: .16; transition: opacity .5s; }
+.story-words li.on { opacity: 1; }
+.story-words .w { font-size: clamp(44px, 8.5vw, 132px); line-height: .95; letter-spacing: -.05em; font-weight: 600; }
+.story-words .k { font-size: clamp(14px, 1.3vw, 17px); color: rgba(245, 244, 240, .7); max-height: 0; overflow: hidden; transition: max-height .5s; }
+.story-words li.on .k { max-height: 3em; }
+.story-meter { margin-top: 5vh; width: min(320px, 60vw); height: 1px; background: rgba(245, 244, 240, .2); }
+.story-meter i { display: block; height: 100%; width: 0; background: var(--ice); }
+
+/* Scene 4: 밝은 학습 공간 */
+.reveal { min-height: 100vh; display: grid; align-items: center; padding: 16vh clamp(16px, 4vw, 64px); }
+.reveal-inner { width: min(1180px, 100%); margin: 0 auto; }
+.reveal h2 { font-size: clamp(34px, 5vw, 72px); letter-spacing: -.04em; margin: 0 0 6vh; font-weight: 600; }
+.device { display: grid; grid-template-columns: 220px minmax(0, 1fr) 260px; gap: 18px; padding: 18px; border-radius: 22px;
+  background: rgba(251, 250, 247, .92); border: 1px solid rgba(16, 20, 29, .08); color: var(--ink);
+  box-shadow: 0 30px 80px rgba(16, 20, 29, .18); transform-origin: 50% 100%; }
+.dev-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; font-weight: 600; }
+.dev-tf { font-size: 14px; margin-bottom: 14px; word-break: break-word; }
+.dev-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 13px; color: var(--ink-2); counter-reset: st; }
+.dev-steps li { padding: 6px 8px; border-radius: 8px; counter-increment: st; display: flex; gap: 8px; }
+.dev-steps li::before { content: counter(st); width: 18px; color: var(--ink-3); }
+.dev-steps li.on { background: var(--obsidian); color: var(--porcelain); }
+.dev-center canvas { width: 100%; aspect-ratio: 4 / 3; display: block; border-radius: 12px; background: #fff; }
+.dev-caption { font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+.dev-verdict { font-size: 13.5px; display: grid; gap: 8px; }
+.dev-verdict .row { padding: 10px 12px; border-radius: 10px; background: #fff; border-left: 3px solid var(--line); }
+.dev-verdict .row.bad { border-color: var(--coral); }
+.dev-verdict .row.good { border-color: var(--sage); }
+.dev-verdict .mono { font-size: 13px; }
+.dev-verdict small { color: var(--ink-3); display: block; }
+
+/* Scene 5 */
+.cta { min-height: 100vh; display: grid; place-content: center; justify-items: center; text-align: center; padding: 0 20px; gap: 36px; }
+.cta-line { font-size: clamp(34px, 5.4vw, 76px); line-height: 1.08; letter-spacing: -.04em; margin: 0; font-weight: 600; }
+.cta-btn { text-decoration: none; padding: 16px 30px; border-radius: 99px; background: var(--fg); color: var(--bg); font-weight: 600;
+  transition: transform .25s cubic-bezier(.2, .8, .2, 1); }
+.cta-btn:hover { transform: translateY(-2px); }
+.cta-foot { font-size: 12.5px; opacity: .55; margin: 0; }
+
+@media (max-width: 900px) {
+  .device { grid-template-columns: 1fr; }
+  .dev-left { display: none; }
+  .hero { padding-bottom: 12vh; }
+  .scroll-cue { display: none; }
+}

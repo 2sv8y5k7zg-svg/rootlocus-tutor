@@ -1,0 +1,11 @@
+# 계산 엔진
+sympy>=1.13
+numpy>=1.26
+# 웹 서버
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart>=0.0.9
+httpx>=0.27
+# 시험 (선택): python-control은 독립 대조용
+pytest>=8
+control>=0.10

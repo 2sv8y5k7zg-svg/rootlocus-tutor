@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>근궤적 튜터 · 학습</title>
+<!-- 글꼴: 인터넷이 없으면 시스템 글꼴로 대신 표시된다 (계산 기능과 무관) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/learn.css">
+</head>
+<body>
+<!-- 상단 막대: 로고, AI 상태, 시연 모드 스위치 -->
+<header class="topbar">
+  <a class="brand" href="/">근궤적 튜터</a>
+  <div class="topbar-right">
+    <label class="switch" title="인터넷·API 키 없이 정해 둔 예시 응답으로 AI 흐름을 보여 줍니다">
+      <input type="checkbox" id="demoMode"> <span>시연 모드</span>
+    </label>
+    <span class="pill" id="aiStatus">AI 확인 중</span>
+  </div>
+</header>
+
+<!-- ① 문제 입력: 처음 화면. 직접 입력 / 문제 사진 / 블록선도(G·H) -->
+<section class="entry" id="entry">
+  <div class="entry-inner">
+    <h1>어떤 시스템의 근궤적을 그려 볼까요?</h1>
+    <p class="lead">개루프 전달함수 K·G(s)H(s)를 입력하거나 문제 사진을 올리세요. 계산은 모두 Python 엔진이 합니다.</p>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" class="tab on" data-tab="text">전달함수 입력</button>
+      <button role="tab" class="tab" data-tab="gh">G(s) · H(s)</button>
+      <button role="tab" class="tab" data-tab="photo">문제 · 블록선도 사진</button>
+    </div>
+
+    <div class="tabpane on" data-pane="text">
+      <div class="field-row">
+        <input id="tfInput" class="big-input mono" placeholder="K(s+2)/(s(s+1))" autocomplete="off" spellcheck="false">
+        <button class="btn primary" id="tfGo">풀이 시작</button>
+      </div>
+      <div class="examples" id="examples"></div>
+    </div>
+
+    <div class="tabpane" data-pane="gh">
+      <div class="gh-grid">
+        <label>앞먹임 G(s)<input id="gInput" class="mono" placeholder="K/(s(s+1))"></label>
+        <label>되먹임 H(s)<input id="hInput" class="mono" placeholder="1" value="1"></label>
+      </div>
+      <button class="btn primary" id="ghGo">구조 확인</button>
+      <p class="hint-line">음의 피드백 기준입니다. 루프 전달함수 L(s) = G(s)H(s)로 근궤적을 그립니다.</p>
+    </div>
+
+    <div class="tabpane" data-pane="photo">
+      <label class="drop" id="drop">
+        <input type="file" id="photoInput" accept="image/*" hidden>
+        <span class="drop-title">사진을 끌어 놓거나 눌러서 고르기</span>
+        <span class="drop-sub">문제 식이나 블록선도 · JPG/PNG · 6MB 이하</span>
+      </label>
+      <!-- 개인정보: 사진은 동의한 경우에만 외부 AI로 보낸다 -->
+      <label class="consent"><input type="checkbox" id="consent">
+        사진을 <b id="aiVendor">외부 AI</b>로 보내 인식하는 데 동의합니다. <span id="aiPolicy"></span> 사진은 서버에 저장하지 않습니다.</label>
+      <button class="btn primary" id="photoGo" disabled>사진 인식</button>
+    </div>
+
+    <!-- AI 인식 결과 확인: 확정 전에는 계산하지 않는다 -->
+    <div class="confirm" id="confirm" hidden>
+      <h2>AI가 읽은 내용을 확인해 주세요</h2>
+      <p class="muted" id="confirmMsg"></p>
+      <div class="confirm-grid">
+        <label>개루프 전달함수 K·G(s)H(s)<input id="cTf" class="mono"></label>
+        <label>G(s)<input id="cG" class="mono"></label>
+        <label>H(s)<input id="cH" class="mono"></label>
+      </div>
+      <div class="confirm-info" id="confirmInfo"></div>
+      <div class="field-row">
+        <button class="btn primary" id="confirmGo">확정하고 풀이 시작</button>
+        <button class="btn ghost" id="confirmCancel">취소</button>
+      </div>
+    </div>
+    <p class="error" id="entryError" hidden></p>
+  </div>
+</section>
+
+<!-- ② 학습 화면: 좌(단계) · 중(수식·그래프) · 우(답 검사·힌트·손글씨) -->
+<main class="studio" id="studio" hidden>
+  <aside class="col-left">
+    <div class="card problem-card">
+      <div class="label">문제</div>
+      <div class="tf mono" id="pTf"></div>
+      <div class="notes" id="pNotes"></div>
+      <button class="btn ghost small" id="newProblem">다른 문제</button>
+    </div>
+    <nav class="steps" id="stepNav" aria-label="9단계"></nav>
+    <div class="verify-summary" id="verifySummary"></div>
+  </aside>
+
+  <section class="col-center">
+    <div class="step-head">
+      <div class="step-no" id="stepNo">1</div>
+      <div>
+        <h2 id="stepTitle"></h2>
+        <p class="concept" id="stepConcept"></p>
+      </div>
+    </div>
+    <div class="card graph-card">
+      <canvas id="plane" aria-label="s평면 근궤적 그래프"></canvas>
+      <div class="graph-legend" id="legend"></div>
+      <div class="graph-readout mono" id="readout">그래프를 누르면 그 점의 K를 Python이 계산합니다.</div>
+      <!-- K 조절: 8·9단계에서만 보인다 -->
+      <div class="k-control" id="kControl" hidden>
+        <label for="kSlider">K</label>
+        <input type="range" id="kSlider" min="0" max="1000" value="0">
+        <input type="number" id="kValue" class="mono" min="0" step="any" value="0">
+        <div class="k-poles mono" id="kPoles"></div>
+      </div>
+    </div>
+    <details class="card work-card" id="workCard">
+      <summary>엔진 풀이 보기 <span class="muted">(전체 풀이 = 4번째 힌트)</span></summary>
+      <div class="formula mono" id="stepFormula"></div>
+      <ol class="work mono" id="stepWork"></ol>
+    </details>
+    <div class="step-nav-btns">
+      <button class="btn ghost" id="prevStep">이전 단계</button>
+      <button class="btn primary" id="nextStep">다음 단계</button>
+    </div>
+  </section>
+
+  <aside class="col-right">
+    <div class="card">
+      <div class="label">내 답 검사</div>
+      <form id="answerForm" class="answers"></form>
+      <div id="verdicts"></div>
+    </div>
+    <div class="card">
+      <div class="label">힌트</div>
+      <div class="ladder" id="ladder"></div>
+      <div class="hint-box" id="hintBox"></div>
+    </div>
+    <div class="card">
+      <div class="label">손글씨 풀이 검사</div>
+      <p class="muted small">종이에 푼 전체 풀이를 찍어 올리면, AI가 읽고 Python 엔진이 단계마다 다시 계산해 비교합니다. 근궤적 그림은 엔진이 담당합니다.</p>
+      <input type="file" id="hwInput" accept="image/*" class="file">
+      <label class="consent small"><input type="checkbox" id="hwConsent"> 사진을 외부 AI로 보내는 데 동의</label>
+      <button class="btn ghost small" id="hwGo" disabled>풀이 사진 검사</button>
+      <div id="hwReport"></div>
+    </div>
+    <div class="card engine-check" id="engineCheck"></div>
+  </aside>
+</main>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/graph.js"></script>
+<script src="/static/js/learn.js"></script>
+</body>
+</html>
