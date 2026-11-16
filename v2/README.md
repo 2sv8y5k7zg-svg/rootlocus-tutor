@@ -36,7 +36,7 @@ python tools/make_report.py    docs/테스트-결과.md 만들기
 python -m pytest tests -q      전체 자동 시험 (엔진·채점·서버·AI 오류 처리)
 python tests/fuzz.py 1000      무작위 1,000개 안정성 시험
 ```
-최근 실행(2026-11-17 KST): 검증 문제 36/36, 검사 항목 420/420, pytest 53/53, 무작위 1,000개 중 실패 0.
+최근 실행(2026-11-17 KST): 검증 문제 36/36, 검사 항목 420/420, pytest 60/60, 무작위 1,000개 중 실패 0.
 
 ## 폴더
 | 경로 | 내용 |
@@ -58,3 +58,11 @@ python tests/fuzz.py 1000      무작위 1,000개 안정성 시험
 - 검증 문제 T16~T34: 새로 만든 문제, 손 풀이 기대값 (`tests/data/new_problems.json`)
 - AI: Google Gemini API (기본 `gemini-3.5-flash-lite`, 2026-11-17 공식 모델·가격 페이지 확인). AI를 학습시키지 않았습니다.
 - 라이브러리: SymPy, NumPy, FastAPI, Uvicorn, httpx, GSAP 3.12.5(Standard no-charge license), python-control(시험용 대조)
+
+## 서버 없이 화면만 보기 (오프라인 미리보기)
+```
+python tools/build_offline.py
+```
+`dist/offline/index.html`(랜딩)과 `learn.html`(학습)이 만들어집니다. 더블클릭하면 Chrome에서 바로 열립니다.
+실제 서버에 예시 문제 9개를 미리 물어본 응답을 넣어 둔 것이라 화면과 숫자는 실제 앱과 같습니다.
+다른 식 계산, 자유 입력 채점, 실제 AI는 `python run.py`로 서버를 켜야 동작합니다. 시연 백업용으로도 쓸 수 있습니다.

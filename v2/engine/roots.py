@@ -35,14 +35,14 @@ def find(P):
             # 1·2차: 근의 공식 → 정확한 값
             for r, k in sp.roots(fp, s).items():
                 r = sp.nsimplify(sp.simplify(r))
-                out.append({'value': complex(sp.N(r, PREC)), 'mult': mult * k, 'exact': r})
+                out.append({'value': complex(sp.N(r, PREC)), 'mult': int(mult * k), 'exact': r})   # int(): sympy 정수가 JSON에 섞이지 않게
         else:
             # 3차 이상: 고정밀 수치해
             for r in fp.nroots(n=PREC, maxsteps=200):
                 z = complex(r)
                 if abs(z.imag) < REAL_TOL * max(1.0, abs(z)):
                     z = complex(z.real, 0.0)
-                out.append({'value': z, 'mult': mult, 'exact': None, 'hp': r})   # hp: 30자리 값 (경계 판정용)
+                out.append({'value': z, 'mult': int(mult), 'exact': None, 'hp': r})   # hp: 30자리 값 (경계 판정용)
     out.sort(key=lambda r: (-round(r['value'].real, 12), -round(r['value'].imag, 12)))
     return out
 

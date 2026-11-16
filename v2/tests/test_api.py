@@ -112,3 +112,24 @@ def test_ai_hint_number_guard(monkeypatch):
 def test_number_check_unit():
     assert verify.check_numbers('σa = -1.25', ['σa = −5/4 = −1.25']) == []
     assert verify.check_numbers('K = 99.9', ['K = 8.16']) == [99.9]
+
+
+# 학습 화면의 예시 문제는 모두 서버(JSON 응답)를 통과해야 한다.
+# (2026-11-17: 중근 문제에서 sympy 정수가 섞여 500 오류가 났던 것의 재발 방지)
+EXAMPLES = ['K/(s(s+1)(s+2))', 'K(s+2)/(s(s+1))', 'K/(s(s+3)(s^2+2s+2))', 'K(s+1)/(s^2(s+9))',
+            'K/(s(s+2)(s^2+2s+5))', 'K(s+1)/(s(s-1))']
+
+
+@pytest.mark.parametrize('tf', EXAMPLES)
+def test_examples_through_server(tf):
+    r = c.post('/api/analyze', json={'problem': {'text': tf}})
+    assert r.status_code == 200 and r.json()['ok']
+
+
+def test_odd_answer_shapes_never_500():
+    fields = c.get('/api/fields').json()
+    for fs in fields.values():
+        for f in fs:
+            for ans in ['[-1, 0]', '0<K<1', '없음', '', 'abc', 's^2+K', '1, 2']:
+                r = c.post('/api/check', json={'problem': P18, 'field': f['field'], 'answer': ans, 'K': 10})
+                assert r.status_code == 200

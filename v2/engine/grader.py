@@ -249,12 +249,15 @@ def check(result, field, answer, k_value=None):
     if st[n]['check']['status'] != 'verified':
         return _unverifiable(f'{n}단계 엔진 검증이 통과하지 않아 정답을 확정하지 않았습니다.')
     fn = globals().get('_check_' + field)
-    return fn(st, answer, k_value) if field == 'polesAtK' else fn(st, answer)
+    try:
+        return fn(st, answer, k_value) if field == 'polesAtK' else fn(st, answer)
+    except Exception as e:   # 예상하지 못한 답 모양 → 오답으로 단정하지 않고 '검증 불가'
+        return _unverifiable(f'이 답은 자동 채점하지 못했습니다 ({type(e).__name__}). 형식을 바꿔 다시 입력해 주세요.')
 
 
 def _check_charPoly(st, answer):
     e = read_poly(answer)
-    if e is None or e.free_symbols - {s, K}:
+    if not isinstance(e, sp.Expr) or e.free_symbols - {s, K}:   # '[-1, 0]'처럼 식이 아닌 답도 '읽지 못함'
         return _unreadable(answer)
     ref = sp.sympify(st[1]['result']['charPolyExpr'], locals={'s': s, 'K': K})
     ratio = sp.cancel(sp.expand(e) / ref) if ref != 0 else None
