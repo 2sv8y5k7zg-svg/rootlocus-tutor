@@ -13,6 +13,11 @@ class PlaneGraph {
     this.pick = null;      // 사용자가 누른 점
     this.progress = 1;     // 8단계 곡선 그리기 애니메이션 진행률 (0~1)
     this.onPick = onPick;
+    this.raf = null;        // 이전 단계의 애니메이션이 새 단계에 섞이지 않게 취소할 수 있도록 저장합니다.
+    this.exactPoints = null; // K 직접 입력 후 Python이 반환한 정확한 폐루프 극점입니다.
+    this.reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.onProgress = null;
+    this.readColors();
 
     // 화면 크기가 바뀌면 다시 그립니다 (ResizeObserver: 요소 크기 변화를 알려 주는 브라우저 기능)
     new ResizeObserver(() => this.resize()).observe(canvas);
@@ -34,13 +39,19 @@ class PlaneGraph {
     this.cv.height = Math.round(h * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.w = w; this.h = h;
+    this.readColors();
     this.fitView();
     this.draw();
   }
 
   setData(graph) {
+    const reveal = this.progress; // 랜딩 스크롤이 지정한 진행률도 유지합니다.
+    this.stopAnimation();
+    this.progress = reveal;
     this.data = graph;
     this.pick = null;
+    this.kIndex = null;
+    this.exactPoints = null;
     this.fitView();
     this.draw();
   }
@@ -74,19 +85,16 @@ class PlaneGraph {
     this.drawGrid();
     if (!this.data) return;
     const d = this.data;
-    const css = getComputedStyle(document.documentElement);
-    const col = {
-      ink: css.getPropertyValue('--ink').trim(), ice: css.getPropertyValue('--ice-deep').trim(),
-      violet: css.getPropertyValue('--violet-deep').trim(), coral: css.getPropertyValue('--coral').trim(),
-      iceSoft: css.getPropertyValue('--ice').trim(),
-    };
+    const col = this.colors;
 
     // 4단계: 점근선 (중심에서 각 방향으로 뻗는 점선)
     if (this.show('asym') && d.asymptotes) {
       c.save();
       c.setLineDash([6, 6]);
-      c.strokeStyle = col.violet; c.globalAlpha = .7; c.lineWidth = 1.2;
-      const R = 4 * Math.max(this.w, this.h) / this.scale;
+      c.strokeStyle = col.violet; c.globalAlpha = .6; c.lineWidth = 1.1;
+      // 중심에서 각도 그대로 뻗습니다. 애니메이션은 선 길이만 바꿉니다.
+      const reveal = this.step === 4 ? this.progress : 1;
+      const R = 4 * Math.max(this.w, this.h) / this.scale * reveal;
       for (const a of d.asymptotes.angles) {
         const t = a * Math.PI / 180;
         const [x0, y0] = this.toPx(d.asymptotes.centroid, 0);
@@ -94,76 +102,116 @@ class PlaneGraph {
         c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
       }
       c.restore();
-      if (d.asymptotes.showCentroid) this.dot(d.asymptotes.centroid, 0, 4, col.violet, true);
+      if (d.asymptotes.showCentroid) {
+        this.dot(d.asymptotes.centroid, 0, 4, col.violet, true);
+        if (this.step === 4) this.focusPoint(d.asymptotes.centroid, 0, col.violet);
+      }
     }
 
     // 3단계: 실수축 근궤적 구간 (굵은 띠)
     if (this.show('seg') && !this.show('branch')) {
       c.save();
-      c.strokeStyle = col.iceSoft; c.lineWidth = 7; c.lineCap = 'round';
+      c.strokeStyle = col.iceSoft; c.lineWidth = 5; c.lineCap = 'round';
       const far = 4 * Math.max(this.w, this.h) / this.scale;
       for (const [lo, hi] of d.segments) {
         const a = this.toPx(lo === null ? this.cx - far : lo, 0);
         const b = this.toPx(hi === null ? this.cx + far : hi, 0);
-        c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+        // 보이는 구간만 왼쪽부터 드러내며, 구간의 수학적 양 끝은 바꾸지 않습니다.
+        const left = Math.max(0, a[0]), right = Math.min(this.w, b[0]);
+        if (right < left) continue;
+        const reveal = this.step === 3 ? this.progress : 1;
+        c.beginPath(); c.moveTo(left, a[1]); c.lineTo(left + (right - left) * reveal, b[1]); c.stroke();
       }
       c.restore();
     }
 
-    // 8단계: 근궤적 가지 곡선. progress만큼만 그려 '그려지는' 움직임을 만듭니다.
+    // 8단계: Python의 가지 점을 순서대로 드러냅니다. 점 사이를 새 곡선으로 보간하지 않습니다.
+    // 밝은 선 끝도 엔진 배열의 실제 점에만 놓습니다. 각 가지의 대응 K 인덱스는 같습니다.
     if (this.show('branch')) {
       c.save();
-      c.strokeStyle = col.ice; c.lineWidth = 2.2; c.lineJoin = 'round';
-      const n = d.K.length;
-      const upto = Math.max(2, Math.floor(n * this.progress));
-      for (const br of d.branches) {
+      c.lineWidth = 2; c.lineJoin = 'round'; c.lineCap = 'round';
+      const reveal = this.step === 8 ? this.progress : 1;
+      const index = Math.floor(Math.max(0, Math.min(1, reveal)) * (d.K.length - 1));
+      for (let j = 0; j < d.branches.length; j++) {
+        const br = d.branches[j], last = Math.min(index, br.length - 1);
+        const color = this.isStudio && j % 2 ? col.violet : col.ice;
+        c.strokeStyle = color;
         c.beginPath();
-        for (let i = 0; i < upto; i++) {
-          const [px, py] = this.toPx(br[i][0], br[i][1]);
-          if (i === 0) c.moveTo(px, py); else c.lineTo(px, py);
+        let started = false;
+        for (let i = 0; i <= last; i++) {
+          const p = br[i];
+          if (!p || !p.every(Number.isFinite)) { started = false; continue; }
+          const [px, py] = this.toPx(p[0], p[1]);
+          if (!started) c.moveTo(px, py); else c.lineTo(px, py);
+          started = true;
         }
         c.stroke();
+        if (reveal < 1 && last >= 0 && br[last].every(Number.isFinite)) {
+          this.dot(br[last][0], br[last][1], 3.5, col.ink, true);
+        }
       }
       c.restore();
     }
 
     // 6단계: 출발각·도착각 화살표
     if (this.show('ang')) {
+      c.save(); c.globalAlpha = this.step === 6 ? this.progress : 1;
       for (const [x, y, deg] of d.angles) {
         for (const sgn of [1, -1]) {           // 켤레(아래쪽) 극점은 각의 부호만 바뀝니다
           if (sgn === -1 && Math.abs(y) < 1e-12) continue;
           this.arrow(x, sgn * y, sgn * deg, col.violet);
         }
       }
+      c.restore();
     }
 
     // 7단계: 허수축 교차점 (±jω)
     if (this.show('cross')) {
       for (const [, w] of d.crossings) {
-        this.dot(0, w, 5, col.coral, true);
-        if (w > 0) this.dot(0, -w, 5, col.coral, true);
+        this.dot(0, w, 4.5, col.coral, true);
+        if (this.step === 7) this.focusPoint(0, w, col.coral);
+        if (w > 0) {
+          this.dot(0, -w, 4.5, col.coral, true);
+          if (this.step === 7) this.focusPoint(0, -w, col.coral);
+        }
       }
     }
 
     // 5단계: 이탈점·진입점
     if (this.show('brk')) {
       for (const [x, y] of d.breakpoints) {
-        this.dot(x, y, 5, col.violet, true);
-        if (Math.abs(y) > 1e-12) this.dot(x, -y, 5, col.violet, true);
+        this.dot(x, y, 4.5, col.violet, true);
+        if (this.step === 5) this.focusPoint(x, y, col.violet);
+        if (Math.abs(y) > 1e-12) {
+          this.dot(x, -y, 4.5, col.violet, true);
+          if (this.step === 5) this.focusPoint(x, -y, col.violet);
+        }
       }
     }
 
     // 2단계: 극점(×)과 영점(○)
     if (this.show('pz')) {
-      for (const [x, y, m] of d.poles) this.cross(x, y, col.ink, m);
-      for (const [x, y, m] of d.zeros) this.ring(x, y, col.ink, m);
+      c.save(); c.globalAlpha = this.step === 2 ? .25 + .75 * this.progress : 1;
+      for (const [x, y, m] of d.poles) {
+        this.cross(x, y, col.ink, m);
+        if (this.step === 2) this.focusPoint(x, y, col.ice);
+      }
+      for (const [x, y, m] of d.zeros) {
+        this.ring(x, y, col.ink, m);
+        if (this.step === 2) this.focusPoint(x, y, col.violet);
+      }
+      c.restore();
     }
 
     // 8·9단계: 현재 K에서의 폐루프 극점 (슬라이더로 움직임)
-    if (this.show('kmove') && this.kIndex !== null) {
-      for (const br of d.branches) {
-        const p = br[Math.min(this.kIndex, br.length - 1)];
-        this.dot(p[0], p[1], 6, col.ink, true, '#fff');
+    if (this.show('kmove') && (this.step !== 8 || this.progress >= 1)) {
+      // 직접 입력한 K의 점을 기다리는 동안에는 이전 K의 점을 표시하지 않습니다.
+      const pts = this.exactPoints || (this.kIndex === null ? [] :
+        d.branches.map(br => br[Math.min(this.kIndex, br.length - 1)]));
+      for (const p of pts) {
+        if (!p || !p.every(Number.isFinite)) continue;
+        this.dot(p[0], p[1], 8, col.ice, false);
+        this.dot(p[0], p[1], 3.5, col.ink, true);
       }
     }
 
@@ -174,7 +222,7 @@ class PlaneGraph {
   // 격자와 실수축·허수축
   drawGrid() {
     const c = this.ctx;
-    c.fillStyle = '#fff'; c.fillRect(0, 0, this.w, this.h);
+    c.fillStyle = this.colors.bg; c.fillRect(0, 0, this.w, this.h);
     if (!this.scale) return;
     const tl = this.toWorld(0, 0), br = this.toWorld(this.w, this.h);
     // 눈금 간격: 화면에 대략 8~12칸이 보이도록 1, 2, 5 × 10^k 중에서 고릅니다
@@ -182,8 +230,8 @@ class PlaneGraph {
     const raw = span / 10, p10 = Math.pow(10, Math.floor(Math.log10(raw)));
     const step = [1, 2, 5, 10].map(m => m * p10).find(s => s >= raw);
     c.lineWidth = 1;
-    c.strokeStyle = '#EEECE6';
-    c.fillStyle = '#9AA0AC';
+    c.strokeStyle = this.colors.grid;
+    c.fillStyle = this.colors.text;
     c.font = '11px ' + getComputedStyle(document.body).fontFamily;
     for (let x = Math.ceil(tl.x / step) * step; x <= br.x; x += step) {
       const [px] = this.toPx(x, 0);
@@ -195,10 +243,10 @@ class PlaneGraph {
       c.beginPath(); c.moveTo(0, py); c.lineTo(this.w, py); c.stroke();
       if (Math.abs(y) > step / 2) c.fillText('j' + (+y.toFixed(6)), this.toPx(0, 0)[0] + 4, py - 3);
     }
-    c.strokeStyle = '#B9BDC6'; c.lineWidth = 1.2;
+    c.strokeStyle = this.colors.axis; c.lineWidth = 1.2;
     const [ox, oy] = this.toPx(0, 0);
     c.beginPath(); c.moveTo(0, oy); c.lineTo(this.w, oy); c.moveTo(ox, 0); c.lineTo(ox, this.h); c.stroke();
-    c.fillStyle = '#6B7180';
+    c.fillStyle = this.colors.text;
     c.fillText('Re', this.w - 20, oy - 6);
     c.fillText('Im', ox + 6, 12);
   }
@@ -218,7 +266,7 @@ class PlaneGraph {
   }
   ring(x, y, color, mult) {
     const c = this.ctx, [px, py] = this.toPx(x, y);
-    c.strokeStyle = color; c.lineWidth = 2; c.fillStyle = '#fff';
+    c.strokeStyle = color; c.lineWidth = 2; c.fillStyle = this.colors.bg;
     c.beginPath(); c.arc(px, py, 6, 0, Math.PI * 2); c.fill(); c.stroke();
     if (mult > 1) { c.fillStyle = color; c.font = '600 11px sans-serif'; c.fillText('×' + mult, px + 8, py - 8); }
   }
@@ -233,16 +281,66 @@ class PlaneGraph {
     c.lineTo(ex + h * Math.cos(a1), ey - h * Math.sin(a1)); c.lineTo(ex + h * Math.cos(a2), ey - h * Math.sin(a2)); c.closePath(); c.fill();
   }
 
-  // 8단계에 들어올 때 곡선이 극점에서 뻗어 나가는 움직임 (약 1.4초)
-  animateBranches() {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { this.progress = 1; this.draw(); return; }
-    const t0 = performance.now(), dur = 1400;
-    const tick = (now) => {
-      const u = Math.min(1, (now - t0) / dur);
-      this.progress = 1 - Math.pow(1 - u, 3);     // 끝에서 부드럽게 멈추는 곡선(ease-out)
-      this.draw();
-      if (u < 1) requestAnimationFrame(tick);
+  // 캔버스별 색을 한 번 읽습니다. 랜딩의 같은 그래프 클래스는 기존 밝은 색을 유지합니다.
+  readColors() {
+    const css = getComputedStyle(this.cv);
+    this.isStudio = Boolean(css.getPropertyValue('--graph-bg').trim());
+    const get = (name, fallback) => css.getPropertyValue('--graph-' + name).trim() || fallback;
+    this.colors = {
+      bg: get('bg', '#fff'), grid: get('grid', '#EEECE6'), axis: get('axis', '#B9BDC6'),
+      text: get('text', '#6B7180'), ink: get('ink', '#10141D'), ice: get('curve', '#3F6E9E'),
+      violet: get('violet', '#6A5BA3'), coral: get('alert', '#B4614F'), iceSoft: get('segment', '#B1CBE6'),
     };
-    requestAnimationFrame(tick);
   }
+
+  // 핵심 점의 좌표는 고정하고, 주변 고리의 반지름과 투명도만 바꿔 시선을 안내합니다.
+  focusPoint(x, y, color) {
+    if (this.progress >= 1) return;
+    const c = this.ctx;
+    c.save();
+    c.globalAlpha = .5 * (1 - this.progress);
+    this.dot(x, y, 9 + (1 - this.progress) * 12, color, false);
+    c.restore();
+  }
+
+  stopAnimation() {
+    if (this.raf !== null) cancelAnimationFrame(this.raf);
+    this.raf = null;
+    this.progress = 1;
+    if (this.onProgress) this.onProgress(1);
+  }
+
+  // 입력: 이동할 단계. 이전 재생을 취소한 후 그 단계에서 새로 배우는 요소만 강조합니다.
+  setStep(n) {
+    this.stopAnimation();
+    this.step = n;
+    this.animateStep();
+  }
+
+  animateStep() {
+    this.stopAnimation();
+    if (this.reducedMotion || document.hidden || this.step < 2 || this.step > 8) {
+      this.draw(); return;
+    }
+    const duration = this.step === 8 ? 2400 : 850;
+    let started = null;
+    this.progress = 0;
+    this.draw();
+    if (this.onProgress) this.onProgress(0);
+    const tick = (now) => {
+      if (this.reducedMotion || document.hidden) { this.stopAnimation(); this.draw(); return; }
+      if (started === null) started = now;
+      const u = Math.min(1, (now - started) / duration);
+      // 곡선은 K 배열 순서대로, 다른 요소는 끝에서 부드럽게 멈추도록 표시합니다.
+      this.progress = this.step === 8 ? u : 1 - Math.pow(1 - u, 3);
+      this.draw();
+      if (this.onProgress) this.onProgress(this.progress);
+      if (u < 1) this.raf = requestAnimationFrame(tick);
+      else this.raf = null;
+    };
+    this.raf = requestAnimationFrame(tick);
+  }
+
+  // 이전 호출부 호환용. 새 학습 화면은 setStep 또는 animateStep을 사용합니다.
+  animateBranches() { this.animateStep(); }
 }

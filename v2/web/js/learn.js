@@ -11,6 +11,10 @@ const state = {
   checked: {},       // 단계별 채점 결과 기록 {step: {field: verdict}}
   hintLevel: {},     // 단계별로 연 힌트 단계
   ai: null,          // AI 상태 (/api/health)
+  selectedK: 0,      // 입력 칸 반올림과 무관하게 현재 선택한 실제 K 값
+  kRevision: 0,      // 늦게 도착한 이전 K의 응답을 버리기 위한 번호
+  kTimer: null,
+  loadRevision: 0,
 };
 
 // 처음 화면의 예시 문제 (수업·교재에서 자주 나오는 꼴)
@@ -27,6 +31,7 @@ function demo() { return $('demoMode').checked; }
 async function init() {
   const graph = new PlaneGraph($('plane'), onPick);
   state.graph = graph;
+  state.motion = new StudioMotion(graph, (i) => { clearTimeout(state.kTimer); setKIndex(i); }, () => exactPoles());
 
   // 예시 버튼
   for (const ex of EXAMPLES) {
@@ -48,7 +53,13 @@ async function init() {
   $('tfGo').onclick = () => start({ text: $('tfInput').value });
   $('tfInput').onkeydown = (e) => { if (e.key === 'Enter') start({ text: $('tfInput').value }); };
   $('ghGo').onclick = confirmGH;
-  $('newProblem').onclick = () => { $('studio').hidden = true; $('entry').hidden = false; window.scrollTo(0, 0); };
+  $('newProblem').onclick = () => {
+    state.motion.reset(); clearTimeout(state.kTimer);
+    state.kRevision++; state.loadRevision++;
+    $('studio').hidden = true; $('entry').hidden = false;
+    $('tfGo').disabled = false; $('tfGo').textContent = '풀이 시작';
+    window.scrollTo(0, 0); $('tfInput').focus();
+  };
   $('prevStep').onclick = () => goStep(Math.max(1, state.step - 1));
   $('nextStep').onclick = () => goStep(Math.min(9, state.step + 1));
   setupPhoto();
@@ -84,15 +95,26 @@ function entryError(msg) { const e = $('entryError'); e.hidden = !msg; e.textCon
 async function start(problem) {
   entryError('');
   if (problem.text !== undefined && !problem.text.trim()) { entryError('전달함수를 입력해 주세요.'); return; }
-  const res = await API.analyze(problem);
-  if (!res.ok) { entryError(res.error.message); return; }
-  state.problem = problem; state.result = res; state.checked = {}; state.hintLevel = {};
-  $('entry').hidden = true; $('confirm').hidden = true; $('studio').hidden = false;
-  window.scrollTo(0, 0);
-  renderProblem();
-  state.graph.resize();
-  state.graph.setData(res.graph);
-  goStep(1);
+  const request = ++state.loadRevision;
+  $('tfGo').disabled = true; $('tfGo').textContent = '계산 중…';
+  try {
+    const res = await API.analyze(problem);
+    if (request !== state.loadRevision) return;
+    if (!res.ok) { entryError(res.error.message); return; }
+    state.motion.reset(); clearTimeout(state.kTimer); state.kRevision++;
+    state.problem = problem; state.result = res; state.checked = {}; state.hintLevel = {};
+    $('entry').hidden = true; $('confirm').hidden = true; $('studio').hidden = false;
+    $('kPoles').textContent = '';
+    $('readout').textContent = '그래프를 누르면 그 점의 K를 Python이 계산합니다.';
+    window.scrollTo(0, 0);
+    renderProblem();
+    state.graph.resize(); state.graph.setData(res.graph);
+    goStep(1);
+  } catch (e) {
+    if (request === state.loadRevision) entryError('계산 서버에 연결하지 못했습니다. 실행 상태를 확인한 뒤 다시 시도해 주세요.');
+  } finally {
+    if (request === state.loadRevision) { $('tfGo').disabled = false; $('tfGo').textContent = '풀이 시작'; }
+  }
 }
 
 // G, H 입력 → 서버가 루프 전달함수와 폐루프 전달함수를 먼저 보여 주고, 확인 후 시작
@@ -175,12 +197,17 @@ function renderProblem() {
 
 // 단계 이동: 제목·질문·풀이·입력 칸·힌트·그래프를 그 단계에 맞게 바꿉니다.
 function goStep(n) {
+  state.motion.stopK(false);
+  clearTimeout(state.kTimer); state.kRevision++;
   state.step = n;
   const st = state.result.steps[n - 1];
-  document.querySelectorAll('.step-btn').forEach((b) => b.classList.toggle('on', +b.dataset.n === n));
+  document.querySelectorAll('.step-btn').forEach((b) => {
+    b.classList.toggle('on', +b.dataset.n === n);
+    if (+b.dataset.n === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+  });
   // 좁은 화면에서는 단계 목록이 가로로 스크롤되므로, 현재 단계 버튼이 보이도록 목록만 옮깁니다
   const nav = $('stepNav'), on = nav.querySelector('.on');
-  if (on && nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: on.offsetLeft - nav.clientWidth / 2 + on.clientWidth / 2, behavior: 'smooth' });
+  if (on && nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: on.offsetLeft - nav.clientWidth / 2 + on.clientWidth / 2, behavior: state.graph.reducedMotion ? 'auto' : 'smooth' });
   $('stepNo').textContent = n;
   $('stepTitle').textContent = st.title;
   $('stepConcept').textContent = st.hints[0].text;
@@ -199,19 +226,23 @@ function goStep(n) {
   renderLadder(n);
   $('hwReport').innerHTML = '';
 
-  // 그래프: 단계에 맞는 요소만, 8단계에 처음 들어오면 곡선이 그려지는 움직임
+  // 단계별 연출은 실제 계산 점과 선의 위치를 유지하며 새 요소만 드러냅니다.
   const g = state.graph;
-  const enteringBranches = n >= 8 && g.step < 8;
   g.step = n;
   $('kControl').hidden = n < 8;
-  if (n >= 8) { if (g.kIndex === null) setKIndex(0); } else g.kIndex = null;
-  if (enteringBranches) g.animateBranches(); else { g.progress = 1; g.draw(); }
+  if (n >= 8) {
+    if (g.kIndex === null && !g.exactPoints) setKIndex(0);
+  } else {
+    g.kIndex = null; g.exactPoints = null;
+  }
+  state.motion.setStep(n);
   legend(n);
 }
 
 function legend(n) {
-  const items = [['극점 ×, 영점 ○', '--ink', 2], ['실수축 구간', '--ice', 3], ['점근선', '--violet-deep', 4],
-    ['이탈·진입점', '--violet-deep', 5], ['출발·도착각', '--violet-deep', 6], ['허수축 교차', '--coral', 7], ['근궤적', '--ice-deep', 8]];
+  const items = [['극점 ×, 영점 ○', '--graph-ink', 2], ['실수축 구간', '--graph-segment', 3], ['점근선', '--graph-violet', 4],
+    ['이탈·진입점', '--graph-violet', 5], ['출발·도착각', '--graph-violet', 6], ['허수축 교차', '--graph-alert', 7],
+    ['근궤적 가지', '--graph-curve', 8], ['근궤적 가지', '--graph-violet', 8]];
   $('legend').innerHTML = items.filter((i) => n >= i[2]).map((i) => `<span><i style="background:var(${i[1]})"></i>${i[0]}</span>`).join('');
 }
 
@@ -304,36 +335,80 @@ async function askHint(level, student, verdict) {
 // 손을 떼면 그 K에서의 정확한 폐루프 극점을 서버에 다시 물어봅니다.
 function setupK() {
   const sl = $('kSlider'), num = $('kValue');
-  let timer = null;
   sl.oninput = () => {
+    state.motion.stopK(false); state.graph.stopAnimation();
     const Ks = state.result.graph.K;
     setKIndex(Math.round(sl.value / 1000 * (Ks.length - 1)));
-    clearTimeout(timer); timer = setTimeout(exactPoles, 180);   // 움직임이 멈추면 0.18초 뒤 한 번만 요청
+    clearTimeout(state.kTimer);
+    state.kTimer = setTimeout(() => exactPoles(), 180);
   };
   num.onchange = () => {
-    const K = Math.max(0, parseFloat(num.value) || 0);
+    state.motion.stopK(false); state.graph.stopAnimation();
+    clearTimeout(state.kTimer);
+    const K = num.valueAsNumber;
+    if (!Number.isFinite(K) || K < 0) {
+      state.kRevision++;
+      state.graph.kIndex = null; state.graph.exactPoints = null; state.graph.draw();
+      $('kPoles').textContent = 'K는 0 이상의 유한한 수로 입력해 주세요.';
+      return;
+    }
+    state.selectedK = K; state.kRevision++;
+    // 슬라이더 손잡이만 가까운 표본 위치에 맞춥니다. 극점은 아래 Python 응답만 사용합니다.
     const Ks = state.result.graph.K;
-    let i = 0; while (i < Ks.length - 1 && Ks[i] < K) i++;     // K 목록에서 가장 가까운 위치 찾기(표시용)
-    setKIndex(i, K);
+    let near = 0;
+    while (near < Ks.length - 1 && Math.abs(Ks[near + 1] - K) < Math.abs(Ks[near] - K)) near++;
+    sl.value = Ks.length > 1 ? Math.round(near / (Ks.length - 1) * 1000) : 0;
+    sl.setAttribute('aria-valuetext', '직접 입력 K = ' + K);
+    // 임의 K를 가까운 표본으로 대신 그리지 않습니다. Python 응답이 올 때까지 표식을 비웁니다.
+    state.graph.kIndex = null; state.graph.exactPoints = null; state.graph.draw();
+    $('kPoles').textContent = '입력한 K의 폐루프 극점을 계산하는 중…';
     exactPoles(K);
   };
 }
 
-function setKIndex(i, typedK) {
-  const Ks = state.result.graph.K;
-  state.graph.kIndex = i;
-  $('kSlider').value = Math.round(i / (Ks.length - 1) * 1000);
-  if (typedK === undefined) $('kValue').value = +Ks[i].toPrecision(5);
+// 화면용으로 Python 표본을 선택합니다. 표본의 K와 점 좌표를 같은 인덱스에서 읽습니다.
+function setKIndex(i) {
+  const data = state.result.graph, Ks = data.K;
+  i = Math.max(0, Math.min(Ks.length - 1, i));
+  state.kRevision++; state.selectedK = Ks[i];
+  state.graph.kIndex = i; state.graph.exactPoints = null;
+  $('kSlider').value = Ks.length > 1 ? Math.round(i / (Ks.length - 1) * 1000) : 0;
+  $('kValue').value = String(Ks[i]);
+  $('kSlider').setAttribute('aria-valuetext', 'K = ' + Ks[i]);
+  // 재생 중 매 프레임 화면 낭독을 하지 않습니다. 멈춘 뒤 검산한 결과만 알립니다.
+  $('kPoles').setAttribute('aria-live', 'off');
+  const coords = data.branches.map((br) => {
+    const p = br[Math.min(i, br.length - 1)];
+    return p ? p[0].toPrecision(5) + (p[1] < 0 ? ' − j' : ' + j') + Math.abs(p[1]).toPrecision(5) : '';
+  });
+  $('kPoles').textContent = '계산 표본 · ' + coords.join(' / ');
   state.graph.draw();
 }
 
-async function exactPoles(K) {
-  if (K === undefined) K = parseFloat($('kValue').value) || 0;
-  const r = await API.poles(state.problem, K);
-  if (!r.poles) return;
-  const st = { stable: '안정', marginal: '임계 안정', unstable: '불안정' }[r.status];
-  $('kPoles').innerHTML = `K = ${+K.toPrecision(6)} → ` + r.poles.map((p) => esc(p.text)).join(', ') +
-    `<span class="st ${r.status}">${st}</span>`;
+// 요청·응답: {problem, K} → Python의 정확한 극점(re, im)과 안정 판정.
+// 문제·단계·K가 바뀌면 오래된 응답을 폐기하여 그래프와 숫자의 불일치를 막습니다.
+async function exactPoles(K = state.selectedK) {
+  if (!Number.isFinite(K) || K < 0 || !state.problem) return;
+  const revision = ++state.kRevision, problem = state.problem;
+  try {
+    const r = await API.poles(problem, K);
+    if (revision !== state.kRevision || problem !== state.problem || state.step < 8) return;
+    $('kPoles').setAttribute('aria-live', 'polite');
+    if (!r.poles) {
+      $('kPoles').textContent = r.error?.message || '현재 K의 극점을 검산하지 못했습니다.';
+      return;
+    }
+    state.graph.exactPoints = r.poles.map(p => [p.re, p.im]);
+    state.graph.draw();
+    const status = { stable: '안정', marginal: '임계 안정', unstable: '불안정' }[r.status];
+    $('kPoles').innerHTML = 'K = ' + esc(K) + ' → ' + r.poles.map(p => esc(p.text)).join(', ') +
+      (status ? '<span class="st ' + r.status + '">' + status + '</span>' : '');
+  } catch (e) {
+    if (revision === state.kRevision && problem === state.problem) {
+      $('kPoles').setAttribute('aria-live', 'polite');
+      $('kPoles').textContent = '서버 연결이 끊겨 현재 K를 검산하지 못했습니다. 슬라이더의 계산 표본은 계속 볼 수 있습니다.';
+    }
+  }
 }
 
 // 그래프를 누르면 그 점의 K(크기 조건)를 서버가 계산합니다

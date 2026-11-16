@@ -9,11 +9,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/static/css/base.css">
 <link rel="stylesheet" href="/static/css/learn.css">
+<link rel="stylesheet" href="/static/css/studio.css">
 </head>
-<body>
+<body class="studio-page">
 <!-- 상단 막대: 로고, AI 상태, 시연 모드 스위치 -->
 <header class="topbar">
-  <a class="brand" href="/">근궤적 튜터</a>
+  <a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">∿</span><span>근궤적 튜터<small>ROOT LOCUS STUDIO</small></span></a>
   <div class="topbar-right">
     <label class="switch" title="인터넷·API 키 없이 정해 둔 예시 응답으로 AI 흐름을 보여 줍니다">
       <input type="checkbox" id="demoMode"> <span>시연 모드</span>
@@ -25,7 +26,8 @@
 <!-- ① 문제 입력: 처음 화면. 직접 입력 / 문제 사진 / 블록선도(G·H) -->
 <section class="entry" id="entry">
   <div class="entry-inner">
-    <h1>어떤 시스템의 근궤적을 그려 볼까요?</h1>
+    <p class="entry-kicker">FROM EQUATION TO MOTION</p>
+    <h1>하나의 식이<br>움직임이 되는 순간.</h1>
     <p class="lead">개루프 전달함수 K·G(s)H(s)를 입력하거나 문제 사진을 올리세요. 계산은 모두 Python 엔진이 합니다.</p>
 
     <div class="tabs" role="tablist">
@@ -104,15 +106,32 @@
       </div>
     </div>
     <div class="card graph-card">
-      <canvas id="plane" aria-label="s평면 근궤적 그래프"></canvas>
+      <!-- 도구 막대는 실제 학습 그래프에만 적용합니다. 재생은 Python의 계산 점을 순서대로 표시합니다. -->
+      <div class="graph-toolbar">
+        <div><span class="section-kicker">THE COMPLEX PLANE</span><h3 id="graphScene">좌표에서 시작하기</h3></div>
+        <div class="graph-actions">
+          <button class="btn" id="replayGraph" type="button">단계 다시 보기</button>
+          <button class="btn" id="focusGraph" type="button" aria-pressed="false">그래프 집중</button>
+        </div>
+      </div>
+      <div class="trace-progress" aria-hidden="true"><span id="traceProgress"></span></div>
+      <canvas id="plane" aria-label="s평면 근궤적 그래프" aria-describedby="graphScene graphHelp">
+        그래프의 값과 풀이 과정은 아래 엔진 풀이와 K 극점 목록에서도 확인할 수 있습니다.
+      </canvas>
+      <div class="graph-caption">
+        <span id="graphHelp">실수축 · 허수축 동일 축척</span>
+        <label class="motion-preference"><input id="reduceMotion" type="checkbox"> 움직임 줄이기</label>
+      </div>
       <div class="graph-legend" id="legend"></div>
       <div class="graph-readout mono" id="readout">그래프를 누르면 그 점의 K를 Python이 계산합니다.</div>
       <!-- K 조절: 8·9단계에서만 보인다 -->
       <div class="k-control" id="kControl" hidden>
+        <button class="btn k-play" id="playK" type="button" aria-pressed="false">K 재생</button>
         <label for="kSlider">K</label>
-        <input type="range" id="kSlider" min="0" max="1000" value="0">
-        <input type="number" id="kValue" class="mono" min="0" step="any" value="0">
-        <div class="k-poles mono" id="kPoles"></div>
+        <input type="range" id="kSlider" aria-describedby="kPlaybackHint" min="0" max="1000" value="0">
+        <input type="number" id="kValue" class="mono" min="0" step="any" value="0" aria-label="이득 K 직접 입력">
+        <div class="k-poles mono" id="kPoles" aria-live="polite"></div>
+        <p class="k-playback-hint" id="kPlaybackHint">재생은 계산된 K의 순서이며, 실제 시간의 흐름을 뜻하지 않습니다.</p>
       </div>
     </div>
     <details class="card work-card" id="workCard">
@@ -151,6 +170,7 @@
 
 <script src="/static/js/api.js"></script>
 <script src="/static/js/graph.js"></script>
+<script src="/static/js/studio-motion.js"></script>
 <script src="/static/js/learn.js"></script>
 </body>
 </html>
