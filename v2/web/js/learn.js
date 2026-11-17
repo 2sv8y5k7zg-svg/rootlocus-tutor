@@ -592,12 +592,35 @@ function buildAnchors(res) {
   return A;
 }
 
-// 단계별 카메라: 그 단계의 주인공 쪽으로 다가갑니다 (없으면 전체 보기). 반환값은 setFocus(pt, z)의 인자.
-function focusFor(n) {
-  const f = focusRaw(n);
-  // 좁은 화면(폰)은 확대를 절반으로 줄여 다른 극점이 화면 밖으로 밀려나지 않게 합니다
-  if (f[0] && window.innerWidth <= 760) f[1] = 1 + (f[1] - 1) * 0.45;
-  return f;
+// 단계별 자동 카메라: 그 단계에서 꼭 보여야 하는 점을 모두 담는 영역을 돌려줍니다 (graph.frame에 넘김).
+//   1·8·9단계  전체 보기 (Python이 정한 범위: 근궤적 전체)
+//   2·3·6단계  극점·영점 전부
+//   4단계      + 점근선 중심        5단계  + 이탈·진입점        7단계  + 허수축 교차점(±jω)
+// 점들이 좁게 모여 있으면 다가가고, 멀리 퍼져 있으면 물러납니다. 실수축은 늘 화면 안에 둡니다.
+function boxFor(n) {
+  const g = state.result.graph, v = g.view;
+  if (n === 1 || n >= 8) return null;
+  const pts = [...(g.poles || []), ...(g.zeros || [])].map((p) => [p[0], p[1]]);
+  if (n === 4 && g.asymptotes && g.asymptotes.showCentroid) pts.push([g.asymptotes.centroid, 0]);
+  if (n === 5) for (const b of g.breakpoints || []) pts.push([b[0], b[1]], [b[0], -b[1]]);
+  if (n === 7) for (const c of g.crossings || []) pts.push([c[0], c[1]], [c[0], -c[1]]);
+  if (!pts.length) return null;
+  const b = { xmin: Infinity, xmax: -Infinity, ymin: 0, ymax: 0 };   // y 범위에 0을 넣어 실수축이 늘 보이게
+  for (const [x, y] of pts) {
+    b.xmin = Math.min(b.xmin, x); b.xmax = Math.max(b.xmax, x);
+    b.ymin = Math.min(b.ymin, y); b.ymax = Math.max(b.ymax, y);
+  }
+  // 너무 좁으면(점 하나, 한 줄로 늘어선 극점) 전체 보기의 40%보다 작아지지 않게 넓힙니다 → 지나친 확대 방지
+  const grow = (lo, hi, min) => { const c = (b[lo] + b[hi]) / 2, h = Math.max(b[hi] - b[lo], min) / 2; b[lo] = c - h; b[hi] = c + h; };
+  grow('xmin', 'xmax', (v.xmax - v.xmin) * 0.4);
+  grow('ymin', 'ymax', (v.ymax - v.ymin) * 0.4);
+  return b;
+}
+
+// 그 단계의 주인공 점 (조명이 비추는 곳). 없으면 null.
+function keyPoint(n) {
+  const r = focusRaw(n);
+  return r[0] || null;
 }
 function focusRaw(n) {
   const g = state.result.graph, st = state.result.steps;
@@ -770,7 +793,7 @@ function drawLinks() {
 
 // 조명: 이 단계의 주인공 자리. 8·9단계는 무대 전체를 밝힙니다.
 function lightFor(n) {
-  const f = focusFor(n)[0];
+  const f = keyPoint(n);
   if (f) return [f, 1];
   if (n >= 8) return [null, 0.2];
   if (n === 4) { const g = state.result.graph; if (g.asymptotes) return [[g.asymptotes.centroid, 0], 1]; }
@@ -786,7 +809,7 @@ function stageStep(n) {
   const g = state.graph, hot = renderFormula(n);
   const animate = MOTION && state.started;
   g.setLight(...lightFor(n));
-  g.setFocus(...focusFor(n));
+  g.frame(boxFor(n));
   if (animate) {
     gsap.fromTo('#bigFormula .tok', { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.025, ease: EASE, delay: 0.18 });
     requestAnimationFrame(() => layoutStage());     // 수식 높이가 바뀌면 그래프 자리도 함께 옮깁니다

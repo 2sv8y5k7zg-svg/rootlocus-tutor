@@ -95,6 +95,8 @@ class PlaneGraph {
     this.cv.height = Math.round(h * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.w = w; this.h = h;
+    this.aimCamera();
+    this.cam = { ...this.camT };          // 창 크기가 바뀌면 카메라는 바로 새 자리로
     this.fitView();
     this.draw();
   }
@@ -107,6 +109,7 @@ class PlaneGraph {
     for (const k in LAYERS) { this.v[k] = 0; this.em[k] = 1; }
     this.v.axes = 0; this.step = 1;
     const v = graph.view;
+    this.box = null;
     this.cam = { x: (v.xmin + v.xmax) / 2, y: (v.ymin + v.ymax) / 2, z: 1 };
     this.camT = { ...this.cam };
     this.light = { x: this.cam.x, y: this.cam.y, a: 0 }; this.lightT = { ...this.light };
@@ -130,8 +133,33 @@ class PlaneGraph {
   // 여백을 바꿉니다. 그래프는 새 자리로 부드럽게 미끄러져 갑니다(카메라 이동). instant면 바로.
   setInsets(ins, instant) {
     this.insT = { ...this.insT, ...ins };
-    if (instant || this.reduced || !this.data) { this.ins = { ...this.insT }; this.fitView(); this.draw(); return; }
+    this.aimCamera();                     // 쓸 수 있는 자리가 바뀌었으니 담을 영역을 다시 맞춥니다
+    if (instant || this.reduced || !this.data) { this.ins = { ...this.insT }; this.cam = { ...this.camT }; this.fitView(); this.draw(); return; }
     this.kick();
+  }
+
+  // 자동 카메라: 이 단계에서 꼭 보여야 하는 영역(box = {xmin, xmax, ymin, ymax}, 수학 좌표)을 받아
+  // 패널을 뺀 화면 자리에 여백을 두고 꽉 차게 맞춥니다. 범위가 좁으면 다가가고(줌 인), 넓으면 물러납니다(줌 아웃).
+  // box가 null이면 Python이 정한 전체 보기 범위(근궤적 전체)를 그대로 씁니다.
+  frame(box) {
+    this.box = box || null;
+    this.aimCamera();
+    if (this.reduced) { this.cam = { ...this.camT }; this.fitView(); this.draw(); return; }
+    this.kick();
+  }
+  // 목표 카메라(camT) 계산. 화면 축척은 fitView와 같은 식(전체 보기 기준)이고, z는 그 축척에 곱하는 배율입니다.
+  aimCamera() {
+    const v = this.data && this.data.view;
+    if (!v || !this.w) return;
+    const b = this.box;
+    if (!b) { this.camT = { x: (v.xmin + v.xmax) / 2, y: (v.ymin + v.ymax) / 2, z: 1 }; return; }
+    const i = this.insT;
+    const W = Math.max(120, this.w - i.l - i.r), H = Math.max(120, this.h - i.t - i.b);
+    const base = Math.min(W / (v.xmax - v.xmin), H / (v.ymax - v.ymin));
+    const PAD = Math.min(56, W * 0.1, H * 0.12);   // 점 표시·글자가 가장자리·패널에 붙지 않게 남기는 화면 여백(px)
+    const fit = Math.min((W - 2 * PAD) / Math.max(b.xmax - b.xmin, 1e-6), (H - 2 * PAD) / Math.max(b.ymax - b.ymin, 1e-6));
+    const z = Math.max(0.35, Math.min(2.6, fit / base));
+    this.camT = { x: (b.xmin + b.xmax) / 2, y: (b.ymin + b.ymax) / 2, z };
   }
 
   // 화면 좌표 (px, py) 근처 radius 안에서 지금 보이는 점 중 가장 가까운 것
