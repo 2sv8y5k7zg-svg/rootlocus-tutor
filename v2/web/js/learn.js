@@ -191,7 +191,7 @@ async function start(problem, btn) {
   state.problem = problem; state.result = res; state.checked = {}; state.hintLevel = {};
 
   // 전환: 입력 화면이 위로 사라지고 → 배경 조형물이 흐름선으로 풀리며 → 무대와 좌우 패널이 들어옵니다
-  flowTo({ flow: 1, dim: 1, oy: 0, ox: 0 }, 2);
+  flowTo({ flow: 1, dim: 0.38, oy: 0, ox: 0 }, 2);   // 풀이 중에는 배경 흐름선을 흐리게 해서 그래프·수식이 먼저 보이게 합니다
   if (MOTION) await gsap.to('#entry', { opacity: 0, y: -30, duration: 0.4, ease: 'power2.in' });
   $('entry').hidden = true; $('confirm').hidden = true; $('studio').hidden = false;
   document.body.classList.add('studying');      // 페이지 스크롤을 멈추고 화면 높이에 딱 맞춥니다
@@ -262,6 +262,35 @@ function openConfirm(vals, pre, msg, conditions, uncertain, photo) {
 // 문제 사진 업로드 → AI 인식 → 확인 패널
 // 시연 모드의 모의 AI는 사진을 읽지 않고 늘 같은 예시를 돌려줍니다. 그래서 사진 탭에 그 사실을 분명히 적고,
 // 버튼 이름도 '예시 결과 보기'로 바꿉니다. (예전에는 이 안내가 없어 "사진을 바꿔도 같은 식만 나온다"고 보였습니다)
+// 사진을 외부 AI로 보내기 전에 준비합니다 (Gemini 약관: 무료 등급에는 개인정보를 보내지 말 것).
+//  1) 캔버스에 다시 그려 저장하므로, 휴대폰 사진 속 위치(GPS)·기기 정보(EXIF)가 빠집니다
+//  2) 긴 변을 1600px 이하로 줄입니다 (전송 시간·AI 토큰 절약, 서버 6MB 제한 대비)
+//  3) 원본 사진의 지문(SHA-256)을 함께 보내, 서버가 같은 사진을 알아보게 합니다 (시연 백업용)
+// 이 브라우저가 그 형식을 그리지 못하면(예: 일부 브라우저의 HEIC) 원본을 그대로 보냅니다.
+async function prepPhoto(file) {
+  let id = '';
+  try {
+    if (window.crypto && crypto.subtle) {
+      const h = new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()));
+      id = Array.from(h, (b) => b.toString(16).padStart(2, '0')).join('');
+    }
+  } catch (e) { id = ''; }
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, bad) => { const im = new Image(); im.onload = () => ok(im); im.onerror = bad; im.src = url; });
+    const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const cx = cv.getContext('2d');
+    cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h);   // 투명한 PNG도 흰 종이 위 글씨처럼
+    cx.drawImage(img, 0, 0, w, h);                    // 최신 브라우저는 사진의 회전 정보(EXIF)를 반영해 그립니다
+    const png = file.type === 'image/png';
+    const blob = await new Promise((r) => cv.toBlob(r, png ? 'image/png' : 'image/jpeg', 0.9));
+    if (blob && blob.size > 0) return { file: new File([blob], png ? 'photo.png' : 'photo.jpg', { type: blob.type }), id };
+  } catch (e) { /* 그리지 못한 형식: 원본을 보냄 */ } finally { URL.revokeObjectURL(url); }
+  return { file, id };
+}
+
 function setupPhoto() {
   const inp = $('photoInput'), drop = $('drop');
   let file = null, reader = null;
@@ -300,7 +329,8 @@ function setupPhoto() {
     entryError('');
     const label = $('photoGo').textContent;
     $('photoGo').disabled = true; $('photoGo').textContent = demo() ? '불러오는 중…' : '인식 중…';
-    const r = await API.upload('/api/ai/recognize', file, { consent: $('consent').checked, demo: demo() });
+    const prep = demo() ? { file, id: '' } : await prepPhoto(file);
+    const r = await API.upload('/api/ai/recognize', prep.file, { consent: $('consent').checked, demo: demo(), photoId: prep.id });
     $('photoGo').textContent = label; ready();
     // 같은 사진을 다시 골라도 change가 일어나도록 비웁니다 (고른 파일은 file에 남아 있음)
     inp.value = '';
@@ -678,7 +708,10 @@ function renderFormula(n) {
 
 // 숫자가 수식에서 떨어져 나와 그래프의 점으로 날아갑니다. 점이 카메라와 함께 움직여도 도착 지점을 매 프레임 다시 잽니다.
 // 도착하면 그 점에서 빛이 번지고, 수식의 숫자와 점 사이에 가는 선이 남습니다.
-const FLY = 0.95;   // 초
+// 2026-11-17 주영님 요청: 눈으로 따라갈 수 있게 조금 느리게(0.95초 → 1.2초).
+// 속도 곡선도 sine.inOut으로 바꿔, 가운데 구간의 최고 속도를 낮췄습니다(power2보다 덜 급하게 가속).
+const FLY = 1.2;     // 초
+const FLY_GAP = 0.13; // 숫자 여러 개가 차례로 떠나는 간격(초)
 function flyTokens(stepAtStart) {
   const stage = $('stage').getBoundingClientRect(), layer = $('flyLayer'), g = state.graph;
   let k = 0;
@@ -692,7 +725,7 @@ function flyTokens(stepAtStart) {
     layer.appendChild(fly);
     const w = fly.offsetWidth, h = fly.offsetHeight;
     const o = { p: 0 };
-    gsap.to(o, { p: 1, duration: FLY, delay: 0.1 + i * 0.09, ease: 'power2.inOut',
+    gsap.to(o, { p: 1, duration: FLY, delay: 0.1 + i * FLY_GAP, ease: 'sine.inOut',
       onStart: () => tk.el.classList.add('sent'),
       onUpdate: () => {
         if (state.step !== stepAtStart) return;
@@ -892,7 +925,9 @@ function setupHandwriting() {
   $('demoMode').addEventListener('change', ready);
   $('hwGo').onclick = async () => {
     $('hwGo').disabled = true; $('hwReport').innerHTML = '<p class="muted small">AI가 읽고, 엔진이 검증하는 중…</p>';
-    const r = await API.upload('/api/ai/handwriting', $('hwInput').files[0],
+    const raw = $('hwInput').files[0];
+    const prep = demo() ? { file: raw } : await prepPhoto(raw);
+    const r = await API.upload('/api/ai/handwriting', prep.file,
       { consent: $('hwConsent').checked, demo: demo(), problem: JSON.stringify(state.problem) });
     ready();
     if (!r.ok) { $('hwReport').innerHTML = `<p class="error small">${esc(r.error.message)} ${esc(r.fallback || '')}</p>`; return; }

@@ -106,6 +106,7 @@
   // 흐름선이 된 뒤에는 보이지 않는 동안 morph를 0으로 돌려놓아, 다음 장면에서 조형물로 돌아갈 준비를 합니다.
   gsap.timeline({ scrollTrigger: { trigger: '#s4', start: 'top 95%', end: 'top 5%', scrub: SCRUB } })
     .to(S, { flow: 1, ease: 'none', duration: 0.7 }, 0)
+    .to(S, { dim: 0.32, ease: 'none', duration: 0.7 }, 0)   // 실제 화면 카드를 읽는 동안 배경 흐름선은 뒤로 물러납니다
     .to('.story-pin', { opacity: 0, ease: 'none', duration: 0.3 }, 0)
     .to(S, { morph: 0, ease: 'none', duration: 0.3 }, 0.7);
   gsap.from('#s4 .eyebrow, #s4 h2', { y: 50, opacity: 0, stagger: 0.1, ease: 'none',
@@ -117,6 +118,8 @@
 
   // Scene 5: 흐름선이 다시 조형물로 모여 화면 가운데에 놓입니다. 문장이 줄마다 올라오고, 버튼은 커서를 살짝 따라옵니다.
   gsap.to(S, { flow: 0, pos: 1, ease: 'none', scrollTrigger: { trigger: '#s5', start: 'top 90%', end: 'top 10%', scrub: SCRUB } });
+  // 배경 밝기는 실제 화면 카드가 화면 위로 거의 빠져나간 뒤에야 돌아옵니다 (카드를 읽는 동안 조형물이 겹쳐 밝게 보이지 않게)
+  gsap.to(S, { dim: 1, ease: 'none', scrollTrigger: { trigger: '#device', start: 'bottom 35%', end: 'bottom top', scrub: SCRUB } });
   gsap.from('.cta-line .ln > span', { yPercent: 115, duration: 1.4, stagger: 0.12, ease: EASE,
     scrollTrigger: { trigger: '#s5', start: 'top 55%' } });
   gsap.from('.cta-btn, .cta-foot', { y: 30, opacity: 0, duration: 1.2, stagger: 0.1, ease: EASE, delay: 0.25,

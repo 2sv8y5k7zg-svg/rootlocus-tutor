@@ -16,6 +16,7 @@ class AIError(Exception):
         noKey      API 키가 서버에 설정되지 않음
         rateLimit  호출 한도 초과 (무료 등급 한도 포함)
         network    연결 실패·시간 초과
+        busy       AI 서버 일시 장애(503 등) — 재시도·대체 모델까지 실패
         badResponse 응답 형식이 약속과 다름
         blocked    안전 필터 등으로 응답 거부
         consent    사용자가 사진 전송에 동의하지 않음"""

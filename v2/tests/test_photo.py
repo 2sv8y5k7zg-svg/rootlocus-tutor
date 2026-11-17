@@ -27,9 +27,10 @@ READS = {
 
 
 def fake_gemini(monkeypatch, seen):
-    def post(url, params=None, json=None, timeout=None):
+    def post(url, headers=None, json=None, timeout=None, **kw):
         part = json['contents'][0]['parts'][1]['inline_data']
         img = base64.b64decode(part['data'])
+        assert 'key' not in (kw.get('params') or {}) and headers['x-goog-api-key'] == 'test-key-not-real'
         seen.append({'url': url, 'mime': part['mime_type'], 'img': img,
                      'schema': json['generationConfig'].get('response_mime_type')})
         body = {'candidates': [{'content': {'parts': [{'text': __import__('json').dumps(READS[img[8:]])}]},
@@ -38,7 +39,7 @@ def fake_gemini(monkeypatch, seen):
     monkeypatch.setenv('GEMINI_API_KEY', 'test-key-not-real')
     monkeypatch.setenv('AI_PROVIDER', 'gemini')
     monkeypatch.setattr(httpx, 'post', post)
-    monkeypatch.setattr(routes, '_rate_ok', lambda: True)
+    monkeypatch.setattr(routes, '_rate_ok', lambda *a: True)
     routes._cache.clear()
 
 

@@ -19,7 +19,7 @@ from server.app import app  # noqa: E402
 from ai import routes as ai_routes  # noqa: E402
 
 # 미리 받아 두는 동안은 서버의 분당 호출 제한(실제 AI 보호용)을 끈다. 모의 AI만 부르므로 외부 전송 없음.
-ai_routes._rate_ok = lambda: True
+ai_routes._rate_ok = lambda *a: True
 
 WEB = ROOT / 'web'
 OUT = ROOT / 'dist' / 'offline'

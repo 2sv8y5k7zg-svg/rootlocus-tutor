@@ -60,12 +60,13 @@ class FakeResp:
 @pytest.mark.parametrize('code,body,expect', [
     (429, {}, 'rateLimit'),
     (403, {}, 'noKey'),
-    (500, {}, 'badResponse'),
+    (500, {}, 'busy'),          # 서버 일시 장애: 재시도 후에도 실패하면 busy (2026-11-17 재시도 추가)
     (200, {'candidates': [{'finishReason': 'SAFETY', 'content': {'parts': []}}]}, 'blocked'),
     (200, {'candidates': [{'content': {'parts': [{'text': 'not json'}]}}]}, 'badResponse'),
 ])
 def test_gemini_errors(monkeypatch, code, body, expect):
     monkeypatch.setenv('GEMINI_API_KEY', 'test-key-not-real')
+    monkeypatch.setattr(gemini.time, 'sleep', lambda s: None)
     monkeypatch.setattr(httpx, 'post', lambda *a, **k: FakeResp(code, body))
     with pytest.raises(gemini.AIError) as e:
         gemini.GeminiProvider().extract_problem(b'x', 'image/png')
@@ -75,6 +76,7 @@ def test_gemini_errors(monkeypatch, code, body, expect):
 
 def test_gemini_timeout(monkeypatch):
     monkeypatch.setenv('GEMINI_API_KEY', 'k')
+    monkeypatch.setattr(gemini.time, 'sleep', lambda s: None)
     def boom(*a, **k):
         raise httpx.ConnectTimeout('t')
     monkeypatch.setattr(httpx, 'post', boom)
@@ -85,14 +87,16 @@ def test_gemini_timeout(monkeypatch):
 
 def test_gemini_request_shape(monkeypatch):
     seen = {}
-    def fake(url, params=None, json=None, timeout=None):
-        seen.update(url=url, params=params, body=json)
+    def fake(url, headers=None, json=None, timeout=None, **kw):
+        seen.update(url=url, params=kw.get('params'), headers=headers, body=json)
         return FakeResp(200, {'candidates': [{'content': {'parts': [{'text': '{"kind":"unknown","conditions":[],"uncertain":[],"confidence":0.1}'}]}}]})
     monkeypatch.setenv('GEMINI_API_KEY', 'k')
     monkeypatch.setattr(httpx, 'post', fake)
     out = gemini.GeminiProvider().extract_problem(b'abc', 'image/png')
     assert out['kind'] == 'unknown'
     assert seen['url'].endswith(':generateContent') and 'models/' in seen['url']
+    # 키는 주소가 아니라 헤더로 (공식 문서 예시와 같게, 주소가 기록돼도 키가 남지 않게)
+    assert seen['headers'] == {'x-goog-api-key': 'k'} and not seen['params'] and 'k' not in seen['url'].split('models/')[1]
     gc = seen['body']['generationConfig']
     assert gc['response_mime_type'] == 'application/json' and 'response_schema' in gc
     assert seen['body']['contents'][0]['parts'][1]['inline_data']['mime_type'] == 'image/png'

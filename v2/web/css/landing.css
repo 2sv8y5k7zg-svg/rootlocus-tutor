@@ -46,8 +46,10 @@ html.lenis, html.lenis body { height: auto; }
 .story { height: 400svh; }
 .story-pin { position: sticky; top: 0; height: 100svh; display: grid; align-content: center; padding: 0 clamp(20px, 6vw, 96px); }
 .story-words { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(4px, 1vh, 12px); }
-.story-words li { display: grid; gap: 6px; opacity: .14; will-change: opacity, transform; transform-origin: 0 50%; }
-.story-words .w { font-size: clamp(44px, 8.5vw, 132px); line-height: .95; letter-spacing: -.05em; font-weight: 600; }
+/* 낱말(.w)의 줄 높이를 글자 아래 꼬리(g, y)까지 담을 만큼 두고, 설명 글(.k)과 사이를 띄웁니다.
+   (줄 높이를 너무 줄이면 Recognize의 g, Verify의 y가 설명 글을 가립니다) */
+.story-words li { display: grid; gap: clamp(8px, 1.2vh, 14px); opacity: .14; will-change: opacity, transform; transform-origin: 0 50%; }
+.story-words .w { font-size: clamp(44px, 8.5vw, 132px); line-height: 1.12; letter-spacing: -.05em; font-weight: 600; }
 .story-words .k { font-size: clamp(14px, 1.3vw, 17px); color: rgba(245, 244, 240, .72); opacity: 0; }
 .story-meter { margin-top: 5vh; width: min(320px, 60vw); height: 1px; background: rgba(245, 244, 240, .2); }
 .story-meter i { display: block; height: 100%; width: 100%; background: var(--ice); transform: scaleX(0); transform-origin: 0 50%; }
@@ -57,7 +59,8 @@ html.lenis, html.lenis body { height: auto; }
 .reveal-inner { width: min(1180px, 100%); margin: 0 auto; perspective: 1600px; }
 .reveal h2 { font-size: clamp(34px, 5vw, 72px); letter-spacing: -.04em; margin: 0 0 6vh; font-weight: 600; }
 .device { display: grid; grid-template-columns: 220px minmax(0, 1fr) 260px; gap: 18px; padding: 18px; border-radius: 26px;
-  background: rgba(22, 27, 39, .78); border: 1px solid rgba(245, 244, 240, .09);
+  /* 뒤 흐름선이 비쳐 설명을 읽는 데 방해되지 않도록 거의 불투명하게 둡니다 */
+  background: rgba(20, 25, 36, .96); border: 1px solid rgba(245, 244, 240, .09);
   box-shadow: 0 40px 100px rgba(0, 0, 0, .45); transform-origin: 50% 100%; will-change: transform, opacity; }
 .dev-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(245, 244, 240, .45); margin-bottom: 10px; font-weight: 600; }
 .dev-tf { font-size: 14px; margin-bottom: 14px; word-break: break-word; }
