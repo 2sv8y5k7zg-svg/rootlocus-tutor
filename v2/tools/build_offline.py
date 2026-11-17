@@ -105,11 +105,17 @@ def wrong_candidates(res, field):
 def main():
     fields = C.get('/api/fields').json()
     health = C.get('/api/health').json()
-    health['ai'] = {'available': False, 'label': '외부 AI', 'sendsDataTo': ''}   # 미리보기는 실제 AI를 부르지 않음
+    # 미리보기 파일은 힌트·손글씨에 실제 AI를 부르지 않는다. 문제 사진만 claude.ai 링크 안에서 Claude가 읽는다(api_offline.js).
+    health['ai'] = {'available': False, 'label': 'Claude', 'sendsDataTo': 'Anthropic Claude, 미리보기 링크에서만'}
+    from ai.prompts import EXTRACT
     data = {'health': health, 'fields': fields, 'analyze': {}, 'check': {}, 'samples': {}, 'poles': {},
-            'diagram': {}, 'hint': {}, 'handwriting': {}}
-
+            'diagram': {}, 'hint': {}, 'handwriting': {}, 'prompts': {'extract': EXTRACT}}
+    # 시연 모드(모의 AI)의 사진 인식 결과. 확인 패널에서 그대로 확정하면 이 구조(블록선도)로 계산하므로 함께 저장한다.
+    data['recognize'] = C.post('/api/ai/recognize', files={'image': ('a.png', b'\x89PNG\r\n\x1a\n' + b'0' * 64, 'image/png')},
+                               data={'demo': 'true', 'consent': 'false'}).json()
     problems = [{'text': t} for t in TEXTS] + [{'G': g, 'H': h} for g, h in GH]
+    if data['recognize']['preview'].get('problem'):
+        problems.append(data['recognize']['preview']['problem'])
     for g, h in GH:
         data['diagram'][key({'G': g, 'H': h})] = post('/api/diagram', {'G': g, 'H': h})
 
@@ -166,9 +172,6 @@ def main():
         data['handwriting'][k] = C.post('/api/ai/handwriting', files={'image': ('a.png', b'\x89PNG\r\n\x1a\n' + b'0' * 64, 'image/png')},
                                         data={'demo': 'true', 'consent': 'false', 'problem': json.dumps(p)}).json()
         print('저장', p, '예시 답', sum(len(v) for v in smp.values()), '개')
-    data['recognize'] = C.post('/api/ai/recognize', files={'image': ('a.png', b'\x89PNG\r\n\x1a\n' + b'0' * 64, 'image/png')},
-                               data={'demo': 'true', 'consent': 'false'}).json()
-
     OUT.mkdir(parents=True, exist_ok=True)
     land_key = key(LANDING)
     land_data = {'health': health, 'fields': fields, 'analyze': {land_key: data['analyze'][land_key]},

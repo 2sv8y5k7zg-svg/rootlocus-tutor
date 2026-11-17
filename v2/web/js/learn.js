@@ -57,20 +57,25 @@ async function init() {
   // 로고(랜딩으로 가는 링크)를 누르면 내용만 사라지고, 배경은 그대로 둔 채 이동합니다
   document.querySelector('.brand').addEventListener('click', (e) => { e.preventDefault(); leaveTo(e.currentTarget.getAttribute('href')); });
   // 화면 크기가 바뀌면 단계 표시 배경의 위치를 다시 맞춥니다
-  addEventListener('resize', () => { moveIndicator(true); if (!MOTION) Flow.frame(); });
+  addEventListener('resize', () => { moveIndicator(true); layoutStage(true); if (!MOTION) Flow.frame(); });
   // 식을 입력하는 동안 배경 가닥이 살짝 반응합니다
   $('tfInput').addEventListener('input', () => Flow.pulse(0.22));
-  $('prevStep').onclick = () => goStep(Math.max(1, state.step - 1));
-  $('nextStep').onclick = () => goStep(Math.min(9, state.step + 1));
+  $('prevStep').onclick = () => stepBy(-1);
+  $('nextStep').onclick = () => stepBy(1);
   setupPhoto();
   setupHandwriting();
   setupK();
+  Sheets.init();
+  setupTimeline();
+  state.graph.onTip = placeTip;
+  state.graph.onFrame = drawLinks;
 
   // 서버 상태와 입력 칸 목록을 한 번 받아 둡니다
   try {
     const [h, f] = await Promise.all([API.health(), API.fields()]);
     state.ai = h.ai; state.fields = f;
     showAiStatus();
+    setupPhoto.refresh?.();
   } catch (e) {
     $('aiStatus').textContent = '서버 연결 안 됨';
   }
@@ -122,6 +127,8 @@ addEventListener('pageshow', (e) => { if (e.persisted && window.gsap) gsap.set('
 async function backToEntry() {
   if (MOTION) await gsap.to('#studio', { opacity: 0, y: 20, duration: 0.35, ease: 'power2.in' });
   $('studio').hidden = true; $('entry').hidden = false;
+  document.body.classList.remove('studying');
+  hideTip();
   if (MOTION) gsap.set('#studio', { clearProps: 'all' });
   $('topProgress').style.transform = 'scaleX(0)';
   state.started = false;
@@ -187,21 +194,25 @@ async function start(problem, btn) {
   flowTo({ flow: 1, dim: 1, oy: 0, ox: 0 }, 2);
   if (MOTION) await gsap.to('#entry', { opacity: 0, y: -30, duration: 0.4, ease: 'power2.in' });
   $('entry').hidden = true; $('confirm').hidden = true; $('studio').hidden = false;
+  document.body.classList.add('studying');      // 페이지 스크롤을 멈추고 화면 높이에 딱 맞춥니다
   if (MOTION) gsap.set('#entry', { clearProps: 'all' });
   window.scrollTo(0, 0);
   state.started = false;
   renderProblem();
   paintKTrack();
+  hideTip();
   state.graph.resize();
   state.graph.setData(res.graph);     // 축이 원점에서 바깥으로 그려지며 시작
+  state.graph.setAnchors(buildAnchors(res));
+  layoutStage(true);
   goStep(1);
   state.started = true;
   if (MOTION) {
-    gsap.from('#stage', { y: 48, scale: 0.96, opacity: 0, duration: 1.2, ease: EASE });
-    gsap.from('.stage-head > *, .stage-foot', { y: 20, opacity: 0, duration: 1, stagger: 0.08, ease: EASE, delay: 0.3 });
-    gsap.from('.col-left > *', { x: -32, opacity: 0, duration: 1, stagger: 0.08, ease: EASE, delay: 0.2 });
-    gsap.from('.col-right > *', { x: 32, opacity: 0, duration: 1, stagger: 0.08, ease: EASE, delay: 0.25 });
-    gsap.from('.work-card, .step-nav-btns', { y: 24, opacity: 0, duration: 0.9, stagger: 0.07, ease: EASE, delay: 0.45 });
+    gsap.from('#plane', { opacity: 0, scale: 0.97, duration: 1.4, ease: EASE });
+    gsap.from('.problem-line, .stage-head > *, .hud-foot', { y: 20, opacity: 0, duration: 1, stagger: 0.07, ease: EASE, delay: 0.25 });
+    gsap.from('.dock-btn', { x: 24, opacity: 0, duration: 0.9, stagger: 0.05, ease: EASE, delay: 0.35 });
+    gsap.from('.timeline', { y: 40, opacity: 0, duration: 1, ease: EASE, delay: 0.2 });
+    gsap.from('.step-btn', { y: 12, opacity: 0, duration: 0.8, stagger: 0.035, ease: EASE, delay: 0.4 });
   }
 }
 
@@ -218,9 +229,13 @@ async function confirmGH() {
 }
 
 // 확인 패널: AI 인식 결과나 G·H 해석 결과를 보여 주고 고칠 수 있게 합니다.
-function openConfirm(vals, pre, msg, conditions, uncertain) {
+function openConfirm(vals, pre, msg, conditions, uncertain, photo) {
   $('confirm').hidden = false;
   $('confirmMsg').textContent = msg;
+  const img = $('confirmPhoto');
+  if (img.dataset.url) { URL.revokeObjectURL(img.dataset.url); delete img.dataset.url; }
+  img.hidden = !photo;
+  if (photo) { img.dataset.url = URL.createObjectURL(photo); img.src = img.dataset.url; }
   $('cTf').value = vals.tf || ''; $('cG').value = vals.G || ''; $('cH').value = vals.H || '';
   const rows = [];
   if (pre.loopText) rows.push(`<div>루프 전달함수 <span class="mono">${esc(pre.loopText)}</span></div>`);
@@ -233,34 +248,69 @@ function openConfirm(vals, pre, msg, conditions, uncertain) {
   $('confirmInfo').innerHTML = rows.join('');
   $('confirm').scrollIntoView({ behavior: 'smooth', block: 'center' });
   $('confirmGo').onclick = () => {
+    const G = $('cG').value.trim(), H = $('cH').value.trim(), tf = $('cTf').value.trim();
+    // 고친 곳이 없고 엔진이 미리 해석한 구조(블록선도 등)가 있으면 그 구조 그대로 계산합니다.
+    // (예전에는 블록선도도 G·H 칸만 보고 계산해서, 칸이 비면 다른 식이 될 수 있었습니다)
+    const untouched = tf === (vals.tf || '') && G === (vals.G || '') && H === (vals.H || '');
+    if (untouched && pre.problem) { start(pre.problem, $('confirmGo')); return; }
     // 사용자가 고친 값을 우선: G가 있으면 G·H 구조, 없으면 전달함수 한 줄
-    const G = $('cG').value.trim(), H = $('cH').value.trim();
-    if (G) start({ G, H: H || '1' }, $('confirmGo')); else start({ text: $('cTf').value }, $('confirmGo'));
+    if (G) start({ G, H: H || '1' }, $('confirmGo')); else start({ text: tf }, $('confirmGo'));
   };
   $('confirmCancel').onclick = () => { $('confirm').hidden = true; };
 }
 
 // 문제 사진 업로드 → AI 인식 → 확인 패널
+// 시연 모드의 모의 AI는 사진을 읽지 않고 늘 같은 예시를 돌려줍니다. 그래서 사진 탭에 그 사실을 분명히 적고,
+// 버튼 이름도 '예시 결과 보기'로 바꿉니다. (예전에는 이 안내가 없어 "사진을 바꿔도 같은 식만 나온다"고 보였습니다)
 function setupPhoto() {
   const inp = $('photoInput'), drop = $('drop');
-  let file = null;
+  let file = null, reader = null;
   const ready = () => { $('photoGo').disabled = !(file && ($('consent').checked || demo())); };
-  inp.onchange = () => { file = inp.files[0]; drop.querySelector('.drop-title').textContent = file ? file.name : '사진 고르기'; ready(); };
+  const showMode = () => {
+    const el = $('photoMode'), go = $('photoGo');
+    el.hidden = false;
+    el.classList.toggle('demo', demo());
+    if (demo()) {
+      el.textContent = '시연 모드에서는 사진을 읽지 않습니다. 어떤 사진을 올려도 정해 둔 예시 결과 하나를 보여 줍니다. 실제로 읽으려면 오른쪽 위 시연 모드를 끄세요.';
+      go.textContent = '예시 결과 보기';
+    } else {
+      go.textContent = '사진 인식';
+      if (reader === 'claude') el.textContent = '이 미리보기 링크에서는 Claude가 사진을 읽습니다(본선 앱은 Gemini). 계산은 Python 엔진 결과만 씁니다.';
+      else if (API.offline) el.textContent = '이 미리보기 파일에서는 실제 AI로 사진을 읽을 수 없습니다. 노트북에서 python run.py로 실행하면 Gemini가 읽습니다.';
+      else if (state.ai && !state.ai.available) el.textContent = 'AI 키가 설정되지 않아 사진 인식이 꺼져 있습니다. 식을 직접 입력하거나 시연 모드로 흐름만 볼 수 있습니다.';
+      else el.hidden = true;
+    }
+  };
+  const pick = (f) => {
+    file = f || null;
+    drop.querySelector('.drop-title').textContent = file ? file.name : '사진을 끌어 놓거나 눌러서 고르기';
+    $('confirm').hidden = true;   // 새 사진을 고르면 이전 사진의 인식 결과는 닫습니다
+    ready();
+  };
+  inp.onchange = () => pick(inp.files[0]);
   $('consent').onchange = ready;
-  $('demoMode').addEventListener('change', ready);
+  $('demoMode').addEventListener('change', () => { ready(); showMode(); });
   drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); };
   drop.ondragleave = () => drop.classList.remove('over');
-  drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); file = e.dataTransfer.files[0]; drop.querySelector('.drop-title').textContent = file.name; ready(); };
+  drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); pick(e.dataTransfer.files[0]); };
+  showMode();
+  if (API.photoReader) API.photoReader().then((r) => { reader = r; showMode(); });
+  setupPhoto.refresh = showMode;   // 서버 상태(AI 키 유무)를 받은 뒤 다시 그립니다
   $('photoGo').onclick = async () => {
     entryError('');
-    $('photoGo').disabled = true; $('photoGo').textContent = '인식 중…';
+    const label = $('photoGo').textContent;
+    $('photoGo').disabled = true; $('photoGo').textContent = demo() ? '불러오는 중…' : '인식 중…';
     const r = await API.upload('/api/ai/recognize', file, { consent: $('consent').checked, demo: demo() });
-    $('photoGo').textContent = '사진 인식'; ready();
+    $('photoGo').textContent = label; ready();
+    // 같은 사진을 다시 골라도 change가 일어나도록 비웁니다 (고른 파일은 file에 남아 있음)
+    inp.value = '';
     if (!r.ok) { entryError(`${r.error.message} ${r.fallback || ''}`); return; }
     const ai = r.ai;
-    const label = r.provider === 'mock' ? '[모의 AI 응답] ' : '';
-    openConfirm({ tf: ai.tf || '', G: ai.G || '', H: ai.H || '' }, r.preview,
-      label + r.message + ` (AI 확신도 ${Math.round((ai.confidence || 0) * 100)}%)`, ai.conditions || [], ai.uncertain || []);
+    const msg = r.provider === 'mock'
+      ? '[시연 모드: 사진을 읽지 않은 예시 결과입니다] ' + r.message
+      : `${r.providerLabel ? r.providerLabel + ' · ' : ''}${r.message} (AI 확신도 ${Math.round((ai.confidence || 0) * 100)}%)`;
+    openConfirm({ tf: ai.tf || '', G: ai.G || '', H: ai.H || '' }, r.preview, msg, ai.conditions || [], ai.uncertain || [],
+      r.provider === 'mock' ? null : file);
   };
 }
 
@@ -275,7 +325,8 @@ function renderProblem() {
   for (const st of r.steps) {
     const b = document.createElement('button');
     b.className = 'step-btn'; b.dataset.n = st.n;
-    b.innerHTML = `<span class="no">${st.n}</span><span>${esc(st.title)}</span><span class="mark" id="mark${st.n}"></span>`;
+    b.title = `${st.n}. ${st.title}`;
+    b.innerHTML = `<span class="no">${st.n}</span><span class="t">${esc(st.title)}</span><span class="mark" id="mark${st.n}"></span>`;
     b.onclick = () => goStep(st.n);
     nav.appendChild(b);
   }
@@ -287,7 +338,8 @@ function renderProblem() {
 function goStep(n) {
   state.step = n;
   const st = state.result.steps[n - 1];
-  document.querySelectorAll('.step-btn').forEach((b) => b.classList.toggle('on', +b.dataset.n === n));
+  document.querySelectorAll('.step-btn').forEach((b) => { b.classList.toggle('on', +b.dataset.n === n); b.classList.toggle('past', +b.dataset.n < n); });
+  $('tlFill').style.transform = `scaleX(${(n - 1) / 8})`;
   // 좁은 화면에서는 단계 목록이 가로로 스크롤되므로, 현재 단계 버튼이 보이도록 목록만 옮깁니다
   const nav = $('stepNav'), on = nav.querySelector('.on');
   if (on && nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: on.offsetLeft - nav.clientWidth / 2 + on.clientWidth / 2, behavior: 'smooth' });
@@ -307,7 +359,6 @@ function goStep(n) {
   } else setText();
   $('stepFormula').textContent = st.formula;
   $('stepWork').innerHTML = st.work.map((w) => `<li>${esc(w)}</li>`).join('');
-  $('workCard').open = false;
   $('prevStep').disabled = n === 1; $('nextStep').disabled = n === 9;
 
   // 엔진이 이 단계를 어떻게 스스로 검산했는지 보여 줍니다
@@ -326,10 +377,14 @@ function goStep(n) {
 
   // 그래프: 이 단계에서 새로 나오는 요소가 그려지는 움직임은 graph.js가 맡습니다
   const g = state.graph;
+  const kWas = !$('kControl').hidden;
   $('kControl').hidden = n < 8;
-  if (n >= 8) { if (g.kIndex === null) setKIndex(0); } else g.setK(null);
-  g.setStep(n);
+  if (n >= 8) { if (g.kIndex === null) { setKIndex(0); exactPoles(0); } } else g.setK(null);
   legend(n);
+  // 누른 점의 말풍선은 단계가 바뀌면 닫습니다. 카메라·조명은 이 단계의 주인공 쪽으로, 수식의 숫자는 그래프로.
+  hideTip();
+  stageStep(n);
+  if (kWas !== !$('kControl').hidden || !state.started) layoutStage(!state.started);
 }
 
 function legend(n) {
@@ -411,9 +466,11 @@ async function askHint(level, student, verdict) {
   const n = state.step;
   state.hintLevel[n] = Math.max(state.hintLevel[n] || 0, level);
   $('ladder').children[level - 1].classList.add('used');
-  if (level === 4) $('workCard').open = true;     // 전체 풀이는 학생이 요청했을 때만 펼칩니다
+  if (level === 4) Sheets.show('work');           // 전체 풀이는 학생이 요청했을 때만 펼칩니다
   const team = state.result.steps[n - 1].hints[level - 1];
-  $('hintBox').innerHTML = `${esc(team.text)}<span class="src">팀 힌트 · 엔진 계산값 기반</span>`;
+  // 전체 풀이는 정답 베끼기에 쓰이지 않도록 '학습 확인용'임을 함께 알립니다 (예선 PPT 5장 대응)
+  const note = level === 4 ? '<span class="src">학습 확인용 풀이입니다. 먼저 1~3번 힌트로 직접 풀어 본 뒤 비교해 보세요.</span>' : '';
+  $('hintBox').innerHTML = `${esc(team.text)}<span class="src">팀 힌트 · 엔진 계산값 기반</span>${note}`;
   // AI가 켜져 있으면 AI 설명을 추가로 받습니다 (꺼져 있으면 팀 힌트만으로 충분)
   if (!(state.ai?.available || demo())) return;
   const r = await API.hint(state.problem, n, level, student, verdict, demo());
@@ -422,7 +479,7 @@ async function askHint(level, student, verdict) {
     if (r.warning) $('hintBox').innerHTML += `<span class="src">${esc(r.warning)}</span>`;
     return;
   }
-  $('hintBox').innerHTML = `${esc(r.text)}<span class="src">${esc(r.providerLabel)} 설명 · 숫자는 엔진 값만 사용했는지 자동 검사됨</span>`;
+  $('hintBox').innerHTML = `${esc(r.text)}<span class="src">${esc(r.providerLabel)} 설명 · 숫자는 엔진 값만 사용했는지 자동 검사됨</span>${note}`;
 }
 
 // ─────────────────────────── K 조절 (8·9단계) ───────────────────────────
@@ -461,14 +518,371 @@ async function exactPoles(K) {
     `<span class="st ${r.status}">${st}</span>`;
 }
 
-// 그래프를 누르면 그 점의 K(크기 조건)를 서버가 계산합니다
-async function onPick(x, y) {
-  const r = await API.gain(state.problem, x, y);
-  const pt = `s = ${x.toFixed(3)} ${y >= 0 ? '+' : '−'} j${Math.abs(y).toFixed(3)}`;
-  if (r.K === null || r.K === undefined) { $('readout').textContent = pt; return; }
-  $('readout').textContent = r.onLocus
-    ? `${pt}  →  근궤적 위의 점, K = ${r.K.toPrecision(5)}`
-    : `${pt}  →  근궤적 위가 아님 (각 조건 오차 ${r.angleError.toFixed(1)}°)`;
+// ─────────────────────────── 그래프의 점 값 ───────────────────────────
+// 누를 수 있는 점 목록을 엔진 결과로 만듭니다. 말풍선에 들어가는 글자·숫자는 모두 서버가 보낸 값입니다
+// (각도·K는 엔진이 계산한 수를 소수 둘째 자리까지 줄여 보여 주기만 합니다).
+const fmtDeg = (d) => `${(Math.round(d * 100) / 100).toString().replace('-', '−')}°`;
+const conjText = (t) => (t.includes('+ j') ? t.replace('+ j', '− j') : t.replace('− j', '+ j'));
+function buildAnchors(res) {
+  const A = [], st = res.steps, g = res.graph;
+  const items = st[5].result.items || [];
+  const angleLines = (re, im, kind) => () => {
+    if (state.step < 6) return [];
+    const it = items.find((x) => x.kind === kind && Math.abs(x.at[0] - re) < 1e-9 && Math.abs(Math.abs(x.at[1]) - Math.abs(im)) < 1e-9);
+    if (!it) return [];
+    const sgn = im < 0 && it.at[1] > 0 ? -1 : 1;     // 아래쪽 켤레 점은 각의 부호만 바뀝니다
+    return [`${kind === 'departure' ? '출발각' : '도착각'} ${it.angles.map((a) => fmtDeg(sgn * a)).join(', ')}`];
+  };
+  for (const p of st[1].result.poles) {
+    A.push({ x: p.re, y: p.im, layer: 'pz', title: p.mult > 1 ? `극점 (${p.mult}중근)` : '극점', main: `s = ${p.text}`, more: angleLines(p.re, p.im, 'departure') });
+  }
+  for (const z of st[1].result.zeros || []) {
+    A.push({ x: z.re, y: z.im, layer: 'pz', title: z.mult > 1 ? `영점 (${z.mult}중근)` : '영점', main: `s = ${z.text}`, more: angleLines(z.re, z.im, 'arrival') });
+  }
+  const r4 = st[3].result;
+  if (g.asymptotes && g.asymptotes.showCentroid && r4.centroid) {
+    const c = r4.centroid, approx = c.approxText && c.approxText !== c.text ? ` ≈ ${c.approxText}` : '';
+    A.push({ x: g.asymptotes.centroid, y: 0, layer: 'asym', title: '점근선 중심', main: `σ = ${c.text}${approx}`,
+      more: () => [`각도 ${r4.angles.map(fmtDeg).join(', ')}`] });
+  }
+  for (const b of st[4].result.valid || []) {
+    const name = b.status === 'breakaway' ? '이탈점' : b.status === 'breakin' ? '진입점' : '이탈·진입점';
+    A.push({ x: b.s[0], y: b.s[1], layer: 'brk', title: name, main: `s = ${b.sText}`, more: () => [`K = ${b.KText}`] });
+    if (Math.abs(b.s[1]) > 1e-12) A.push({ x: b.s[0], y: -b.s[1], layer: 'brk', title: name, main: `s = ${conjText(b.sText)}`, more: () => [`K = ${b.KText}`] });
+  }
+  for (const c of st[6].result.crossings || []) {
+    const w = c.omegaText || String(c.omega);
+    const approx = c.omegaExact && w !== c.omega.toFixed(4) ? ` ≈ ${c.omega.toFixed(4)}` : '';
+    const more = () => [`K = ${c.KText}${String(c.K) !== c.KText ? ` ≈ ${+c.K.toPrecision(6)}` : ''}`];
+    if (c.omega > 1e-12) {
+      A.push({ x: 0, y: c.omega, layer: 'cross', title: '허수축 교차', main: `s = +j${w}${approx}`, more });
+      A.push({ x: 0, y: -c.omega, layer: 'cross', title: '허수축 교차', main: `s = −j${w}${approx}`, more });
+    } else A.push({ x: 0, y: 0, layer: 'cross', title: '허수축 교차', main: 's = 0', more });
+  }
+  return A;
+}
+
+// 단계별 카메라: 그 단계의 주인공 쪽으로 다가갑니다 (없으면 전체 보기). 반환값은 setFocus(pt, z)의 인자.
+function focusFor(n) {
+  const f = focusRaw(n);
+  // 좁은 화면(폰)은 확대를 절반으로 줄여 다른 극점이 화면 밖으로 밀려나지 않게 합니다
+  if (f[0] && window.innerWidth <= 760) f[1] = 1 + (f[1] - 1) * 0.45;
+  return f;
+}
+function focusRaw(n) {
+  const g = state.result.graph, st = state.result.steps;
+  if (n === 5) { const b = (st[4].result.valid || [])[0]; if (b) return [[b.s[0], b.s[1]], 1.5]; }
+  if (n === 6) { const it = (st[5].result.items || [])[0]; if (it) return [[it.at[0], it.at[1]], 1.5]; }
+  if (n === 7) { const c = (g.crossings || [])[0]; if (c) return [[0, c[1]], 1.45]; }
+  return [null];
+}
+
+// 그래프를 눌렀을 때: 표시된 점이면 그 점의 값을 말풍선으로, 빈 곳이면 닫기
+function onPick(a) {
+  const tip = $('pointTip');
+  if (!a) { hideTip(); return; }
+  const more = a.more ? a.more() : [];
+  tip.innerHTML = `<b>${esc(a.title)}</b><div class="mono">${esc(a.main)}</div>` + more.map((m) => `<div class="mono muted">${esc(m)}</div>`).join('');
+  tip.hidden = false;
+  tip.classList.remove('show'); void tip.offsetWidth; tip.classList.add('show');
+}
+// 말풍선 위치: graph.js가 매 프레임 점의 화면 위치를 알려 줍니다(카메라가 움직여도 점을 따라감)
+function placeTip(px, py) {
+  const tip = $('pointTip');
+  if (tip.hidden) return;
+  tip.style.left = px + 'px'; tip.style.top = py + 'px';
+  tip.classList.toggle('below', py < 110);
+}
+function hideTip() { $('pointTip').hidden = true; if (state.graph) state.graph.clearPick(); }
+
+// ─────────────────────────── 수식이 그림이 되는 연출 ───────────────────────────
+// 단계마다 핵심 수식을 크게 보여 주고, 그래프의 점·선과 이어진 숫자(hot)는 그 자리로 날아가 앉습니다.
+// 날아간 숫자와 점은 가는 선으로 계속 이어져 "이 점은 이 계산에서 나왔다"를 보여 줍니다.
+// 수식의 글자와 숫자는 모두 서버(엔진) 결과의 글자 그대로입니다. 여기서는 배치만 합니다.
+// 토큰: { t: 글자, a: [re, im] 이 숫자가 가리키는 점 (없으면 null), c: 'dim' | 'res' 같은 모양 }
+function formulaFor(n) {
+  const st = state.result.steps, g = state.result.graph;
+  const T = (t, a, c) => ({ t, a: a || null, c: c || '' });
+  const out = [];
+  if (n === 1) {
+    out.push(T('1 + K·G(s)H(s) = 0', null, 'dim'), T('\n'), T(`${st[0].result.charPoly} = 0`, null, 'res'));
+  } else if (n === 2) {
+    const r = st[1].result;
+    out.push(T('극점  ', null, 'dim'));
+    r.poles.forEach((p, i) => { if (i) out.push(T(',  ', null, 'dim')); out.push(T(p.text + (p.mult > 1 ? ` (×${p.mult})` : ''), [p.re, p.im])); });
+    if ((r.zeros || []).length) {
+      out.push(T('\n'), T('영점  ', null, 'dim'));
+      r.zeros.forEach((z, i) => { if (i) out.push(T(',  ', null, 'dim')); out.push(T(z.text + (z.mult > 1 ? ` (×${z.mult})` : ''), [z.re, z.im])); });
+    }
+    out.push(T('\n'), T(`가지 수 n = ${r.branches}`, null, 'dim'));
+  } else if (n === 3) {
+    const v = g.view, segs = st[2].result.segments || [];
+    out.push(T('근궤적 구간  ', null, 'dim'));
+    segs.forEach((sg, i) => {
+      if (i) out.push(T(' ∪ ', null, 'dim'));
+      const lo = sg.lo === null ? Math.max(v.xmin, sg.hi - (v.xmax - v.xmin) * 0.3) : sg.lo;
+      const hi = sg.hi === null ? Math.min(v.xmax, sg.lo + (v.xmax - v.xmin) * 0.3) : sg.hi;
+      out.push(T(`[${sg.loText}, ${sg.hiText}]`, [(lo + hi) / 2, 0]));
+    });
+    if (!segs.length) out.push(T('없음', null, 'dim'));
+  } else if (n === 4) {
+    const r = st[3].result;
+    if (r.centroid && g.asymptotes && g.asymptotes.showCentroid) {
+      out.push(T('σa = (Σp − Σz)/(n − m) = ', null, 'dim'), T(r.centroid.text, [g.asymptotes.centroid, 0], 'res'));
+      out.push(T('\n'), T(`θ = ${r.angles.map(fmtDeg).join(', ')}`, null, 'dim'));
+    } else out.push(T(st[3].formula, null, 'dim'));
+  } else if (n === 5) {
+    const r = st[4].result;
+    out.push(T(`${r.equation} = 0`, null, 'dim'));
+    (r.valid || []).forEach((b) => { out.push(T('\n'), T('s = ', null, 'dim'), T(b.sText, [b.s[0], b.s[1]], 'res'), T(`   K = ${b.KText}`, null, 'dim')); });
+    if (!(r.valid || []).length) out.push(T('\n'), T('근궤적 위의 이탈·진입점 없음', null, 'dim'));
+  } else if (n === 6) {
+    const r = st[5].result, pts = {};
+    for (const p of st[1].result.poles) pts[p.text] = [p.re, p.im];
+    for (const z of st[1].result.zeros || []) pts[z.text] = [z.re, z.im];
+    const it = (r.items || [])[0];
+    if (it) {
+      out.push(T(`θ${it.kind === 'departure' ? 'd' : 'a'} = 180°`, null, 'dim'));
+      for (const c of it.contributions) out.push(T(` ${c.sign} `, null, 'dim'), T(`${c.mult > 1 ? c.mult + '×' : ''}${fmtDeg(c.angle)}`, pts[c.from] || null));
+      out.push(T(' = ', null, 'dim'), T(it.angles.map(fmtDeg).join(', '), it.at, 'res'));
+    } else out.push(T('복소 극점·영점이 없어 구할 각이 없습니다', null, 'dim'));
+  } else if (n === 7) {
+    const r = st[6].result;
+    out.push(T(`안정  ${r.stableText}`, null, 'dim'));
+    for (const c of r.crossings || []) {
+      out.push(T('\n'), T('s = ', null, 'dim'), T(c.omega > 1e-12 ? `±j${c.omegaText}` : '0', c.omega > 1e-12 ? [[0, c.omega], [0, -c.omega]] : [0, 0], 'res'), T(`   K = ${c.KText}`, null, 'dim'));
+    }
+  } else if (n === 8) {
+    out.push(T('K = 0 → ∞', null, 'dim'), T('   극점에서 출발해 영점·점근선으로', null, 'dim'));
+  } else if (n === 9) {
+    out.push(T('D(s) + K·N(s) = 0 의 근 = 폐루프 극점', null, 'dim'));
+  }
+  return out;
+}
+
+const Fx = { tokens: [], links: [] };   // 지금 화면의 토큰(점과 이어진 것만)과 연결선
+// 수식을 그리고, 점과 이어진 숫자의 개수를 돌려줍니다
+function renderFormula(n) {
+  const box = $('bigFormula');
+  const parts = formulaFor(n);
+  box.innerHTML = parts.map((p, i) => p.t === '\n' ? '<br>' :
+    `<span class="tok ${p.a ? 'hot' : ''} ${p.c}" data-i="${i}">${esc(p.t)}</span>`).join('');
+  // 한 숫자가 여러 점을 가리킬 수 있습니다(예: ±jω는 위·아래 두 교차점). pts는 항상 점의 목록입니다.
+  Fx.tokens = parts.map((p, i) => ({ ...p, pts: p.a ? (Array.isArray(p.a[0]) ? p.a : [p.a]) : [], el: box.querySelector(`[data-i="${i}"]`) }))
+    .filter((p) => p.pts.length && p.el);
+  Fx.links = [];
+  $('links').innerHTML = '';
+  $('flyLayer').innerHTML = '';
+  return Fx.tokens.length;
+}
+
+// 숫자가 수식에서 떨어져 나와 그래프의 점으로 날아갑니다. 점이 카메라와 함께 움직여도 도착 지점을 매 프레임 다시 잽니다.
+// 도착하면 그 점에서 빛이 번지고, 수식의 숫자와 점 사이에 가는 선이 남습니다.
+const FLY = 0.95;   // 초
+function flyTokens(stepAtStart) {
+  const stage = $('stage').getBoundingClientRect(), layer = $('flyLayer'), g = state.graph;
+  let k = 0;
+  Fx.tokens.forEach((tk) => tk.pts.forEach((pt) => {
+    const i = k++;
+    const r = tk.el.getBoundingClientRect();
+    const sx = r.left - stage.left + r.width / 2, sy = r.top - stage.top + r.height / 2;
+    const fly = document.createElement('span');
+    fly.className = 'fly'; fly.textContent = tk.t;
+    fly.style.fontSize = getComputedStyle(tk.el).fontSize;
+    layer.appendChild(fly);
+    const w = fly.offsetWidth, h = fly.offsetHeight;
+    const o = { p: 0 };
+    gsap.to(o, { p: 1, duration: FLY, delay: 0.1 + i * 0.09, ease: 'power2.inOut',
+      onStart: () => tk.el.classList.add('sent'),
+      onUpdate: () => {
+        if (state.step !== stepAtStart) return;
+        const [tx, ty] = g.toPx(pt[0], pt[1]);
+        const u = o.p, cx = sx + (tx - sx) * 0.15, cy = Math.min(sy, ty) - 60;   // 살짝 위로 휘는 곡선
+        const x = (1 - u) * (1 - u) * sx + 2 * (1 - u) * u * cx + u * u * tx;
+        const y = (1 - u) * (1 - u) * sy + 2 * (1 - u) * u * cy + u * u * ty;
+        fly.style.transform = `translate(${x - w / 2}px, ${y - h / 2}px) scale(${1 - 0.55 * u})`;
+        fly.style.opacity = u < 0.75 ? 1 : 1 - (u - 0.75) / 0.25;
+      },
+      onComplete: () => {
+        fly.remove();
+        if (state.step !== stepAtStart) return;
+        g.pulse(pt[0], pt[1]);
+        addLink(tk, pt);
+      } });
+  }));
+}
+
+// 수식의 숫자 ↔ 그래프의 점 연결선. 위치는 graph.js가 그릴 때마다 맞춥니다(onFrame → drawLinks).
+function addLink(tk, pt) {
+  const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  if (tk.c === 'res') ln.setAttribute('class', 'res');
+  $('links').appendChild(ln);
+  const L = { tk, pt, ln, a: 0 };
+  Fx.links.push(L);
+  if (MOTION) gsap.to(L, { a: 1, duration: 0.6, ease: 'power2.out', onUpdate: drawLinks }); else L.a = 1;
+  drawLinks();
+}
+function drawLinks() {
+  if (!Fx.links.length) return;
+  const stage = $('stage').getBoundingClientRect(), g = state.graph;
+  for (const L of Fx.links) {
+    const r = L.tk.el.getBoundingClientRect();
+    const sx = r.left - stage.left + r.width / 2, sy = r.bottom - stage.top + 2;
+    const [tx, ty] = g.toPx(L.pt[0], L.pt[1]);
+    // 선은 숫자에서 출발해 점까지 자라납니다 (a: 0 → 1)
+    L.ln.setAttribute('x1', sx); L.ln.setAttribute('y1', sy);
+    L.ln.setAttribute('x2', sx + (tx - sx) * L.a); L.ln.setAttribute('y2', sy + (ty - sy) * L.a);
+  }
+}
+
+// 조명: 이 단계의 주인공 자리. 8·9단계는 무대 전체를 밝힙니다.
+function lightFor(n) {
+  const f = focusFor(n)[0];
+  if (f) return [f, 1];
+  if (n >= 8) return [null, 0.2];
+  if (n === 4) { const g = state.result.graph; if (g.asymptotes) return [[g.asymptotes.centroid, 0], 1]; }
+  if (n === 2 || n === 3) {
+    const ps = state.result.steps[1].result.poles;
+    return [[ps.reduce((a, p) => a + p.re, 0) / ps.length, 0], 0.85];
+  }
+  return [null, 0.7];
+}
+
+// 단계에 들어설 때의 연출 전체: 수식 → (숫자가 날아감) → 그래프 요소가 그 자리에서 나타남
+function stageStep(n) {
+  const g = state.graph, hot = renderFormula(n);
+  const animate = MOTION && state.started;
+  g.setLight(...lightFor(n));
+  g.setFocus(...focusFor(n));
+  if (animate) {
+    gsap.fromTo('#bigFormula .tok', { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.025, ease: EASE, delay: 0.18 });
+    requestAnimationFrame(() => layoutStage());     // 수식 높이가 바뀌면 그래프 자리도 함께 옮깁니다
+    // 숫자가 날아가 닿는 순간에 맞춰 그래프 요소가 나오도록 늦춥니다
+    g.setStep(n, { delay: hot ? (0.1 + FLY * 0.8) * 1000 + 450 : 0 });
+    if (hot) setTimeout(() => { if (state.step === n) { layoutStage(); flyTokens(n); } }, 450);
+  } else {
+    g.setStep(n);
+    // 움직임 없이: 연결선만 바로 그립니다
+    requestAnimationFrame(() => { layoutStage(true); Fx.tokens.forEach((tk) => { tk.el.classList.add('sent'); tk.pts.forEach((pt) => addLink(tk, pt)); }); });
+  }
+}
+
+// ─────────────────────────── 한 화면 배치 ───────────────────────────
+// 떠 있는 패널(제목·도크·시트·K 막대)에 가리지 않도록 그래프가 쓸 여백을 재서 graph.js에 알려 줍니다.
+// 시트를 열고 닫으면 이 값이 바뀌고, 그래프는 남은 자리 가운데로 미끄러져 갑니다.
+function layoutStage(instant) {
+  if ($('studio').hidden || !state.graph) return;
+  const stage = $('stage').getBoundingClientRect(), mobile = innerWidth <= 760;
+  const head = $('hudHead').getBoundingClientRect(), kc = $('kControl'), kH = kc.hidden ? 0 : kc.offsetHeight;
+  const dock = $('dock').getBoundingClientRect(), sheets = $('sheets');
+  const ins = { t: head.bottom - stage.top + 12, l: 20, r: 20, b: 20 };
+  // K 막대가 보이면 범례는 그 위로 올라갑니다 (겹치지 않게)
+  $('hudFoot').style.bottom = kH && !mobile ? (kH + 22) + 'px' : '';
+  if (mobile) {
+    sheets.style.bottom = (stage.bottom - dock.top + 10 + (kH ? kH + 8 : 0)) + 'px';
+    ins.b = stage.bottom - dock.top + 12 + (kH ? kH + 10 : 0);
+    if (Sheets.open.length) ins.b += sheets.offsetHeight + 8;
+  } else {
+    sheets.style.bottom = '';
+    ins.r = Sheets.open.length ? stage.right - sheets.getBoundingClientRect().left + 16 : stage.right - dock.left + 16;
+    ins.b = $('hudFoot').offsetHeight + 26 + (kH ? kH + 10 : 0);
+  }
+  state.graph.setInsets(ins, instant);
+}
+
+// ─────────────────────────── 도크와 시트 ───────────────────────────
+// 아이콘을 누르면 그 아이콘 자리에서 시트가 커지며 펼쳐집니다(FLIP: 처음 위치·크기에서 최종 위치·크기로 이어서 움직임).
+// 넓은 화면은 최대 2장, 휴대폰은 1장. 더 열면 가장 오래된 시트가 닫힙니다.
+const Sheets = {
+  open: [],
+  el(name) { return document.querySelector(`.sheet[data-sheet="${name}"]`); },
+  btn(name) { return document.querySelector(`.dock-btn[data-sheet="${name}"]`); },
+  max() { return innerWidth <= 760 ? 1 : 2; },
+  init() {
+    document.querySelectorAll('.dock-btn').forEach((b) => { b.onclick = () => this.toggle(b.dataset.sheet); });
+    document.querySelectorAll('.sheet-x').forEach((x) => { x.onclick = () => this.close(x.closest('.sheet').dataset.sheet); });
+  },
+  toggle(name) { if (this.open.includes(name)) this.close(name); else this.show(name); },
+  rects() { return this.open.map((n) => [n, this.el(n).getBoundingClientRect()]); },
+  // 다른 시트의 자리가 바뀔 때도 뚝 옮겨지지 않게: 바뀌기 전 위치에서 새 위치로 미끄러지게 합니다
+  flipOthers(before, skip) {
+    if (!MOTION) return;
+    for (const [n, r] of before) {
+      if (n === skip || !this.open.includes(n)) continue;
+      const dy = r.top - this.el(n).getBoundingClientRect().top;
+      if (Math.abs(dy) > 1) gsap.fromTo(this.el(n), { y: dy }, { y: 0, duration: 0.7, ease: EASE, overwrite: 'auto' });
+    }
+  },
+  show(name) {
+    if (this.open.includes(name)) { if (MOTION) gsap.fromTo(this.el(name), { scale: 0.98 }, { scale: 1, duration: 0.5, ease: EASE }); return; }
+    while (this.open.length >= this.max()) this.close(this.open[0], true);
+    const before = this.rects();
+    this.open.push(name);
+    const el = this.el(name), btn = this.btn(name);
+    el.hidden = false; btn.classList.add('on');
+    if (MOTION) {
+      const r = el.getBoundingClientRect(), b = btn.getBoundingClientRect();
+      gsap.fromTo(el, { x: b.left + b.width / 2 - (r.left + r.width / 2), y: b.top + b.height / 2 - (r.top + r.height / 2),
+        scaleX: b.width / r.width, scaleY: b.height / r.height, opacity: 0, transformOrigin: '50% 50%' },
+      { x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1, duration: 0.75, ease: EASE, overwrite: 'auto' });
+      gsap.fromTo(el.querySelectorAll('.sheet-head, .sheet-body'), { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.06, delay: 0.22, ease: EASE });
+    }
+    this.flipOthers(before, name);
+    hideTip();
+    layoutStage();
+  },
+  close(name, quick) {
+    const i = this.open.indexOf(name);
+    if (i < 0) return;
+    this.open.splice(i, 1);
+    const el = this.el(name), btn = this.btn(name);
+    btn.classList.remove('on');
+    const done = () => {
+      const before = this.rects();
+      el.hidden = true;
+      if (MOTION) gsap.set(el, { clearProps: 'transform,opacity' });
+      this.flipOthers(before);
+      layoutStage();
+    };
+    if (!MOTION) { done(); return; }
+    const r = el.getBoundingClientRect(), b = btn.getBoundingClientRect();
+    if (quick) gsap.to(el, { opacity: 0, scale: 0.96, duration: 0.2, ease: 'power2.in', overwrite: 'auto', onComplete: done });
+    else gsap.to(el, { x: b.left + b.width / 2 - (r.left + r.width / 2), y: b.top + b.height / 2 - (r.top + r.height / 2),
+      scaleX: b.width / r.width, scaleY: b.height / r.height, opacity: 0, duration: 0.45, ease: 'power3.in', overwrite: 'auto', onComplete: done });
+  },
+};
+
+// ─────────────────────────── 타임라인 ───────────────────────────
+// 단계 이동: 번호 누르기, 화살표, 타임라인을 좌우로 밀기, 무대·타임라인 위에서 휠 한 번, 키보드 ←/→.
+// 휠·트랙패드는 한 번 굴리는 동안 신호가 여러 번 오므로, 신호가 0.24초 끊길 때까지는 한 단계만 움직입니다(오작동 방지).
+function stepBy(d) { if (state.result) goStep(Math.max(1, Math.min(9, state.step + d))); }
+function setupTimeline() {
+  const tl = $('timeline');
+  let sw = null, swiped = false;
+  tl.addEventListener('pointerdown', (e) => { sw = { x: e.clientX, y: e.clientY }; swiped = false; });
+  tl.addEventListener('pointerup', (e) => {
+    if (!sw) return;
+    const dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null;
+    if (Math.abs(dx) > 44 && Math.abs(dx) > 1.5 * Math.abs(dy)) { swiped = true; stepBy(dx < 0 ? 1 : -1); }
+  });
+  // 밀기로 단계를 옮겼으면, 손을 뗀 자리의 버튼 누르기는 무시합니다
+  tl.addEventListener('click', (e) => { if (swiped) { e.stopPropagation(); e.preventDefault(); swiped = false; } }, true);
+
+  let acc = 0, locked = false, quiet = 0;
+  const wheel = (e) => {
+    if (!state.started || e.target.closest('.sheet, .k-control')) return;
+    e.preventDefault();
+    clearTimeout(quiet); quiet = setTimeout(() => { locked = false; acc = 0; }, 240);
+    if (locked) return;
+    acc += Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (Math.abs(acc) > 60) { locked = true; stepBy(Math.sign(acc)); acc = 0; }
+  };
+  $('stage').addEventListener('wheel', wheel, { passive: false });
+  tl.addEventListener('wheel', wheel, { passive: false });
+  addEventListener('keydown', (e) => {
+    if ($('studio').hidden || e.target.closest('input, textarea, select')) return;
+    if (e.key === 'ArrowRight') stepBy(1); else if (e.key === 'ArrowLeft') stepBy(-1); else if (e.key === 'Escape') hideTip();
+  });
 }
 
 // ─────────────────────────── 손글씨 풀이 ───────────────────────────

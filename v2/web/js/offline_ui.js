@@ -14,7 +14,7 @@
   const origRender = renderAnswers;
   renderAnswers = function (n) {
     origRender(n);
-    const samples = PREVIEW.samples[stableKey(state.problem)] || {};
+    const samples = findStored(PREVIEW.samples, state.problem) || {};
     document.querySelectorAll('#answerForm input[data-field]').forEach((inp) => {
       const list = samples[inp.dataset.field];
       if (!list || !list.length) return;

@@ -25,7 +25,10 @@ const easeBack = (x) => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3)
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 
 class PlaneGraph {
-  // canvas: 그릴 <canvas>, onPick: 그래프를 눌렀을 때 (re, im) 좌표를 넘겨받을 함수
+  // canvas: 그릴 <canvas>
+  // onPick: 그래프를 눌렀을 때 불리는 함수. 표시된 점(anchor) 근처를 눌렀으면 그 점, 빈 곳이면 null을 넘깁니다.
+  //   (예전에는 아무 곳이나 누르면 그 좌표의 K를 물었는데, 손가락으로 −1 같은 점을 정확히 누르기 어려워
+  //    필요한 값을 얻지 못했습니다. 그래서 '의미 있는 점'에만 달라붙게 바꿨습니다.)
   constructor(canvas, onPick) {
     this.cv = canvas;
     this.ctx = canvas.getContext('2d');
@@ -33,7 +36,22 @@ class PlaneGraph {
     this.step = 1;           // 현재 단계
     this.kIndex = null;      // K 표시의 목표 위치 (가지 배열의 몇 번째 점인지)
     this.kShown = null;      // 화면에 실제로 그려지는 위치 (목표를 부드럽게 따라감, 소수 가능)
-    this.pick = null;        // 사용자가 누른 점
+    this.pick = null;        // 사용자가 누른 점 (anchor 하나)
+    this.anchors = [];       // 누를 수 있는 점 목록 {x, y, layer, ...} — 값과 글자는 모두 엔진 결과 (learn.js가 만듦)
+    this.onTip = null;       // 누른 점의 화면 위치가 바뀔 때 (px, py)를 알려 줄 함수 (말풍선 위치 맞추기)
+    // 그래프가 차지할 안쪽 여백(px). 시트가 열리면 오른쪽 여백이 커지고, 그래프는 남은 자리 가운데로 미끄러져 갑니다.
+    this.ins = { t: 0, r: 0, b: 0, l: 0 };
+    this.insT = { t: 0, r: 0, b: 0, l: 0 };
+    // 카메라: 화면 가운데에 둘 복소평면 좌표(x, y)와 확대 배율 z. 단계마다 그 단계의 주인공 쪽으로 천천히 다가갑니다.
+    this.cam = { x: 0, y: 0, z: 1 };
+    this.camT = { x: 0, y: 0, z: 1 };
+    // 조명: 지금 단계의 주인공 자리에 빛이 고이고, 바깥은 어두워집니다(a = 세기 0~1)
+    this.light = { x: 0, y: 0, a: 0 };
+    this.lightT = { x: 0, y: 0, a: 0 };
+    this.pulses = [];        // 수식에서 날아온 숫자가 도착한 자리의 물결 {x, y, t0}
+    this.onFrame = null;     // 매 프레임 그린 뒤 불리는 함수 (수식↔점 연결선 위치 맞추기)
+    this.dprCap = 2;         // 프레임이 밀리는 기기에서는 스스로 낮춥니다 (선명도보다 부드러움 우선)
+    this.slow = 0;
     this.pickT = 0;          // 누른 순간의 시각 (물결 효과용)
     this.onPick = onPick;
     this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -46,19 +64,31 @@ class PlaneGraph {
 
     // 화면 크기가 바뀌면 다시 그립니다 (ResizeObserver: 요소 크기 변화를 알려 주는 브라우저 기능)
     new ResizeObserver(() => this.resize()).observe(canvas);
-    canvas.addEventListener('click', (e) => {
-      if (!this.data) return;
+    // 누르기: 손가락은 넉넉하게(반지름 40px), 마우스는 26px 안의 가장 가까운 점에 달라붙습니다
+    let down = null;
+    canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; });
+    canvas.addEventListener('pointerup', (e) => {
+      if (!this.data || !down) return;
+      const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y); down = null;
+      if (moved > 12) return;                                   // 끌기는 누르기로 보지 않음
       const r = canvas.getBoundingClientRect();
-      this.pick = this.toWorld(e.clientX - r.left, e.clientY - r.top);
+      const a = this.nearest(e.clientX - r.left, e.clientY - r.top, e.pointerType === 'mouse' ? 26 : 40);
+      this.pick = a;
       this.pickT = performance.now();
       this.kick();
-      if (this.onPick) this.onPick(this.pick.x, this.pick.y);
+      if (this.onPick) this.onPick(a);
+    });
+    // 마우스를 점 위에 올리면 손가락 모양 커서 (누를 수 있다는 표시)
+    canvas.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || !this.data) return;
+      const r = canvas.getBoundingClientRect();
+      canvas.classList.toggle('can-pick', !!this.nearest(e.clientX - r.left, e.clientY - r.top, 26));
     });
   }
 
   // 레티나 화면에서도 선이 흐리지 않도록 실제 픽셀 수를 devicePixelRatio 배로 잡습니다.
   resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
     const w = this.cv.clientWidth, h = this.cv.clientHeight;
     if (!w || !h) return;
     this.cv.width = Math.round(w * dpr);
@@ -76,18 +106,46 @@ class PlaneGraph {
     this.tweens = [];
     for (const k in LAYERS) { this.v[k] = 0; this.em[k] = 1; }
     this.v.axes = 0; this.step = 1;
+    const v = graph.view;
+    this.cam = { x: (v.xmin + v.xmax) / 2, y: (v.ymin + v.ymax) / 2, z: 1 };
+    this.camT = { ...this.cam };
+    this.light = { x: this.cam.x, y: this.cam.y, a: 0 }; this.lightT = { ...this.light };
+    this.pulses = [];
     this.fitView();
     this.tween(this.v, 'axes', 1, 1100, 0);
   }
 
   // Python이 정한 보기 범위(view)를 화면 비율에 맞춥니다. 가로·세로 축척을 같게(원이 원으로 보이게).
-  fitView() {
+  // 여백(ins)을 뺀 자리 안에 맞추므로, 떠 있는 패널에 가리지 않습니다.
+  fitView(skipArc) {
     if (!this.data || !this.w) return;
-    const v = this.data.view;
-    this.scale = Math.min(this.w / (v.xmax - v.xmin), this.h / (v.ymax - v.ymin));
+    const v = this.data.view, i = this.ins;
+    const W = Math.max(120, this.w - i.l - i.r), H = Math.max(120, this.h - i.t - i.b);
+    this.scale = Math.min(W / (v.xmax - v.xmin), H / (v.ymax - v.ymin));
     this.cx = (v.xmin + v.xmax) / 2; this.cy = (v.ymin + v.ymax) / 2;
-    this.buildArc();
+    this.ox = i.l + W / 2; this.oy = i.t + H / 2;
+    if (!skipArc) this.buildArc();
   }
+
+  // 여백을 바꿉니다. 그래프는 새 자리로 부드럽게 미끄러져 갑니다(카메라 이동). instant면 바로.
+  setInsets(ins, instant) {
+    this.insT = { ...this.insT, ...ins };
+    if (instant || this.reduced || !this.data) { this.ins = { ...this.insT }; this.fitView(); this.draw(); return; }
+    this.kick();
+  }
+
+  // 화면 좌표 (px, py) 근처 radius 안에서 지금 보이는 점 중 가장 가까운 것
+  nearest(px, py, radius) {
+    let best = null, bd = radius;
+    for (const a of this.anchors) {
+      if (!(this.v[a.layer] > 0.5)) continue;               // 아직 나오지 않은 단계의 점은 누를 수 없음
+      const [ax, ay] = this.toPx(a.x, a.y), d = Math.hypot(ax - px, ay - py);
+      if (d < bd) { bd = d; best = a; }
+    }
+    return best;
+  }
+  setAnchors(list) { this.anchors = list || []; this.pick = null; }
+  clearPick() { this.pick = null; this.draw(); }
 
   // 곡선이 '일정한 속도'로 그려지도록, 점 번호별로 화면에서 지나온 길이(누적)를 미리 구해 둡니다.
   // (K 표본은 처음에 아주 촘촘해서, 점 번호대로 그리면 처음엔 멈춘 듯하다가 갑자기 지나가 버립니다)
@@ -117,8 +175,37 @@ class PlaneGraph {
   }
 
   // 좌표 변환: 복소평면 (x, y) ↔ 화면 픽셀 (px, py). y축은 화면에서 위가 +.
-  toPx(x, y) { return [this.w / 2 + (x - this.cx) * this.scale, this.h / 2 - (y - this.cy) * this.scale]; }
-  toWorld(px, py) { return { x: this.cx + (px - this.w / 2) / this.scale, y: this.cy - (py - this.h / 2) / this.scale }; }
+  toPx(x, y) { const k = this.scale * this.cam.z; return [this.ox + (x - this.cam.x) * k, this.oy - (y - this.cam.y) * k]; }
+  toWorld(px, py) { const k = this.scale * this.cam.z; return { x: this.cam.x + (px - this.ox) / k, y: this.cam.y - (py - this.oy) / k }; }
+
+  // 조명 자리와 세기. pt가 null이면 보기 범위 가운데.
+  setLight(pt, a) {
+    const v = this.data && this.data.view;
+    if (!v) return;
+    this.lightT = { x: pt ? pt[0] : (v.xmin + v.xmax) / 2, y: pt ? pt[1] : (v.ymin + v.ymax) / 2, a };
+    if (this.reduced) this.light = { ...this.lightT };
+    this.kick();
+  }
+  placeSpot() {
+    const el = this.spot || (this.spot = document.getElementById('spot'));
+    if (!el || !this.w) return;
+    const L = this.light, [lx, ly] = this.toPx(L.x, L.y);
+    // 막은 지름 600px 원판. 화면 대각선의 2.2배까지 키워 어느 자리에 빛이 있어도 무대 전체를 덮습니다
+    const k = 2.2 * Math.hypot(this.w, this.h) / 600;
+    el.style.transform = `translate(${lx - 300}px, ${ly - 300}px) scale(${k})`;
+    el.style.opacity = L.a.toFixed(3);
+  }
+  // 수식에서 날아온 숫자가 도착했을 때 그 점에서 물결이 한 번 퍼집니다
+  pulse(x, y) { this.pulses.push({ x, y, t0: performance.now() }); this.kick(); }
+
+  // 카메라를 한 점으로 (pt = [x, y], z = 확대 배율). pt가 null이면 전체 보기로 물러납니다.
+  setFocus(pt, z) {
+    const v = this.data && this.data.view;
+    if (!v) return;
+    this.camT = pt ? { x: pt[0], y: pt[1], z: z || 1.6 } : { x: (v.xmin + v.xmax) / 2, y: (v.ymin + v.ymax) / 2, z: 1 };
+    if (this.reduced) { this.cam = { ...this.camT }; this.buildArc(); this.draw(); return; }
+    this.kick();
+  }
 
   // ── 움직임 엔진 ────────────────────────────────────────────────
   // obj[key] 값을 지금 값에서 to까지 dur(ms) 동안 바꿉니다. delay(ms) 뒤에 시작.
@@ -146,8 +233,30 @@ class PlaneGraph {
         const d = this.kIndex - this.kShown;
         if (Math.abs(d) > 0.02 && !this.reduced) { this.kShown += d * (1 - Math.pow(0.84, dt / 16.7)); busy = true; } else this.kShown = this.kIndex;
       }
-      if (this.pick && now - this.pickT < 700) busy = true;
+      if (this.pick && now - this.pickT < 900) busy = true;
+      // 여백(카메라)이 목표를 따라갑니다. 지난 시간 기준이라 주사율과 무관하게 같은 속도입니다.
+      let moving = false;
+      for (const k of ['t', 'r', 'b', 'l']) {
+        const d = this.insT[k] - this.ins[k];
+        if (Math.abs(d) > 0.3) { this.ins[k] += d * (1 - Math.pow(0.86, dt / 16.7)); moving = true; } else this.ins[k] = this.insT[k];
+      }
+      // 카메라는 조금 더 느리게(영화의 카메라처럼) 따라갑니다
+      for (const k of ['x', 'y', 'z']) {
+        const d = this.camT[k] - this.cam[k], eps = k === 'z' ? 0.002 : 0.002 / this.scale * 100;
+        if (Math.abs(d) > eps) { this.cam[k] += d * (1 - Math.pow(0.94, dt / 16.7)); moving = true; } else this.cam[k] = this.camT[k];
+      }
+      for (const k of ['x', 'y', 'a']) {
+        const d = this.lightT[k] - this.light[k];
+        if (Math.abs(d) > 1e-3) { this.light[k] += d * (1 - Math.pow(0.93, dt / 16.7)); busy = true; } else this.light[k] = this.lightT[k];
+      }
+      this.pulses = this.pulses.filter((q) => now - q.t0 < 900);
+      if (this.pulses.length) busy = true;
+      if (moving) { busy = true; this.fitView(true); this.arcStale = true; }
+      else if (this.arcStale) { this.arcStale = false; this.buildArc(); }
       this.draw(now);
+      // 큰 화면에서 프레임이 계속 밀리면(33ms 넘는 프레임이 잦으면) 해상도를 한 단계 낮춥니다
+      if (busy && dt > 33) this.slow++; else if (busy) this.slow = Math.max(0, this.slow - 0.25);
+      if (this.slow > 12 && this.dprCap > 1) { this.dprCap = Math.max(1, this.dprCap - 0.5); this.slow = 0; this.resize(); }
       if (busy) requestAnimationFrame(loop); else { this.running = false; this.lastNow = 0; }
     };
     requestAnimationFrame(loop);
@@ -159,7 +268,7 @@ class PlaneGraph {
     const instant = opts && opts.instant;
     const prev = this.step;
     this.step = n;
-    let delay = 0;
+    let delay = (opts && opts.delay) || 0;              // 수식의 숫자가 날아와 닿을 때 맞춰 나오도록 늦출 수 있음
     for (const k in LAYERS) {
       const L = LAYERS[k];
       let on = n >= L.step;
@@ -175,7 +284,7 @@ class PlaneGraph {
         this.tween(this.v, k, 0, 260, 0);
       }
       const focus = n >= 8 || L.step === n;             // 8·9단계는 전체가 주인공
-      this.tween(this.em, k, focus ? 1 : 0.5, 500, 0);
+      this.tween(this.em, k, focus ? 1 : 0.32, 700, 0); // 조명: 지난 단계의 요소는 그림자 속으로
     }
     if (instant) { this.tweens = []; this.v.axes = 1; this.draw(); }
   }
@@ -200,6 +309,9 @@ class PlaneGraph {
     if (!this.data || !this.scale) return;
     const d = this.data, v = this.v, em = this.em;
     this.drawGrid(easeOut(v.axes));
+    // 조명은 캔버스에 그리지 않고, 그래프 위의 투명한 막(.spot)을 옮겨서 표현합니다.
+    // 막의 무늬(가운데 빛, 바깥 어둠)는 한 번만 그려 두고 위치·크기·투명도만 바꾸므로 프레임 부담이 거의 없습니다.
+    this.placeSpot();
 
     // 4단계: 점근선 — 중심점이 먼저 나타나고, 점선이 중심에서 바깥으로 뻗습니다
     if (v.asym > 0 && d.asymptotes) {
@@ -221,7 +333,7 @@ class PlaneGraph {
       const p = easeInOut(v.seg), far = 4 * Math.max(this.w, this.h) / this.scale;
       c.save(); c.lineCap = 'round';
       for (const [lo, hi] of d.segments) {
-        const b = this.toPx(hi === null ? this.cx + far : hi, 0), a = this.toPx(lo === null ? this.cx - far : lo, 0);
+        const b = this.toPx(hi === null ? this.cam.x + far : hi, 0), a = this.toPx(lo === null ? this.cam.x - far : lo, 0);
         const ex = b[0] + (a[0] - b[0]) * p;
         c.strokeStyle = STAGE.ice; c.globalAlpha = 0.22 * em.seg; c.lineWidth = 9;
         c.beginPath(); c.moveTo(b[0], b[1]); c.lineTo(ex, a[1]); c.stroke();
@@ -270,6 +382,18 @@ class PlaneGraph {
       });
     }
 
+    // 수식에서 날아온 숫자가 닿은 자리: 빛이 번쩍이며 물결이 퍼집니다
+    for (const q of this.pulses) {
+      const u = clamp01((now - q.t0) / 900), [px, py] = this.toPx(q.x, q.y);
+      c.save();
+      c.strokeStyle = STAGE.ice; c.globalAlpha = 0.7 * (1 - u); c.lineWidth = 1.4;
+      c.beginPath(); c.arc(px, py, 6 + 30 * easeOut(u), 0, Math.PI * 2); c.stroke();
+      const g = c.createRadialGradient(px, py, 0, px, py, 26);
+      g.addColorStop(0, `rgba(255,255,255,${0.55 * (1 - u)})`); g.addColorStop(1, 'rgba(177,203,230,0)');
+      c.globalAlpha = 1; c.fillStyle = g; c.beginPath(); c.arc(px, py, 26, 0, Math.PI * 2); c.fill();
+      c.restore();
+    }
+
     // 8·9단계: 현재 K에서의 폐루프 극점. 우반면(불안정)이면 붉은 계열로 바뀝니다
     if (v.branch >= 1 && this.kShown !== null) {
       for (const br of d.branches) {
@@ -278,14 +402,16 @@ class PlaneGraph {
       }
     }
 
-    // 사용자가 누른 점: 물결이 한 번 퍼집니다
+    // 누른 점: 그 점을 감싸는 고리가 조여 들며 '잡혔다'를 보여 주고, 말풍선 위치를 알려 줍니다
     if (this.pick) {
-      const [px, py] = this.toPx(this.pick.x, this.pick.y), u = clamp01((now - this.pickT) / 700);
-      c.save(); c.strokeStyle = STAGE.coral;
-      c.globalAlpha = 1 - u; c.lineWidth = 1.5; c.beginPath(); c.arc(px, py, 4 + 22 * easeOut(u), 0, Math.PI * 2); c.stroke();
-      c.globalAlpha = 1; c.lineWidth = 2; c.beginPath(); c.arc(px, py, 4, 0, Math.PI * 2); c.stroke();
+      const [px, py] = this.toPx(this.pick.x, this.pick.y), u = clamp01((now - this.pickT) / 900);
+      c.save(); c.strokeStyle = STAGE.ice;
+      c.globalAlpha = 0.5 * (1 - u); c.lineWidth = 1.2; c.beginPath(); c.arc(px, py, 12 + 26 * easeOut(u), 0, Math.PI * 2); c.stroke();
+      c.globalAlpha = 0.95; c.lineWidth = 1.6; c.beginPath(); c.arc(px, py, 12 + 10 * (1 - easeOut(clamp01(u * 1.8))), 0, Math.PI * 2); c.stroke();
       c.restore();
+      if (this.onTip) this.onTip(px, py);
     }
+    if (this.onFrame) this.onFrame();
   }
 
   // 가지 배열 br의 '소수 번째' 점 (두 점 사이를 직선으로 이어 구함 — 화면 표시용 보간)
