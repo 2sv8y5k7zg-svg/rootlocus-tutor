@@ -35,6 +35,10 @@ a { color: inherit; }
 [hidden] { display: none !important; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+/* 배경 오브젝트 캔버스(flow.js): 화면 뒤에 고정. 글자 선택·클릭을 막지 않도록 pointer-events 없음.
+   높이는 lvh(주소창이 접힌 상태의 화면 높이)로 잡아 휴대폰에서 아래가 비지 않게 한다 */
+#flowCanvas { position: fixed; left: 0; top: 0; width: 100vw; height: 100lvh; z-index: 0; pointer-events: none; }
+
 /* 움직임 줄이기 설정을 켠 사용자에게는 전환 효과를 끈다 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }

@@ -53,11 +53,13 @@ async function init() {
   $('tfInput').onkeydown = (e) => { if (e.key === 'Enter') start({ text: $('tfInput').value }, $('tfGo')); };
   $('ghGo').onclick = confirmGH;
   $('newProblem').onclick = backToEntry;
-  openCurtain();
-  // 로고(랜딩으로 가는 링크)를 누르면 막이 올라온 뒤 이동합니다
+  openPage();
+  // 로고(랜딩으로 가는 링크)를 누르면 내용만 사라지고, 배경은 그대로 둔 채 이동합니다
   document.querySelector('.brand').addEventListener('click', (e) => { e.preventDefault(); leaveTo(e.currentTarget.getAttribute('href')); });
   // 화면 크기가 바뀌면 단계 표시 배경의 위치를 다시 맞춥니다
-  addEventListener('resize', () => moveIndicator(true));
+  addEventListener('resize', () => { moveIndicator(true); if (!MOTION) Flow.frame(); });
+  // 식을 입력하는 동안 배경 가닥이 살짝 반응합니다
+  $('tfInput').addEventListener('input', () => Flow.pulse(0.22));
   $('prevStep').onclick = () => goStep(Math.max(1, state.step - 1));
   $('nextStep').onclick = () => goStep(Math.min(9, state.step + 1));
   setupPhoto();
@@ -76,14 +78,31 @@ async function init() {
   if (q) start({ text: q });
 }
 
-// ─────────────────────────── 화면 전환 ───────────────────────────
-// 페이지가 열릴 때: 화면을 덮은 막이 위로 걷히고, 글자들이 아래에서 차례로 올라옵니다.
-function openCurtain() {
-  const c = $('curtain');
-  if (!MOTION) { c.style.visibility = 'hidden'; return; }
-  gsap.to(c, { scaleY: 0, duration: 0.95, ease: 'expo.inOut', delay: 0.05, onComplete: () => { c.style.visibility = 'hidden'; } });
-  gsap.from('.topbar', { y: -24, opacity: 0, duration: 1, ease: EASE, delay: 0.45 });
-  revealEntry(0.4);
+// ─────────────────────────── 화면 전환과 배경 ───────────────────────────
+// 배경 오브젝트(flow.js)는 랜딩과 같은 것입니다. 학습 화면은 그 상태값(Flow.S)만 바꿉니다.
+//   문제 입력 화면  조형물(형태 A)이 옆에 떠 있음
+//   풀이 화면       조형물이 흐름선(형태 C)으로 풀리고, 단계가 나아간 만큼 왼쪽부터 밝아짐
+// flowTo: 상태값을 목표까지 부드럽게 옮깁니다. 움직임을 끈 환경에서는 바로 바꾸고 한 번만 그립니다.
+function flowTo(vars, duration) {
+  if (MOTION) gsap.to(Flow.S, { ...vars, duration: duration || 1.6, ease: 'power3.inOut', overwrite: 'auto' });
+  else { Object.assign(Flow.S, vars); Flow.frame(); }
+}
+// 문제 입력 화면에서 조형물이 놓일 자리. 좁은 화면에서는 글자와 겹치지 않도록 아래쪽으로 내리고 조금 어둡게 합니다.
+function entryPose() {
+  const narrow = innerWidth <= 900;
+  return { pos: 0, ox: narrow ? 0 : 0.08, oy: narrow ? 0.5 : 0.02, dim: narrow ? 0.55 : 1, flow: 0, morph: 0, story: 0, progress: 0 };
+}
+
+// 페이지가 열릴 때: 랜딩에서 넘어왔으면 배경이 그 자세에서 이어지고, 글자들만 아래에서 차례로 올라옵니다.
+function openPage() {
+  Flow.init($('flowCanvas'));
+  const continued = Flow.takeover();
+  if (!MOTION) { Object.assign(Flow.S, entryPose(), { intro: 1 }); Flow.frame(); return; }
+  gsap.ticker.add(Flow.frame);                      // 매 프레임 배경 그리기
+  if (continued) flowTo(entryPose(), 1.7);          // 랜딩에서 있던 자리 → 입력 화면의 자리로 미끄러져 이동
+  else { Object.assign(Flow.S, entryPose(), { intro: 0 }); gsap.to(Flow.S, { intro: 1, duration: 2.2, ease: 'power2.out' }); }
+  gsap.from('.topbar', { y: -24, opacity: 0, duration: 1, ease: EASE, delay: 0.1 });
+  revealEntry(0.1);
 }
 function revealEntry(delay) {
   if (!MOTION) return;
@@ -91,15 +110,13 @@ function revealEntry(delay) {
   gsap.from('.tabpane.on .field-row', { y: 30, opacity: 0, duration: 1.1, ease: EASE, delay: delay + 0.35 });
   gsap.from('#examples .chip', { y: 16, opacity: 0, duration: 0.9, stagger: 0.045, ease: EASE, delay: delay + 0.5 });
 }
-// 다른 페이지로 나갈 때: 막이 아래에서 올라와 화면을 덮은 뒤 이동합니다.
+// 다른 페이지로 나갈 때: 글자와 카드만 사라지고 배경은 남습니다. 배경의 지금 상태를 적어 두면 다음 페이지가 이어 받습니다.
 function leaveTo(href) {
-  const c = $('curtain');
   if (!MOTION) { location.href = href; return; }
-  c.style.visibility = 'visible';
-  gsap.fromTo(c, { scaleY: 0, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.65, ease: 'expo.inOut', onComplete: () => { location.href = href; } });
+  gsap.to('.topbar, .entry, .studio', { opacity: 0, duration: 0.45, ease: 'power2.in', onComplete: () => { Flow.handoff(); location.href = href; } });
 }
-// 뒤로 가기로 돌아왔을 때 막이 덮인 채 남지 않도록 합니다
-addEventListener('pageshow', (e) => { if (e.persisted) { const c = $('curtain'); c.style.visibility = 'hidden'; } });
+// 뒤로 가기로 돌아왔을 때 내용이 사라진 채 남지 않도록 합니다
+addEventListener('pageshow', (e) => { if (e.persisted && window.gsap) gsap.set('.topbar, .entry, .studio', { clearProps: 'opacity' }); });
 
 // 풀이 화면 → 문제 입력 화면
 async function backToEntry() {
@@ -109,6 +126,7 @@ async function backToEntry() {
   $('topProgress').style.transform = 'scaleX(0)';
   state.started = false;
   window.scrollTo(0, 0);
+  flowTo(entryPose(), 1.8);      // 흐름선이 다시 조형물로 모입니다
   revealEntry(0);
 }
 
@@ -165,7 +183,8 @@ async function start(problem, btn) {
   if (!res.ok) { entryError(res.error.message); return; }
   state.problem = problem; state.result = res; state.checked = {}; state.hintLevel = {};
 
-  // 전환: 입력 화면이 위로 사라지고 → 무대가 떠오르며 → 좌우 패널이 양옆에서 들어옵니다
+  // 전환: 입력 화면이 위로 사라지고 → 배경 조형물이 흐름선으로 풀리며 → 무대와 좌우 패널이 들어옵니다
+  flowTo({ flow: 1, dim: 1, oy: 0, ox: 0 }, 2);
   if (MOTION) await gsap.to('#entry', { opacity: 0, y: -30, duration: 0.4, ease: 'power2.in' });
   $('entry').hidden = true; $('confirm').hidden = true; $('studio').hidden = false;
   if (MOTION) gsap.set('#entry', { clearProps: 'all' });
@@ -274,6 +293,8 @@ function goStep(n) {
   if (on && nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: on.offsetLeft - nav.clientWidth / 2 + on.clientWidth / 2, behavior: 'smooth' });
   moveIndicator(!state.started);
   $('topProgress').style.transform = `scaleX(${n / 9})`;
+  // 배경 흐름선도 같은 비율만큼 왼쪽부터 밝아집니다 (상단 선·단계 목록·배경이 같은 진행을 가리킴)
+  flowTo({ progress: n / 9 }, 1.4);
   // 제목·질문 바꾸기: 이전 글자가 위로 빠지고 새 글자가 아래에서 올라옵니다
   const setText = () => { $('stepNo').textContent = n; $('stepTitle').textContent = st.title; $('stepConcept').textContent = st.hints[0].text; };
   const heads = ['#stepNo', '#stepTitle', '#stepConcept'];
@@ -365,6 +386,7 @@ function showVerdict(field, v, answer) {
   const ex = box.querySelector('[data-explain]');
   if (ex) ex.onclick = () => askHint(Math.max(2, state.hintLevel[state.step] || 2), answer, v);
   $('verdicts').prepend(box);
+  if (v.status === 'correct' || v.status === 'approx') Flow.pulse(1);   // 정답이면 배경 전체가 한 번 밝아집니다
 }
 
 // 단계 목록에 채점 표시 (모든 칸을 맞히면 ✓)

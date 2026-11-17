@@ -11,14 +11,10 @@
 <link rel="stylesheet" href="/static/css/landing.css">
 </head>
 <body class="landing">
-<!-- 화면 전체에 깔리는 오브젝트 캔버스 (Scene 1~3). 스크롤 진행률에 따라 형태가 바뀐다 -->
-<canvas id="stage" aria-hidden="true"></canvas>
+<!-- 화면 전체에 깔리는 배경 오브젝트 캔버스 (flow.js). 스크롤 진행률에 따라 형태가 바뀌고, 학습 화면까지 이어진다 -->
+<canvas id="flowCanvas" aria-hidden="true"></canvas>
 <!-- 커서를 따라다니는 은은한 빛 (CSS로 그린 원을 transform으로만 옮겨서 가볍습니다) -->
 <div class="glow" id="glow" aria-hidden="true"></div>
-<!-- 밝은 학습 공간: Scene 4에서 원이 커지며 화면을 덮습니다 (clip-path) -->
-<div class="light" id="light" aria-hidden="true"></div>
-<!-- 페이지 전환 막: 학습 화면으로 넘어갈 때 아래에서 올라와 화면을 덮습니다 -->
-<div class="curtain" id="curtain" aria-hidden="true"><i></i></div>
 
 <header class="lnav">
   <span class="lbrand">근궤적 튜터</span>
@@ -53,10 +49,10 @@
   </div>
 </section>
 
-<!-- Scene 4 — Product Reveal: 어두운 공간 → 밝은 학습 공간. 실제 엔진 데이터로 그린 그래프와 채점 -->
+<!-- Scene 4 — Product Reveal: 좌표 구조가 흐름선으로 풀리고 그 위로 실제 화면이 일어선다. 실제 엔진 데이터로 그린 그래프와 채점 -->
 <section class="scene reveal" id="s4">
   <div class="reveal-inner">
-    <p class="eyebrow dark">실제 화면</p>
+    <p class="eyebrow">실제 화면</p>
     <h2>추상에서 실제로.</h2>
     <div class="device" id="device">
       <div class="dev-left">
@@ -92,6 +88,7 @@
 <script src="/static/vendor/lenis/lenis.min.js"></script>
 <script src="/static/js/api.js"></script>
 <script src="/static/js/graph.js"></script>
+<script src="/static/js/flow.js"></script>
 <script src="/static/js/landing.js"></script>
 </body>
 </html>

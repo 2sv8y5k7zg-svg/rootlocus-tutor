@@ -11,9 +11,8 @@
 <link rel="stylesheet" href="/static/css/learn.css">
 </head>
 <body class="learn">
-<!-- 페이지 전환 막: 랜딩에서 넘어올 때 화면을 덮고 있다가 위로 걷힙니다 (learn.js가 움직임) -->
-<div class="curtain" id="curtain" aria-hidden="true"><i></i></div>
-<noscript><style>.curtain{display:none}</style></noscript>
+<!-- 배경 오브젝트: 랜딩과 같은 캔버스·같은 모듈(flow.js). 랜딩에서 넘어오면 같은 자세에서 이어집니다 -->
+<canvas id="flowCanvas" aria-hidden="true"></canvas>
 
 <!-- 상단 막대: 로고, AI 상태, 시연 모드 스위치. 아래 가는 선은 9단계 중 어디까지 왔는지 보여 줍니다 -->
 <header class="topbar">
@@ -29,16 +28,6 @@
 
 <!-- ① 문제 입력: 처음 화면. 직접 입력 / 문제 사진 / 블록선도(G·H) -->
 <section class="entry" id="entry">
-  <!-- 배경 장식: 선으로 그린 s평면 스케치 (실제 계산값 아님). 화면이 열릴 때 한 번 그려집니다 -->
-  <svg class="entry-art" viewBox="0 0 600 520" fill="none" aria-hidden="true">
-    <path class="ax" pathLength="1" d="M20 300H580M400 20V500"/>
-    <path class="as" pathLength="1" d="M250 300L560 40M250 300L560 560M250 300L-60 40M250 300L-60 560"/>
-    <path class="lc" pathLength="1" d="M330 200C350 150 390 110 400 95C420 70 470 30 540 0"/>
-    <path class="lc" pathLength="1" d="M330 400C350 450 390 490 400 505C420 530 470 570 540 600"/>
-    <path class="lc" pathLength="1" d="M400 300H190C150 260 110 190 60 60"/>
-    <path class="lc" pathLength="1" d="M120 300H190C150 340 110 410 60 540"/>
-    <g class="px"><path d="M394 294l12 12m0-12l-12 12M324 194l12 12m0-12l-12 12M324 394l12 12m0-12l-12 12M114 294l12 12m0-12l-12 12"/></g>
-  </svg>
   <div class="entry-inner">
     <p class="eyebrow in">Root Locus Studio</p>
     <h1 class="in">어떤 시스템의<br>근궤적을 그려 볼까요?</h1>
@@ -174,6 +163,7 @@
 <script src="/static/vendor/gsap/gsap.min.js"></script>
 <script src="/static/js/api.js"></script>
 <script src="/static/js/graph.js"></script>
+<script src="/static/js/flow.js"></script>
 <script src="/static/js/learn.js"></script>
 </body>
 </html>
