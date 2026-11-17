@@ -12,7 +12,9 @@
 //   Flow.pulse()       가닥이 한 번 밝아졌다 가라앉음 (정답을 맞혔을 때 등)
 
 const Flow = (function () {
-  let cv, ctx, W = 0, H = 0, dpr = 1, M = 54, P = 120, lowPower = false, touch = false, skip = 0, lastProgress = -1, MAXPX = 1.5e6;
+  let cv, ctx, W = 0, H = 0, dpr = 1, M = 54, P = 72, lowPower = false, touch = false, MAXPX = 1.5e6;
+  // 프레임 시간 측정용: 기기가 버거워할 때만 그리는 빈도를 낮춥니다 (아래 pace 참고)
+  let lastT = 0, ema = 16.7, stride = 1, tick = 0, slowFor = 0, okFor = 0, probeWait = 4000, q = 0, rest = 0, lastProgress = -1;
 
   // 연출 상태. 0~1 사이 값들이며, 페이지 코드가 스크롤이나 학습 진행에 맞춰 바꿉니다.
   const S = {
@@ -30,16 +32,18 @@ const Flow = (function () {
   };
 
   // 두 페이지가 같은 시계를 쓰도록 '컴퓨터 시계'로 시간을 잽니다 → 페이지를 넘어가도 회전 각도가 이어집니다.
-  const now = () => (Date.now() - 1.7e12) / 1000;
+  // performance 시계는 1ms보다 촘촘해서, 화면 주사율이 높은 기기(120Hz)에서도 회전이 프레임마다 고르게 나아갑니다.
+  const now = () => (performance.timeOrigin + performance.now() - 1.7e12) / 1000;
 
   function init(canvas) {
     cv = canvas; ctx = cv.getContext('2d');
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     touch = matchMedia('(pointer: coarse)').matches;
-    // 저사양 판단: 화면이 작거나 CPU 코어가 적으면 가닥 수를 줄이고 가벼운 합성으로 그립니다
-    lowPower = reduced || (navigator.hardwareConcurrency || 8) <= 4 || Math.min(innerWidth, innerHeight) < 500;
+    // 저사양 판단: 화면이 작거나(휴대폰) CPU 코어가 아주 적으면 가닥 수를 줄이고 가벼운 합성으로 그립니다.
+    // 그 밖의 기기는 일단 온전하게 그리고, 실제로 프레임이 밀릴 때만 아래 pace()가 단계를 낮춥니다.
+    lowPower = reduced || (navigator.hardwareConcurrency || 8) <= 2 || Math.min(innerWidth, innerHeight) < 500;
     M = lowPower ? 30 : 54;    // 가닥 수
-    P = lowPower ? 64 : 120;   // 가닥 하나의 점 수
+    P = 72;                    // 가닥 하나의 점 수 (점 사이를 곡선으로 이으므로 이 정도로 충분히 매끄럽습니다)
     addEventListener('resize', () => resize(false));
     resize(true);
     // 커서 위치(-1~1)는 목표값으로만 저장하고, 그릴 때 천천히 따라가게 해서 과하게 흔들리지 않게 합니다
@@ -107,12 +111,33 @@ const Flow = (function () {
 
   const PC = 36;             // 흐름선 가닥 하나의 점 수 (완만한 물결이라 적어도 매끄럽습니다)
 
-  // 가닥 하나를 그립니다 (PX, PY에 담긴 n개의 점을 선으로 잇기)
+  // 가닥 하나를 그립니다 (PX, PY에 담긴 n개의 점).
+  // 점과 점을 직선으로 이으면 굽은 곳에서 꺾인 자국이 보입니다. 이웃한 두 점의 가운데를 지나는 2차 곡선으로 이어
+  // 꺾임 없이 매끈한 선이 되게 합니다(점 수를 늘리는 것보다 가볍습니다).
   function strokeLine(n, r, g, b, alpha) {
     ctx.strokeStyle = `rgba(${r | 0},${g | 0},${b | 0},${alpha})`;
     ctx.beginPath(); ctx.moveTo(PX[0], PY[0]);
-    for (let p = 1; p < n; p++) ctx.lineTo(PX[p], PY[p]);
+    for (let p = 1; p < n - 1; p++) ctx.quadraticCurveTo(PX[p], PY[p], (PX[p] + PX[p + 1]) / 2, (PY[p] + PY[p + 1]) / 2);
+    ctx.lineTo(PX[n - 1], PY[n - 1]);
     ctx.stroke();
+  }
+
+  // 기기에 맞춰 스스로 무게를 조절합니다. 기본은 '온전한 품질로 매 프레임'입니다.
+  // 실제 프레임 간격(ema: 최근 평균)이 계속 길면 한 단계씩 가볍게 합니다. 끊김보다 '조금 단순한 그림'이 낫기 때문에
+  // 그리는 빈도는 마지막에만 낮춥니다.
+  //   q 1  겹친 선을 밝게 더하는 합성을 끔   q 2  가닥을 절반만 그림   그다음  두세 프레임에 한 번 그림
+  // 한동안 여유가 있으면 빈도는 다시 매 프레임으로 돌아가 봅니다(다시 밀리면 더 오래 기다렸다가 시도).
+  // 돌려주는 값: 이번 프레임을 건너뛸지 여부. dt는 직전 프레임과의 간격(ms).
+  function pace(dt) {
+    ema += (dt - ema) * 0.12;
+    if (ema > 23) { slowFor += dt; okFor = 0; } else { okFor += dt; slowFor = 0; }
+    if (slowFor > 450) {
+      slowFor = 0; ema = 16.7;
+      if (q < 2) q++;
+      else if (stride < 3) { stride++; probeWait = Math.min(probeWait * 2, 30000); }
+    } else if (stride > 1 && okFor > probeWait) { okFor = 0; stride--; }
+    tick = (tick + 1) % stride;
+    return tick !== 0;
   }
 
   // 형태가 바뀌는 방식 (절제된 전환):
@@ -121,15 +146,21 @@ const Flow = (function () {
   //   ③ 그 원점에서 좌표축이 뻗어 나오거나(B), 흐름선이 조용히 떠오릅니다(C). 되돌아갈 때는 같은 길을 거꾸로 갑니다.
   function frame() {
     if (!ctx) return;
-    S.mx += (S.tx - S.mx) * 0.05; S.my += (S.ty - S.my) * 0.05;
-    if (S.energy > 0.002) S.energy *= 0.955; else S.energy = 0;
-    // 흐름선만 남은 뒤에는 움직임이 아주 느립니다. 풀이 화면의 그래프·카드 움직임에 계산 시간을 양보하도록
-    // 평소에는 네 프레임에 한 번, 밝아지는 중이거나 진행 정도가 바뀌는 중에는 두 프레임에 한 번만 그립니다.
+    // 감쇠는 '지난 시간' 기준으로 계산합니다 → 주사율이 60Hz든 120Hz든 같은 속도로 따라가고 가라앉습니다.
+    const tn = performance.now();
+    const dt = lastT ? Math.min(tn - lastT, 100) : 16.7; lastT = tn;
+    const kf = dt / 16.7;
+    const follow = 1 - Math.pow(0.95, kf);
+    S.mx += (S.tx - S.mx) * follow; S.my += (S.ty - S.my) * follow;
+    if (S.energy > 0.002) S.energy *= Math.pow(0.955, kf); else S.energy = 0;
+    if (pace(dt)) return;
     const flowOnly = S.flow >= 1;
-    if (flowOnly) {
+    // 프레임이 밀린 적이 있는 기기(q > 0)에서는, 흐름선만 남은 조용한 배경이 그래프·카드 움직임에 시간을 양보합니다:
+    // 배경에 변화가 없으면 네 프레임에 한 번, 밝아지는 중이면 두 프레임에 한 번만 그립니다. 여유 있는 기기는 매 프레임 그립니다.
+    if (flowOnly && q > 0) {
       const busy = S.energy > 0 || S.progress !== lastProgress;
-      skip = (skip + 1) % (busy ? 2 : 4);
-      if (skip) return;
+      rest = (rest + 1) % (busy ? 2 : 4);
+      if (rest) return;
       lastProgress = S.progress;
     }
     ctx.clearRect(0, 0, W, H);
@@ -155,7 +186,9 @@ const Flow = (function () {
     const drawFrac = 0.03 + 0.97 * draw;                 // 갈래는 한 점(극점 자리)에 모여 있다가 뻗어 나갑니다
 
     // 'lighter': 겹친 선이 더 밝아지는 합성(빛 느낌). 저사양 기기에서는 무거워서 일반 합성으로 그립니다
-    ctx.globalCompositeOperation = lowPower || flowOnly ? 'source-over' : 'lighter';
+    ctx.globalCompositeOperation = lowPower || q > 0 || flowOnly ? 'source-over' : 'lighter';
+    const step = q >= 2 && !lowPower ? 2 : 1;          // 가닥을 절반만 그릴 때는 그만큼 진하게 그려 밝기를 맞춥니다
+    const thick = step === 2 ? 1.5 : 1;
     ctx.lineWidth = lowPower ? 1 : 1.1;
 
     // ── 형태 A: 조형물 (고리로 가라앉았다가 사라짐) ──
@@ -166,8 +199,8 @@ const Flow = (function () {
       // 처음 등장할 때는 조금 작게 시작해 제자리로 커집니다. 사라질 때는 원점 쪽으로 작아집니다.
       const scale = base * (0.86 + 0.14 * intro) * (1 - 0.72 * gone);
       // 고리로 모이면 가닥이 겹쳐 밝아지므로 그만큼 옅게 그립니다
-      const alphaA = 0.32 * (1 - 0.86 * calm) * (1 - gone) * glowK;
-      for (let i = 0; i < M; i++) {
+      const alphaA = 0.32 * (1 - 0.86 * calm) * (1 - gone) * glowK * thick;
+      for (let i = 0; i < M; i += step) {
         const k = i / M;
         for (let p = 0; p < P; p++) {
           shapeA(i, p / (P - 1), t, A);
@@ -208,14 +241,14 @@ const Flow = (function () {
     if (ff > 0.3) {
       const litEdge = S.progress * 1.1;                  // 여기까지가 밝은 부분 (학습이 진행된 만큼 왼쪽부터 빛이 차오름)
       const last = Math.min(PC - 1, Math.floor(litEdge * (PC - 1)));
-      for (let i = 0; i < M; i++) {
+      for (let i = 0; i < M; i += step) {
         const k = i / M;
         const ci = flowOnly ? 1 : ease5(clamp((ff - 0.3 - 0.3 * k) / 0.4));
         if (ci < 0.005) continue;
         const r = ICE[0] + (VIO[0] - ICE[0]) * k, g = ICE[1] + (VIO[1] - ICE[1]) * k, b = ICE[2] + (VIO[2] - ICE[2]) * k;
         for (let p = 0; p < PC; p++) { shapeC(i, p / (PC - 1), t, C); PX[p] = C[0]; PY[p] = C[1]; }
-        strokeLine(PC, r, g, b, 0.12 * ci * glowK);
-        if (last > 0) strokeLine(last + 1, r, g, b, 0.2 * ci * glowK);
+        strokeLine(PC, r, g, b, 0.12 * ci * glowK * thick);
+        if (last > 0) strokeLine(last + 1, r, g, b, 0.2 * ci * glowK * thick);
       }
     }
     ctx.globalCompositeOperation = 'source-over';

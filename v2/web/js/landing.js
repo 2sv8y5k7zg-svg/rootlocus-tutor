@@ -49,7 +49,7 @@
   });
 
   const EASE = 'expo.out';
-  const SCRUB = touch ? 0.5 : 0.9;     // 스크롤을 따라가는 감쇠 시간(초)
+  const SCRUB = touch ? 0.7 : 0.9;     // 스크롤을 따라가는 감쇠 시간(초)
 
   // 문장을 낱말 단위로 나눕니다 (Scene 2에서 낱말이 하나씩 밝아지도록)
   function splitWords() {
@@ -86,10 +86,10 @@
   gsap.to('.hero-copy', { opacity: 0, y: -60, ease: 'none', scrollTrigger: { trigger: '#s1', start: 'top top', end: 'bottom 45%', scrub: SCRUB } });
   gsap.to('#morphLine', { opacity: 0, y: -40, ease: 'none', scrollTrigger: { trigger: '#s2', start: 'bottom 115%', end: 'bottom 75%', scrub: SCRUB } });
 
-  // Scene 3: 화면 고정(pin). 스크롤 3화면 길이 동안 세 낱말이 차례로 밝아졌다 어두워집니다.
+  // Scene 3: 화면 고정(CSS sticky). 스크롤 3화면 길이 동안 세 낱말이 차례로 밝아졌다 어두워집니다.
   // 낱말의 밝기·위치·설명 글이 모두 스크롤 진행률에 묶여 있어, 어느 방향으로 스크롤해도 끊기지 않습니다.
   const tl = gsap.timeline({ defaults: { ease: 'power2.out' },
-    scrollTrigger: { trigger: '#s3', start: 'top top', end: '+=300%', pin: true, scrub: SCRUB, anticipatePin: 1 } });
+    scrollTrigger: { trigger: '#s3', start: 'top top', end: 'bottom bottom', scrub: SCRUB } });
   tl.to(S, { story: 1, ease: 'none', duration: 3 }, 0);
   tl.to('#meter', { scaleX: 1, ease: 'none', duration: 3 }, 0);
   document.querySelectorAll('.story-words li').forEach((li, i) => {

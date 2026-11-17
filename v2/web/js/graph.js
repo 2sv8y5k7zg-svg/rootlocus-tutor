@@ -140,14 +140,15 @@ class PlaneGraph {
         if (u < 1) busy = true;
       }
       this.tweens = this.tweens.filter((t) => now - t.t0 < t.dur);
-      // K 표시가 목표 위치를 부드럽게 따라갑니다
+      // K 표시가 목표 위치를 부드럽게 따라갑니다. 지난 시간 기준으로 계산해 주사율(60Hz·120Hz)과 무관하게 같은 속도입니다.
+      const dt = this.lastNow ? Math.min(now - this.lastNow, 100) : 16.7; this.lastNow = now;
       if (this.kIndex !== null && this.kShown !== null) {
         const d = this.kIndex - this.kShown;
-        if (Math.abs(d) > 0.02 && !this.reduced) { this.kShown += d * 0.2; busy = true; } else this.kShown = this.kIndex;
+        if (Math.abs(d) > 0.02 && !this.reduced) { this.kShown += d * (1 - Math.pow(0.84, dt / 16.7)); busy = true; } else this.kShown = this.kIndex;
       }
       if (this.pick && now - this.pickT < 700) busy = true;
       this.draw(now);
-      if (busy) requestAnimationFrame(loop); else this.running = false;
+      if (busy) requestAnimationFrame(loop); else { this.running = false; this.lastNow = 0; }
     };
     requestAnimationFrame(loop);
   }

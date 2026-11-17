@@ -40,9 +40,11 @@ html.lenis, html.lenis body { height: auto; }
 .morph-line .wd { display: inline-block; opacity: .12; will-change: opacity; }
 .morph-line em { font-style: normal; color: var(--ice); }
 
-/* Scene 3: GSAP이 이 구간을 화면에 고정(pin)한다. 낱말의 밝기·위치는 스크롤 진행률에 묶여 있다 */
-.story { height: 100svh; }
-.story-pin { height: 100svh; display: grid; align-content: center; padding: 0 clamp(20px, 6vw, 96px); }
+/* Scene 3: 스크롤 4화면 길이의 구간 안에서, 안쪽 상자가 화면 위에 붙어(sticky) 머문다.
+   붙이는 일을 브라우저가 스크롤과 같은 단계에서 처리하므로, 스크립트로 고정할 때 터치 기기에서 생기던 미세한 떨림이 없다.
+   낱말의 밝기·위치는 스크롤 진행률에 묶여 있다 */
+.story { height: 400svh; }
+.story-pin { position: sticky; top: 0; height: 100svh; display: grid; align-content: center; padding: 0 clamp(20px, 6vw, 96px); }
 .story-words { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(4px, 1vh, 12px); }
 .story-words li { display: grid; gap: 6px; opacity: .14; will-change: opacity, transform; transform-origin: 0 50%; }
 .story-words .w { font-size: clamp(44px, 8.5vw, 132px); line-height: .95; letter-spacing: -.05em; font-weight: 600; }
