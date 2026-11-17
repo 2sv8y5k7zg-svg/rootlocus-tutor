@@ -1,5 +1,5 @@
 // flow.js — 랜딩과 학습 화면이 함께 쓰는 '배경 오브젝트'입니다.
-// 화면 뒤에 고정된 캔버스 하나에 빛의 가닥(선) 묶음을 그리고, 세 가지 형태 사이를 차분하게 오갑니다(가닥을 날려 섞지 않고, 고리로 가라앉혔다가 다음 형태를 떠올림).
+// 화면 뒤에 고정된 캔버스 하나에 빛의 가닥(선) 묶음을 그리고, 세 가지 형태 사이를 오갑니다(조형물이 감긴 실처럼 풀려 가지런한 평행선으로 정리된 뒤 다음 형태가 됨).
 //   형태 A  조형물      3차원 리본 묶음. 천천히 돕니다 (랜딩 첫 화면, 학습의 문제 입력 화면)
 //   형태 B  좌표 구조   축·격자·네 갈래 곡선 (랜딩 중간 장면)
 //   형태 C  흐름선      화면 전체를 가로지르는 잔잔한 물결선 (랜딩의 실제 화면 소개, 학습의 풀이 화면)
@@ -140,10 +140,12 @@ const Flow = (function () {
     return tick !== 0;
   }
 
-  // 형태가 바뀌는 방식 (절제된 전환):
-  //   가닥이 한 올씩 날아다니며 섞이면 중간 모양이 엉킨 실타래처럼 보여 눈이 피로합니다. 그래서 점을 옮겨 섞지 않고
-  //   ① 조형물이 회전을 멈추며 납작한 고리 하나로 가라앉고 → ② 고리가 원점으로 작아지며 사라지는 동안
-  //   ③ 그 원점에서 좌표축이 뻗어 나오거나(B), 흐름선이 조용히 떠오릅니다(C). 되돌아갈 때는 같은 길을 거꾸로 갑니다.
+  // 형태가 바뀌는 방식 (풀렸다가 정리되는 전환):
+  //   ① 조형물의 가닥들이 회전을 멈추며 함께 풀려, 느슨하게 일렁이는 리본이 됩니다.
+  //   ② 일렁임이 가라앉아 가지런한 평행선 묶음으로 정리됩니다.
+  //   ③ 평행선이 가운데 한 줄(실수축)로 모이며 좌표 구조가 떠오르거나(B), 화면 전체로 퍼져 흐름선이 됩니다(C).
+  //   모든 가닥이 같은 방향·같은 박자로 움직이고 목표도 서로 닮은 평행선이라, 중간 모양이 엉키지 않습니다.
+  //   되돌아갈 때는 같은 길을 거꾸로 갑니다.
   function frame() {
     if (!ctx) return;
     // 감쇠는 '지난 시간' 기준으로 계산합니다 → 주사율이 60Hz든 120Hz든 같은 속도로 따라가고 가라앉습니다.
@@ -179,8 +181,9 @@ const Flow = (function () {
     const glowK = (1 + S.energy * 1.6) * S.dim * intro;
     const mm = clamp(S.morph), ff = clamp(S.flow);
     const away = Math.max(mm, ff);                       // 조형물에서 벗어난 정도
-    const calm = ease5(clamp(away / 0.55));              // ① 고리로 가라앉은 정도
-    const gone = ease5(clamp((away - 0.45) / 0.4));      // ② 고리가 사라진 정도
+    const merge = ease5(clamp((mm - 0.62) / 0.3));       // ③ 평행선이 한 줄(실수축)로 모인 정도
+    const reopen = ease(clamp(ff * 2.5));                // 좌표 구조에서 흐름선으로 갈 때: 모였던 줄이 다시 벌어짐
+    const toC = ease5(clamp((ff - 0.45) / 0.55));        // 평행선이 화면 전체 흐름선으로 퍼진 정도
     const wB = ease5(clamp((mm - 0.6) / 0.4)) * (1 - ease(clamp(ff * 2.5)));   // 좌표 구조가 보이는 정도
     const offset = 1 - verify;
     const drawFrac = 0.03 + 0.97 * draw;                 // 갈래는 한 점(극점 자리)에 모여 있다가 뻗어 나갑니다
@@ -191,35 +194,77 @@ const Flow = (function () {
     const thick = step === 2 ? 1.5 : 1;
     ctx.lineWidth = lowPower ? 1 : 1.1;
 
-    // ── 형태 A: 조형물 (고리로 가라앉았다가 사라짐) ──
-    if (!flowOnly && gone < 0.995) {
-      const live = 1 - calm;                             // 입체감·회전이 남은 정도
-      const yaw = (t * 0.12 + S.mx * 0.35) * live, pitch = (0.35 + S.my * 0.25) * live;
-      const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
-      // 처음 등장할 때는 조금 작게 시작해 제자리로 커집니다. 사라질 때는 원점 쪽으로 작아집니다.
-      const scale = base * (0.86 + 0.14 * intro) * (1 - 0.72 * gone);
-      // 고리로 모이면 가닥이 겹쳐 밝아지므로 그만큼 옅게 그립니다
-      const alphaA = 0.32 * (1 - 0.86 * calm) * (1 - gone) * glowK * thick;
+    // ── 가닥 묶음: 조형물(A) → 풀림 → 평행선 → (실수축으로 모임 | 흐름선 C) ──
+    const scaleB = base * 1.12;
+    const lineVis = 1 - merge * (1 - reopen);            // 실수축으로 완전히 모이면 좌표 구조의 축이 자리를 이어받습니다
+    if (flowOnly) {
+      // 흐름선만 남은 상태: 가장 가벼운 경로
+      const last = Math.min(PC - 1, Math.floor(S.progress * 1.1 * (PC - 1)));   // 학습이 진행된 만큼 왼쪽부터 밝아짐
       for (let i = 0; i < M; i += step) {
         const k = i / M;
+        const r = ICE[0] + (VIO[0] - ICE[0]) * k, g = ICE[1] + (VIO[1] - ICE[1]) * k, b = ICE[2] + (VIO[2] - ICE[2]) * k;
+        for (let p = 0; p < PC; p++) { shapeC(i, p / (PC - 1), t, C); PX[p] = C[0]; PY[p] = C[1]; }
+        strokeLine(PC, r, g, b, 0.12 * glowK * thick);
+        if (last > 0) strokeLine(last + 1, r, g, b, 0.2 * glowK * thick);
+      }
+    } else if (lineVis > 0.004) {
+      const scaleA = base * (0.86 + 0.14 * intro);       // 처음 등장할 때는 조금 작게 시작해 제자리로 커집니다
+      const spanY = 2.5 * scaleB * (1 - merge * (1 - reopen));   // 평행선 묶음의 높이 (모일수록 0)
+      const x0 = cx - 2.3 * scaleB, spanX = 3.6 * scaleB;        // 좌표 구조의 실수축과 같은 자리·길이
+      const litLast = Math.floor(S.progress * 1.1 * (P - 1));
+      // 회전은 모든 가닥이 함께 멈춥니다. 돌던 각도는 -180°~180° 범위로 접어서, 가까운 쪽으로 조용히 정면을 향하게 합니다
+      // (접지 않으면 그동안 쌓인 회전을 한꺼번에 되감느라 빠르게 돌아 버립니다).
+      const still = ease5(clamp(away * 1.12 / 0.6));
+      let turn = (t * 0.12) % (2 * Math.PI); if (turn > Math.PI) turn -= 2 * Math.PI;
+      const yaw = (turn + S.mx * 0.35) * (1 - still), pitch = (0.35 + S.my * 0.25) * (1 - still);
+      const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+      for (let i = 0; i < M; i += step) {
+        const k = i / M;
+        // 가닥마다 아주 조금씩 늦게 풀립니다 (한꺼번에 '툭' 바뀌지 않고 결을 따라 흘러가도록)
+        const e = ease5(clamp((away * 1.12 - 0.12 * k) / 0.6));
+        const live = 1 - e;                              // 고리가 아직 말려 있는 정도 (1: 닫힌 고리, 0: 곧은 선)
+        const detail = 1 - ease(clamp(e * 1.7));         // 조형물의 굴곡·입체감이 남은 정도 (풀리기 시작하면 먼저 가라앉음)
+        const loose = Math.sin(Math.PI * e) * scaleB * 0.1;       // 풀리는 도중에만 생기는 잔잔한 일렁임 (처음과 끝은 0)
+        // 고리의 반지름(px): 다 펴졌을 때 선의 길이가 좌표 구조의 실수축 길이와 같아지도록 맞춥니다
+        const rho = scaleA + (spanX / (2 * Math.PI) - scaleA) * e;
+        const ox = cx + (x0 + spanX / 2 - cx) * e;       // 펴지면서 실수축의 가운데로 옮겨 감
+        const oy = cy + (k - 0.5) * spanY * e;           // 펴지면서 가닥마다 제 줄로 벌어짐
         for (let p = 0; p < P; p++) {
-          shapeA(i, p / (P - 1), t, A);
-          // 고리: 반지름 1인 원을 살짝 눕힌 모양. live가 0이 되면 모든 가닥이 이 고리 하나로 겹칩니다.
-          const th = (p / (P - 1)) * Math.PI * 2;
-          const x = Math.cos(th) + (A[0] - Math.cos(th)) * live, y = Math.sin(th) * 0.62 + (A[1] - Math.sin(th) * 0.62) * live, z = A[2] * live;
+          const u = p / (P - 1);
+          // '감긴 실을 푸는' 모양: 고리의 굽은 정도(live)를 줄여 가면, 닫힌 원이 위쪽에서 열리며 점점 펴져 곧은 선이 됩니다.
+          // s는 고리를 따라 잰 위치(-π ~ π). 굽은 정도가 0이면 그냥 직선입니다.
+          const s = (u - 0.5) * 2 * Math.PI;
+          let x, y, z = 0;
+          if (live > 0.002) {
+            x = Math.sin(s * live) / live;
+            // 열리는 동안 모양이 화면 위로 치우치지 않도록, 호의 위아래 가운데를 기준점에 맞춥니다
+            y = (1 - Math.cos(s * live)) / live - live - ((1 - Math.cos(Math.PI * live)) / live - 2 * live) / 2;
+          } else { x = s; y = 0; }
+          if (detail > 0.001) {
+            // 조형물 고유의 굴곡: 원에서 벗어난 만큼만 더합니다 (shapeA와 같은 고리 위치가 되도록 u를 3/4바퀴 옮김)
+            shapeA(i, u + 0.25, t, A);
+            x += (A[0] - Math.sin(s)) * detail; y += (A[1] + Math.cos(s)) * detail; z = A[2] * detail;
+          }
           // 3차원 회전 후 원근 투영 → 화면 좌표
           const x1 = x * cyw + z * syw, z1 = -x * syw + z * cyw;
           const y2 = y * cp - z1 * sp, z2 = y * sp + z1 * cp;
           const f = 3.2 / (3.2 + z2);
-          PX[p] = cx + x1 * scale * f; PY[p] = cy - y2 * scale * f;
+          let px = ox + x1 * rho * f, py = oy - y2 * rho * f + loose * Math.sin(u * 4.2 + k * 5 + t * 0.35);
+          // 흐름선으로 갈 때는 가지런한 평행선이 화면 전체로 퍼집니다
+          if (toC > 0) { shapeC(i, u, t, C); px += (C[0] - px) * toC; py += (C[1] - py) * toC; }
+          PX[p] = px; PY[p] = py;
         }
-        strokeLine(P, ICE[0] + (VIO[0] - ICE[0]) * k, ICE[1] + (VIO[1] - ICE[1]) * k, ICE[2] + (VIO[2] - ICE[2]) * k, alphaA);
+        const r = ICE[0] + (VIO[0] - ICE[0]) * k, g = ICE[1] + (VIO[1] - ICE[1]) * k, b = ICE[2] + (VIO[2] - ICE[2]) * k;
+        // 밝기: 조형물 0.32 → 평행선 0.2 → 흐름선 0.12. 한 줄로 모일 때는 겹쳐서 밝아지므로 더 옅게.
+        const a0 = 0.32 + (0.2 - 0.32) * e + (0.12 - 0.2) * toC;
+        strokeLine(P, r, g, b, a0 * lineVis * (1 - 0.8 * merge * (1 - reopen)) * glowK * thick);
+        if (toC > 0.5 && litLast > 0) strokeLine(Math.min(P, litLast + 1), r, g, b, 0.2 * (toC - 0.5) * 2 * glowK * thick);
       }
     }
 
     // ── 형태 B: 좌표 구조 (원점에서 뻗어 나옴) ──
     if (!flowOnly && wB > 0.005) {
-      const scale = base * 1.12;
+      const scale = scaleB;
       const grow = 0.35 + 0.65 * wB;                     // 축과 격자가 원점에서 바깥으로 자랍니다
       const nB = 40;
       for (let i = 0; i < M; i++) {
@@ -229,7 +274,7 @@ const Flow = (function () {
         let alpha = (isAxis ? 0.5 : isGrid ? 0.09 : 0.2 * (1 + 0.6 * verify)) * wB * glowK;
         for (let p = 0; p < nB; p++) {
           shapeB(i, p / (nB - 1), offset, drawFrac, B);
-          const gk = isAxis || isGrid ? grow : 1;
+          const gk = i > 0 && (isAxis || isGrid) ? grow : 1;
           PX[p] = cx + B[0] * gk * scale; PY[p] = cy - B[1] * gk * scale;
         }
         if (isAxis || isGrid) strokeLine(nB, WHITE[0], WHITE[1], WHITE[2], alpha);
@@ -237,23 +282,9 @@ const Flow = (function () {
       }
     }
 
-    // ── 형태 C: 흐름선 (위쪽 가닥부터 조용히 떠오름) ──
-    if (ff > 0.3) {
-      const litEdge = S.progress * 1.1;                  // 여기까지가 밝은 부분 (학습이 진행된 만큼 왼쪽부터 빛이 차오름)
-      const last = Math.min(PC - 1, Math.floor(litEdge * (PC - 1)));
-      for (let i = 0; i < M; i += step) {
-        const k = i / M;
-        const ci = flowOnly ? 1 : ease5(clamp((ff - 0.3 - 0.3 * k) / 0.4));
-        if (ci < 0.005) continue;
-        const r = ICE[0] + (VIO[0] - ICE[0]) * k, g = ICE[1] + (VIO[1] - ICE[1]) * k, b = ICE[2] + (VIO[2] - ICE[2]) * k;
-        for (let p = 0; p < PC; p++) { shapeC(i, p / (PC - 1), t, C); PX[p] = C[0]; PY[p] = C[1]; }
-        strokeLine(PC, r, g, b, 0.12 * ci * glowK * thick);
-        if (last > 0) strokeLine(last + 1, r, g, b, 0.2 * ci * glowK * thick);
-      }
-    }
     ctx.globalCompositeOperation = 'source-over';
 
-    const scale = base * 1.12;
+    const scale = scaleB;
     // B 형태에서만 보이는 것들 (흐름선으로 넘어가면 함께 사라짐)
     const bOnly = wB * S.dim;
     const scanA = Math.sin(Math.PI * scan) * bOnly;
