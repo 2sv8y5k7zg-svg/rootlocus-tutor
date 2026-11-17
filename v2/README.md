@@ -57,7 +57,7 @@ python tests/fuzz.py 1000      무작위 1,000개 안정성 시험
 - 검증 문제 T01~T15: 기존 저장소(2sv8y5k7zg-svg/rootlocus-tutor)의 문제와 기준 정답
 - 검증 문제 T16~T34: 새로 만든 문제, 손 풀이 기대값 (`tests/data/new_problems.json`)
 - AI: Google Gemini API (기본 `gemini-3.5-flash-lite`, 2026-11-17 공식 모델·가격 페이지 확인). AI를 학습시키지 않았습니다.
-- 라이브러리: SymPy, NumPy, FastAPI, Uvicorn, httpx, GSAP 3.12.5(Standard no-charge license), python-control(시험용 대조)
+- 라이브러리: SymPy, NumPy, FastAPI, Uvicorn, httpx, GSAP 3.12.5(Standard no-charge license), Lenis 1.1.20(MIT, 휠 스크롤 감쇠), python-control(시험용 대조)
 
 ## 서버 없이 화면만 보기 (오프라인 미리보기)
 ```

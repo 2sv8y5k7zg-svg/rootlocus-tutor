@@ -10,25 +10,41 @@
 <link rel="stylesheet" href="/static/css/base.css">
 <link rel="stylesheet" href="/static/css/learn.css">
 </head>
-<body>
-<!-- 상단 막대: 로고, AI 상태, 시연 모드 스위치 -->
+<body class="learn">
+<!-- 페이지 전환 막: 랜딩에서 넘어올 때 화면을 덮고 있다가 위로 걷힙니다 (learn.js가 움직임) -->
+<div class="curtain" id="curtain" aria-hidden="true"><i></i></div>
+<noscript><style>.curtain{display:none}</style></noscript>
+
+<!-- 상단 막대: 로고, AI 상태, 시연 모드 스위치. 아래 가는 선은 9단계 중 어디까지 왔는지 보여 줍니다 -->
 <header class="topbar">
   <a class="brand" href="/">근궤적 튜터</a>
   <div class="topbar-right">
     <label class="switch" title="인터넷·API 키 없이 정해 둔 예시 응답으로 AI 흐름을 보여 줍니다">
-      <input type="checkbox" id="demoMode"> <span>시연 모드</span>
+      <input type="checkbox" id="demoMode"> <i class="sw" aria-hidden="true"></i><span>시연 모드</span>
     </label>
     <span class="pill" id="aiStatus">AI 확인 중</span>
   </div>
+  <i class="top-progress" id="topProgress" aria-hidden="true"></i>
 </header>
 
 <!-- ① 문제 입력: 처음 화면. 직접 입력 / 문제 사진 / 블록선도(G·H) -->
 <section class="entry" id="entry">
+  <!-- 배경 장식: 선으로 그린 s평면 스케치 (실제 계산값 아님). 화면이 열릴 때 한 번 그려집니다 -->
+  <svg class="entry-art" viewBox="0 0 600 520" fill="none" aria-hidden="true">
+    <path class="ax" pathLength="1" d="M20 300H580M400 20V500"/>
+    <path class="as" pathLength="1" d="M250 300L560 40M250 300L560 560M250 300L-60 40M250 300L-60 560"/>
+    <path class="lc" pathLength="1" d="M330 200C350 150 390 110 400 95C420 70 470 30 540 0"/>
+    <path class="lc" pathLength="1" d="M330 400C350 450 390 490 400 505C420 530 470 570 540 600"/>
+    <path class="lc" pathLength="1" d="M400 300H190C150 260 110 190 60 60"/>
+    <path class="lc" pathLength="1" d="M120 300H190C150 340 110 410 60 540"/>
+    <g class="px"><path d="M394 294l12 12m0-12l-12 12M324 194l12 12m0-12l-12 12M324 394l12 12m0-12l-12 12M114 294l12 12m0-12l-12 12"/></g>
+  </svg>
   <div class="entry-inner">
-    <h1>어떤 시스템의 근궤적을 그려 볼까요?</h1>
-    <p class="lead">개루프 전달함수 K·G(s)H(s)를 입력하거나 문제 사진을 올리세요. 계산은 모두 Python 엔진이 합니다.</p>
+    <p class="eyebrow in">Root Locus Studio</p>
+    <h1 class="in">어떤 시스템의<br>근궤적을 그려 볼까요?</h1>
+    <p class="lead in">개루프 전달함수 K·G(s)H(s)를 입력하거나 문제 사진을 올리세요. 계산은 모두 Python 엔진이 합니다.</p>
 
-    <div class="tabs" role="tablist">
+    <div class="tabs in" role="tablist">
       <button role="tab" class="tab on" data-tab="text">전달함수 입력</button>
       <button role="tab" class="tab" data-tab="gh">G(s) · H(s)</button>
       <button role="tab" class="tab" data-tab="photo">문제 · 블록선도 사진</button>
@@ -36,8 +52,9 @@
 
     <div class="tabpane on" data-pane="text">
       <div class="field-row">
-        <input id="tfInput" class="big-input mono" placeholder="K(s+2)/(s(s+1))" autocomplete="off" spellcheck="false">
-        <button class="btn primary" id="tfGo">풀이 시작</button>
+        <label class="big-field"><span class="sr-only">전달함수</span>
+          <input id="tfInput" class="big-input mono" placeholder="K(s+2)/(s(s+1))" autocomplete="off" spellcheck="false"><i></i></label>
+        <button class="btn primary go" id="tfGo"><span>풀이 시작</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5l5 5-5 5"/></svg></button>
       </div>
       <div class="examples" id="examples"></div>
     </div>
@@ -47,7 +64,7 @@
         <label>앞먹임 G(s)<input id="gInput" class="mono" placeholder="K/(s(s+1))"></label>
         <label>되먹임 H(s)<input id="hInput" class="mono" placeholder="1" value="1"></label>
       </div>
-      <button class="btn primary" id="ghGo">구조 확인</button>
+      <button class="btn primary go" id="ghGo"><span>구조 확인</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5l5 5-5 5"/></svg></button>
       <p class="hint-line">음의 피드백 기준입니다. 루프 전달함수 L(s) = G(s)H(s)로 근궤적을 그립니다.</p>
     </div>
 
@@ -59,8 +76,8 @@
       </label>
       <!-- 개인정보: 사진은 동의한 경우에만 외부 AI로 보낸다 -->
       <label class="consent"><input type="checkbox" id="consent">
-        사진을 <b id="aiVendor">외부 AI</b>로 보내 인식하는 데 동의합니다. <span id="aiPolicy"></span> 사진은 서버에 저장하지 않습니다.</label>
-      <button class="btn primary" id="photoGo" disabled>사진 인식</button>
+        <span>사진을 <b id="aiVendor">외부 AI</b>로 보내 인식하는 데 동의합니다. <span id="aiPolicy"></span> 사진은 서버에 저장하지 않습니다.</span></label>
+      <button class="btn primary go" id="photoGo" disabled>사진 인식</button>
     </div>
 
     <!-- AI 인식 결과 확인: 확정 전에는 계산하지 않는다 -->
@@ -82,7 +99,7 @@
   </div>
 </section>
 
-<!-- ② 학습 화면: 좌(단계) · 중(수식·그래프) · 우(답 검사·힌트·손글씨) -->
+<!-- ② 학습 화면: 좌(단계) · 중(어두운 그래프 무대) · 우(답 검사·힌트·손글씨) -->
 <main class="studio" id="studio" hidden>
   <aside class="col-left">
     <div class="card problem-card">
@@ -91,28 +108,32 @@
       <div class="notes" id="pNotes"></div>
       <button class="btn ghost small" id="newProblem">다른 문제</button>
     </div>
+    <!-- 단계 목록. .step-ind는 현재 단계 뒤에서 미끄러지며 따라다니는 검은 배경 -->
     <nav class="steps" id="stepNav" aria-label="9단계"></nav>
     <div class="verify-summary" id="verifySummary"></div>
   </aside>
 
   <section class="col-center">
-    <div class="step-head">
-      <div class="step-no" id="stepNo">1</div>
-      <div>
-        <h2 id="stepTitle"></h2>
-        <p class="concept" id="stepConcept"></p>
+    <!-- 그래프 무대: 어두운 바탕 위에 빛나는 선으로 그립니다 -->
+    <div class="stage" id="stage">
+      <div class="stage-head">
+        <div class="step-no mono"><span id="stepNo">1</span><small>/9</small></div>
+        <div class="step-text">
+          <h2 id="stepTitle"></h2>
+          <p class="concept" id="stepConcept"></p>
+        </div>
       </div>
-    </div>
-    <div class="card graph-card">
       <canvas id="plane" aria-label="s평면 근궤적 그래프"></canvas>
-      <div class="graph-legend" id="legend"></div>
-      <div class="graph-readout mono" id="readout">그래프를 누르면 그 점의 K를 Python이 계산합니다.</div>
-      <!-- K 조절: 8·9단계에서만 보인다 -->
-      <div class="k-control" id="kControl" hidden>
-        <label for="kSlider">K</label>
-        <input type="range" id="kSlider" min="0" max="1000" value="0">
-        <input type="number" id="kValue" class="mono" min="0" step="any" value="0">
-        <div class="k-poles mono" id="kPoles"></div>
+      <div class="stage-foot">
+        <div class="graph-legend" id="legend"></div>
+        <div class="graph-readout mono" id="readout">그래프를 누르면 그 점의 K를 Python이 계산합니다.</div>
+        <!-- K 조절: 8·9단계에서만 보인다. 막대 색은 안정(푸른색)·불안정(붉은색) 구간 -->
+        <div class="k-control" id="kControl" hidden>
+          <label for="kSlider" class="mono">K</label>
+          <input type="range" id="kSlider" min="0" max="1000" value="0">
+          <input type="number" id="kValue" class="mono" min="0" step="any" value="0">
+          <div class="k-poles mono" id="kPoles"></div>
+        </div>
       </div>
     </div>
     <details class="card work-card" id="workCard">
@@ -122,7 +143,7 @@
     </details>
     <div class="step-nav-btns">
       <button class="btn ghost" id="prevStep">이전 단계</button>
-      <button class="btn primary" id="nextStep">다음 단계</button>
+      <button class="btn primary go" id="nextStep"><span>다음 단계</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5l5 5-5 5"/></svg></button>
     </div>
   </section>
 
@@ -141,7 +162,7 @@
       <div class="label">손글씨 풀이 검사</div>
       <p class="muted small">종이에 푼 전체 풀이를 찍어 올리면, AI가 읽고 Python 엔진이 단계마다 다시 계산해 비교합니다. 근궤적 그림은 엔진이 담당합니다.</p>
       <input type="file" id="hwInput" accept="image/*" class="file">
-      <label class="consent small"><input type="checkbox" id="hwConsent"> 사진을 외부 AI로 보내는 데 동의</label>
+      <label class="consent small"><input type="checkbox" id="hwConsent"> <span>사진을 외부 AI로 보내는 데 동의</span></label>
       <button class="btn ghost small" id="hwGo" disabled>풀이 사진 검사</button>
       <div id="hwReport"></div>
     </div>
@@ -149,6 +170,8 @@
   </aside>
 </main>
 
+<!-- GSAP: 화면 전환 움직임에 씁니다 (web/vendor에 함께 둠, 인터넷 없이 동작) -->
+<script src="/static/vendor/gsap/gsap.min.js"></script>
 <script src="/static/js/api.js"></script>
 <script src="/static/js/graph.js"></script>
 <script src="/static/js/learn.js"></script>

@@ -20,6 +20,10 @@ const EXAMPLES = [
 ];
 
 // 한 단계의 '생각해 볼 질문'은 4단계 힌트 중 1번째(개념 질문)를 씁니다.
+// 움직임 설정: GSAP이 있고, 사용자가 '움직임 줄이기'를 켜지 않았을 때만 전환 효과를 씁니다.
+const MOTION = !!window.gsap && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const EASE = 'expo.out';      // 빨리 출발해서 길게 감속하는 속도 곡선 (화면 전체에서 하나로 통일)
+
 function esc(t) { return String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function demo() { return $('demoMode').checked; }
 
@@ -32,7 +36,7 @@ async function init() {
   for (const ex of EXAMPLES) {
     const b = document.createElement('button');
     b.className = 'chip'; b.innerHTML = `<span class="mono">${esc(ex)}</span>`;
-    b.onclick = () => { $('tfInput').value = ex; start({ text: ex }); };
+    b.onclick = () => { $('tfInput').value = ex; start({ text: ex }, $('tfGo')); };
     $('examples').appendChild(b);
   }
   // 랜딩 페이지에서 ?tf=... 로 넘어오면 바로 시작
@@ -45,10 +49,15 @@ async function init() {
     document.querySelectorAll('.tabpane').forEach((p) => p.classList.toggle('on', p.dataset.pane === t.dataset.tab));
   });
 
-  $('tfGo').onclick = () => start({ text: $('tfInput').value });
-  $('tfInput').onkeydown = (e) => { if (e.key === 'Enter') start({ text: $('tfInput').value }); };
+  $('tfGo').onclick = () => start({ text: $('tfInput').value }, $('tfGo'));
+  $('tfInput').onkeydown = (e) => { if (e.key === 'Enter') start({ text: $('tfInput').value }, $('tfGo')); };
   $('ghGo').onclick = confirmGH;
-  $('newProblem').onclick = () => { $('studio').hidden = true; $('entry').hidden = false; window.scrollTo(0, 0); };
+  $('newProblem').onclick = backToEntry;
+  openCurtain();
+  // 로고(랜딩으로 가는 링크)를 누르면 막이 올라온 뒤 이동합니다
+  document.querySelector('.brand').addEventListener('click', (e) => { e.preventDefault(); leaveTo(e.currentTarget.getAttribute('href')); });
+  // 화면 크기가 바뀌면 단계 표시 배경의 위치를 다시 맞춥니다
+  addEventListener('resize', () => moveIndicator(true));
   $('prevStep').onclick = () => goStep(Math.max(1, state.step - 1));
   $('nextStep').onclick = () => goStep(Math.min(9, state.step + 1));
   setupPhoto();
@@ -67,6 +76,67 @@ async function init() {
   if (q) start({ text: q });
 }
 
+// ─────────────────────────── 화면 전환 ───────────────────────────
+// 페이지가 열릴 때: 화면을 덮은 막이 위로 걷히고, 글자들이 아래에서 차례로 올라옵니다.
+function openCurtain() {
+  const c = $('curtain');
+  if (!MOTION) { c.style.visibility = 'hidden'; return; }
+  gsap.to(c, { scaleY: 0, duration: 0.95, ease: 'expo.inOut', delay: 0.05, onComplete: () => { c.style.visibility = 'hidden'; } });
+  gsap.from('.topbar', { y: -24, opacity: 0, duration: 1, ease: EASE, delay: 0.45 });
+  revealEntry(0.4);
+}
+function revealEntry(delay) {
+  if (!MOTION) return;
+  gsap.from('.entry-inner > .in', { y: 40, opacity: 0, duration: 1.2, stagger: 0.08, ease: EASE, delay });
+  gsap.from('.tabpane.on .field-row', { y: 30, opacity: 0, duration: 1.1, ease: EASE, delay: delay + 0.35 });
+  gsap.from('#examples .chip', { y: 16, opacity: 0, duration: 0.9, stagger: 0.045, ease: EASE, delay: delay + 0.5 });
+}
+// 다른 페이지로 나갈 때: 막이 아래에서 올라와 화면을 덮은 뒤 이동합니다.
+function leaveTo(href) {
+  const c = $('curtain');
+  if (!MOTION) { location.href = href; return; }
+  c.style.visibility = 'visible';
+  gsap.fromTo(c, { scaleY: 0, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.65, ease: 'expo.inOut', onComplete: () => { location.href = href; } });
+}
+// 뒤로 가기로 돌아왔을 때 막이 덮인 채 남지 않도록 합니다
+addEventListener('pageshow', (e) => { if (e.persisted) { const c = $('curtain'); c.style.visibility = 'hidden'; } });
+
+// 풀이 화면 → 문제 입력 화면
+async function backToEntry() {
+  if (MOTION) await gsap.to('#studio', { opacity: 0, y: 20, duration: 0.35, ease: 'power2.in' });
+  $('studio').hidden = true; $('entry').hidden = false;
+  if (MOTION) gsap.set('#studio', { clearProps: 'all' });
+  $('topProgress').style.transform = 'scaleX(0)';
+  state.started = false;
+  window.scrollTo(0, 0);
+  revealEntry(0);
+}
+
+// 단계 목록의 검은 배경을 현재 단계 버튼 자리로 옮깁니다 (instant: 움직임 없이 바로)
+function moveIndicator(instant) {
+  const ind = $('stepInd'), btn = document.querySelector('.step-btn.on');
+  if (!ind || !btn) return;
+  const to = { x: btn.offsetLeft, y: btn.offsetTop, width: btn.offsetWidth, height: btn.offsetHeight };
+  if (!window.gsap) { ind.style.cssText = `transform:translate(${to.x}px,${to.y}px);width:${to.width}px;height:${to.height}px`; return; }
+  if (instant || !MOTION) gsap.set(ind, to); else gsap.to(ind, { ...to, duration: 0.7, ease: EASE, overwrite: true });
+}
+
+// K 막대에 안정(푸른색)·불안정(붉은색) 구간을 칠합니다. 구간은 7단계에서 엔진이 구한 안정 범위입니다.
+function paintKTrack() {
+  const Ks = state.result.graph.K, iv = state.result.steps[6].result.stable || [];
+  const ok = (K) => iv.some((r) => K > r.lo && (r.hi === null || r.hi === undefined || K < r.hi));
+  const parts = [];
+  let from = 0, cur = ok(Ks[1]);
+  for (let i = 2; i < Ks.length; i++) {
+    const s = ok(Ks[i]);
+    if (s !== cur) { parts.push([from, i, cur]); from = i; cur = s; }
+  }
+  parts.push([from, Ks.length - 1, cur]);
+  const pct = (i) => (i / (Ks.length - 1) * 100).toFixed(2) + '%';
+  const css = parts.map(([a, b, s]) => `${s ? 'rgba(177,203,230,.9)' : 'rgba(232,164,147,.8)'} ${pct(a)} ${pct(b)}`).join(', ');
+  $('kSlider').style.setProperty('--track', `linear-gradient(90deg, ${css})`);
+}
+
 function showAiStatus() {
   const ai = state.ai || {};
   const el = $('aiStatus');
@@ -81,18 +151,39 @@ function showAiStatus() {
 function entryError(msg) { const e = $('entryError'); e.hidden = !msg; e.textContent = msg || ''; }
 
 // 문제 객체를 서버에 보내 9단계 결과를 받고 학습 화면을 엽니다.
-async function start(problem) {
+// btn: 누른 버튼 (계산을 기다리는 동안 빛줄기가 지나가는 표시를 합니다)
+async function start(problem, btn) {
   entryError('');
   if (problem.text !== undefined && !problem.text.trim()) { entryError('전달함수를 입력해 주세요.'); return; }
-  const res = await API.analyze(problem);
+  if (state.busy) return;
+  state.busy = true;
+  if (btn) btn.classList.add('loading');
+  let res;
+  try { res = await API.analyze(problem); } catch (e) { res = { ok: false, error: { message: '서버에 연결하지 못했습니다.' } }; }
+  if (btn) btn.classList.remove('loading');
+  state.busy = false;
   if (!res.ok) { entryError(res.error.message); return; }
   state.problem = problem; state.result = res; state.checked = {}; state.hintLevel = {};
+
+  // 전환: 입력 화면이 위로 사라지고 → 무대가 떠오르며 → 좌우 패널이 양옆에서 들어옵니다
+  if (MOTION) await gsap.to('#entry', { opacity: 0, y: -30, duration: 0.4, ease: 'power2.in' });
   $('entry').hidden = true; $('confirm').hidden = true; $('studio').hidden = false;
+  if (MOTION) gsap.set('#entry', { clearProps: 'all' });
   window.scrollTo(0, 0);
+  state.started = false;
   renderProblem();
+  paintKTrack();
   state.graph.resize();
-  state.graph.setData(res.graph);
+  state.graph.setData(res.graph);     // 축이 원점에서 바깥으로 그려지며 시작
   goStep(1);
+  state.started = true;
+  if (MOTION) {
+    gsap.from('#stage', { y: 48, scale: 0.96, opacity: 0, duration: 1.2, ease: EASE });
+    gsap.from('.stage-head > *, .stage-foot', { y: 20, opacity: 0, duration: 1, stagger: 0.08, ease: EASE, delay: 0.3 });
+    gsap.from('.col-left > *', { x: -32, opacity: 0, duration: 1, stagger: 0.08, ease: EASE, delay: 0.2 });
+    gsap.from('.col-right > *', { x: 32, opacity: 0, duration: 1, stagger: 0.08, ease: EASE, delay: 0.25 });
+    gsap.from('.work-card, .step-nav-btns', { y: 24, opacity: 0, duration: 0.9, stagger: 0.07, ease: EASE, delay: 0.45 });
+  }
 }
 
 // G, H 입력 → 서버가 루프 전달함수와 폐루프 전달함수를 먼저 보여 주고, 확인 후 시작
@@ -125,7 +216,7 @@ function openConfirm(vals, pre, msg, conditions, uncertain) {
   $('confirmGo').onclick = () => {
     // 사용자가 고친 값을 우선: G가 있으면 G·H 구조, 없으면 전달함수 한 줄
     const G = $('cG').value.trim(), H = $('cH').value.trim();
-    if (G) start({ G, H: H || '1' }); else start({ text: $('cTf').value });
+    if (G) start({ G, H: H || '1' }, $('confirmGo')); else start({ text: $('cTf').value }, $('confirmGo'));
   };
   $('confirmCancel').onclick = () => { $('confirm').hidden = true; };
 }
@@ -161,7 +252,7 @@ function renderProblem() {
   const notes = [...(r.input.notes || [])];
   if (r.diagram) notes.push(`폐루프 T(s) = ${r.diagram.T}`);
   $('pNotes').textContent = notes.join(' · ');
-  const nav = $('stepNav'); nav.innerHTML = '';
+  const nav = $('stepNav'); nav.innerHTML = '<i class="step-ind" id="stepInd"></i>';
   for (const st of r.steps) {
     const b = document.createElement('button');
     b.className = 'step-btn'; b.dataset.n = st.n;
@@ -181,9 +272,18 @@ function goStep(n) {
   // 좁은 화면에서는 단계 목록이 가로로 스크롤되므로, 현재 단계 버튼이 보이도록 목록만 옮깁니다
   const nav = $('stepNav'), on = nav.querySelector('.on');
   if (on && nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: on.offsetLeft - nav.clientWidth / 2 + on.clientWidth / 2, behavior: 'smooth' });
-  $('stepNo').textContent = n;
-  $('stepTitle').textContent = st.title;
-  $('stepConcept').textContent = st.hints[0].text;
+  moveIndicator(!state.started);
+  $('topProgress').style.transform = `scaleX(${n / 9})`;
+  // 제목·질문 바꾸기: 이전 글자가 위로 빠지고 새 글자가 아래에서 올라옵니다
+  const setText = () => { $('stepNo').textContent = n; $('stepTitle').textContent = st.title; $('stepConcept').textContent = st.hints[0].text; };
+  const heads = ['#stepNo', '#stepTitle', '#stepConcept'];
+  if (MOTION && state.started) {
+    gsap.killTweensOf(heads);
+    gsap.to(heads, { y: -12, opacity: 0, duration: 0.16, ease: 'power2.in', onComplete: () => {
+      setText();
+      gsap.fromTo(heads, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.06, ease: EASE });
+    } });
+  } else setText();
   $('stepFormula').textContent = st.formula;
   $('stepWork').innerHTML = st.work.map((w) => `<li>${esc(w)}</li>`).join('');
   $('workCard').open = false;
@@ -199,20 +299,24 @@ function goStep(n) {
   renderLadder(n);
   $('hwReport').innerHTML = '';
 
-  // 그래프: 단계에 맞는 요소만, 8단계에 처음 들어오면 곡선이 그려지는 움직임
+  if (MOTION && state.started) {
+    gsap.fromTo('#answerForm, #ladder, #engineCheck', { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.05, ease: EASE });
+  }
+
+  // 그래프: 이 단계에서 새로 나오는 요소가 그려지는 움직임은 graph.js가 맡습니다
   const g = state.graph;
-  const enteringBranches = n >= 8 && g.step < 8;
-  g.step = n;
   $('kControl').hidden = n < 8;
-  if (n >= 8) { if (g.kIndex === null) setKIndex(0); } else g.kIndex = null;
-  if (enteringBranches) g.animateBranches(); else { g.progress = 1; g.draw(); }
+  if (n >= 8) { if (g.kIndex === null) setKIndex(0); } else g.setK(null);
+  g.setStep(n);
   legend(n);
 }
 
 function legend(n) {
-  const items = [['극점 ×, 영점 ○', '--ink', 2], ['실수축 구간', '--ice', 3], ['점근선', '--violet-deep', 4],
-    ['이탈·진입점', '--violet-deep', 5], ['출발·도착각', '--violet-deep', 6], ['허수축 교차', '--coral', 7], ['근궤적', '--ice-deep', 8]];
-  $('legend').innerHTML = items.filter((i) => n >= i[2]).map((i) => `<span><i style="background:var(${i[1]})"></i>${i[0]}</span>`).join('');
+  // 색은 graph.js의 무대 색과 같습니다. 이 단계에서 새로 나온 항목만 떠오르는 움직임(.new)
+  const items = [['극점 ×, 영점 ○', '#F5F4F0', 2], ['실수축 구간', '#B1CBE6', 3], ['점근선', '#B4A9D5', 4],
+    ['이탈·진입점', '#B4A9D5', 5], ['출발·도착각', '#B4A9D5', 6], ['허수축 교차', '#E8A493', 7], ['근궤적', '#B1CBE6', 8]];
+  $('legend').innerHTML = items.filter((i) => n >= i[2] && !(i[2] === 3 && n >= 8))
+    .map((i) => `<span class="${i[2] === n ? 'new' : ''}"><i style="background:${i[1]}"></i>${i[0]}</span>`).join('');
 }
 
 // 단계별 답 입력 칸 (서버의 /api/fields 목록으로 만듭니다)
@@ -321,10 +425,9 @@ function setupK() {
 
 function setKIndex(i, typedK) {
   const Ks = state.result.graph.K;
-  state.graph.kIndex = i;
+  state.graph.setK(i);      // 표시는 목표 위치까지 미끄러지듯 이동합니다 (graph.js)
   $('kSlider').value = Math.round(i / (Ks.length - 1) * 1000);
   if (typedK === undefined) $('kValue').value = +Ks[i].toPrecision(5);
-  state.graph.draw();
 }
 
 async function exactPoles(K) {
