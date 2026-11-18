@@ -1,5 +1,8 @@
 # 근궤적 AI 튜터
 
+> **본선 버전은 [`v2/`](v2/README.md)입니다** (Python 계산 엔진 + Gemini, 2026-11-17~). 이 아래 내용과 `js/`·`app/`은 예선 때 만든 1차 버전(JavaScript)으로, 보관용입니다.
+> 같이 작업하는 규칙: [AGENTS.md](AGENTS.md)(ChatGPT·Codex) · [CLAUDE.md](CLAUDE.md)(Claude Code) · 할 일: [v2/docs/할일.md](v2/docs/할일.md)
+
 제어공학 근궤적을 전달함수부터 단계별로 그려 가며 수식과 그래프를 연결하고, 막히면 AI가 검증된 계산을 바탕으로 힌트를 주는 학습 홈페이지입니다.
 2026 안양대학교 AI 경진대회(AI+X) 출품작.
 

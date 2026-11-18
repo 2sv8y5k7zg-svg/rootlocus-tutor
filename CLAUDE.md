@@ -20,41 +20,39 @@
 - 2026-12-03(목) 본선: 발표 5분 + 라이브 시연 5분 + 질의응답 5분
 - 규정: 생성형 AI로 코드 작성 가능(본선 PPT에 도구와 범위 명시). 질의응답에서 팀원이 코드·모델 동작을 설명 못 하면 감점 가능. API가 맡은 부분과 팀이 만든 부분을 나눠 설명해야 함. 개발비·유료 API 지원 없음.
 
-## 구조
-| 경로 | 내용 |
-|---|---|
-| js/ | 계산 엔진: complex, poly(근 찾기·중근), format(정확값 표기), routh(Routh 표·교차·안정 범위), locus(실수축·점근선·이탈점·출발각·가지) |
-| app/js/ | 화면: parser(식 해석), mathview(수식 HTML), content(9단계 내용·힌트), graph(s평면·움직임), ai(AI 연결부·숫자 검사), store(브라우저 기록), main(화면 흐름) |
-| app/template.html, app/app.css | 페이지 뼈대와 스타일 (색 = 의미: 극점·영점·근궤적·점근선·핵심 점) |
-| tests/ | problems.json(검증 문제 17개), expected.json(기준 정답), run-tests.js |
-| tools/ | reference.py(sympy 기준 정답), overlay.py(python-control 비교 그림), make_crosscheck.py(교차검증 표), build.py(한 파일로 묶기), smoke.py(헤드리스 브라우저 점검) |
-| dist/ | 묶은 결과 rootlocus-tutor.html (인터넷 없이도 동작, AI만 꺼짐) |
-| docs/ | 할일.md, 시작-준비.md, AI-사용기록.md, 교차검증_표.md, 비교 그림, 화면 캡처 |
-| AGENTS.md | ChatGPT·Codex용 공동 작업 안내 (이 파일과 규칙이 같음) |
+## 지금 상태와 구조 (2026-11-18 KST 개정)
+- **본선 버전은 `v2/`** (Python FastAPI + SymPy 엔진, HTML·CSS·JS 화면, Gemini 연결). 새 작업은 모두 v2에서 한다.
+- `js/`, `app/`, 루트 `tests/`·`tools/`·`dist/`는 1차 버전(JS 엔진). 보관용으로 고치지 않는다. 열린 PR #1~#4, #6은 1차 버전 대상.
+- v2는 PR #7(브랜치 `claude/python-v2`). main에 합쳐지기 전이면 이 브랜치에서 새 브랜치를 따고 PR 대상도 이 브랜치로 한다.
+- 폴더별 역할, 먼저 읽을 문서 목록은 AGENTS.md "구조 (v2/)"·"먼저 읽을 것"과 같다. 파일별 설명은 `v2/docs/코드-설명서.md`.
+- 미리보기(서버 없이 여는 화면): https://claude.ai/artifact/AzENn7yt6KoUm5H5pYbNbt — `python tools/build_offline.py` 후 `dist/offline/artifact/index.html`(+ learn.html)을 같은 링크에 다시 게시한다.
 
-## 명령어
-- 엔진 검사: `node tests/run-tests.js` (현재 17/17 문제, 225/225 항목 통과)
-- 기준 정답 다시 계산: `python3 tools/reference.py` (sympy, numpy 필요)
-- 묶기: `python3 tools/build.py` → dist/rootlocus-tutor.html
-- 화면 점검: `python3 tools/smoke.py` (playwright 필요. 브라우저는 Playwright Chromium → Edge → Chrome 순서로 찾음)
-- 윈도우에서는 `python3` 대신 `python`(또는 `py`)을 쓴다. 파일을 읽고 쓸 때는 항상 UTF-8.
+## 명령어 (v2 폴더에서. 윈도우는 python, 맥·리눅스는 python3, 파일은 항상 UTF-8)
+- 실행: `python run.py` → http://127.0.0.1:8000
+- 검증 문제: `python tests/run_tests.py` (현재 36/36 문제, 420/420 항목)
+- 전체 시험: `python -m pytest tests -q` (현재 74/74, Gemini는 흉내 낸 응답으로만)
+- 무작위 시험: `python tests/fuzz.py 1000`
+- 미리보기 만들기: `python tools/build_offline.py`
 
 ## 꼭 지킬 규칙
-1. 정확성이 모션보다 우선. 화면·AI에 나오는 숫자는 전부 엔진 계산값이다. AI가 새 숫자를 만들면 숫자 검사(ai.js checkNumbers)가 경고한다.
-2. 엔진(js/)을 고치면 커밋 전에 `node tests/run-tests.js`가 전부 통과해야 한다. expected.json은 reference.py로만 갱신하고 바뀐 값을 사람에게 보여 준다.
-3. 지원 범위: 연속시간, 음의 피드백, K ≥ 0, 실수 계수, 분모 4차 이하, 분자 차수 ≤ 분모 차수. 범위 밖은 계산하지 않고 이유를 안내한다.
-4. 풀이 순서는 수업 방식 그대로: 1 특성방정식 → 2 극점·영점·가지 수 → 3 실수축(오른쪽 개수 홀짝, 중근은 겹친 수만큼) → 4 점근선 → 5 이탈점·진입점(D′N − DN′ = 0, K = −D/N 부호 확인) → 6 출발각·도착각(θ = 180° + Σ영점각 − Σ다른 극점각) → 7 Routh·허수축 교차 → 8 완성 → 9 K 변화.
-5. 페이지는 프레임워크·빌드 도구 없이 HTML·CSS·JavaScript만 쓴다. 엔진은 C처럼 읽히게(for 반복문, 짧은 함수, 한글 주석).
-6. API 키는 브라우저 코드에 절대 넣지 않는다. Cloudflare Worker의 비밀값(secret)으로만 둔다.
-7. AI가 실패하거나 없으면 팀이 쓴 정적 힌트로 그대로 동작해야 한다(시연 백업).
-8. 현재 상태가 필요한 정보(Gemini 모델 이름·무료 한도·API 주소, Cloudflare 설정 방법 등)는 기억으로 쓰지 말고 공식 문서를 확인한다.
-9. 작업은 브랜치로 한다. 작업마다 `claude/짧은-설명` 브랜치를 만들고, PR 설명에 무엇을·왜·검사 결과·남은 일을 쓴다. main에 합치는 사람은 주영님이다. docs/할일.md에서 `(담당: GPT)`가 붙은 항목은 고치지 않는다. 자세한 협업 규칙은 AGENTS.md의 "같이 작업하는 방법".
+1. 정확성이 모션보다 우선. 화면·AI에 나오는 숫자는 전부 `engine/` 계산값이다. AI가 엔진에 없는 숫자를 쓰면 `ai/verify.py check_numbers`가 잡아 팀 힌트로 바꾼다.
+2. AI(Gemini)는 사진 인식·힌트 문장·오류 후보만 맡는다. AI가 읽은 식은 사람이 [확정]해야 계산한다.
+3. `engine/`을 고치면 커밋 전에 `run_tests.py`와 pytest가 전부 통과해야 한다. 기준 정답(`tests/data/`)을 바꾸면 바뀐 값을 사람에게 보여 준다.
+4. 지원 범위: 연속시간, 음의 피드백, K ≥ 0, 실수 계수, 분모 4차 이하, 분자 차수 ≤ 분모 차수. 범위 밖은 계산하지 않고 이유를 안내한다.
+5. 풀이 순서는 수업 방식 그대로: 1 특성방정식 → 2 극점·영점·가지 수 → 3 실수축(오른쪽 개수 홀짝, 중근은 겹친 수만큼) → 4 점근선 → 5 이탈점·진입점(D′N − DN′ = 0, K = −D/N 부호 확인) → 6 출발각·도착각(θ = 180° + Σ영점각 − Σ다른 극점각) → 7 Routh·허수축 교차 → 8 완성 → 9 K 변화.
+6. 짧은 함수, 한글 주석. Python이 아닌 코드에도 한글 주석. 화면은 프레임워크·빌드 도구 없이 HTML·CSS·JavaScript만.
+7. API 키는 서버 환경변수 `GEMINI_API_KEY`에만 둔다. 브라우저 코드·커밋·로그·채팅에 남기지 않는다.
+8. AI가 실패하거나 없어도 계산·채점·팀 힌트로 끝까지 동작해야 한다(시연 백업). 사진은 서버에 저장하지 않고, 동의한 경우에만 외부 AI로 보낸다.
+9. 현재 상태가 필요한 정보(Gemini 모델 이름·무료 한도·약관·API 주소 등)는 기억으로 쓰지 말고 공식 문서를 확인한다. 정리된 내용은 `v2/docs/Gemini-점검.md`.
+10. 작업은 브랜치로 한다. 작업마다 `claude/짧은-설명` 브랜치를 만들고, PR 설명에 무엇을·왜·검사 결과·남은 일을 쓴다. main에 합치는 사람은 주영님이다. `v2/docs/할일.md`에서 `(담당: GPT)`가 붙은 항목은 고치지 않는다. 자세한 협업 규칙은 AGENTS.md의 "같이 작업하는 방법".
+11. 작업 후 `v2/docs/예선-대조표.md`의 해당 줄과 갱신 기록을 고친다(본선에서 예선 PPT 항목이 모두 구현됐음을 보여야 함).
 
 ## 결정된 것
 - 공개 홈페이지 + 무료 AI(Gemini 무료 등급). AI를 직접 학습시키지 않고, 팀이 쓴 힌트 규칙과 엔진 검증값을 매번 함께 보낸다.
-- 배포: Cloudflare 한 곳에 페이지와 AI 중계(/api/...)를 같이. 노트북에서 직접 올리므로 GitHub 없이 가능.
+- 배포: 1차 버전 때는 Cloudflare 한 곳에 페이지와 AI 중계를 두기로 했으나, v2는 FastAPI 서버라 배포처를 다시 정해야 한다(미정, 배포는 주영님 승인 후). 본선 시연은 노트북에서 `python run.py`.
 - 코드 관리: GitHub 비공개 저장소 `2sv8y5k7zg-svg/rootlocus-tutor` (2026-11-09). ChatGPT와 같이 쓰고, 노트북은 이 저장소를 clone해서 작업한다. 저장소 공개 전환은 주영님 확인 후.
 - Streamlit은 쓰지 않는다(움직임·속도·디자인 제약).
-- 미리보기(claude.ai 아티팩트)에서는 AI를 Claude가 맡았다. 공개판은 ai.js 연결부만 Gemini 중계로 바꾼다.
+- 미리보기(claude.ai 아티팩트)에서는 사진 읽기를 Claude가 맡는다. 본선 앱은 Gemini 무료 등급(`gemini-3.5-flash-lite`, 대체 `gemini-3.1-flash-lite`).
+- 학습 화면은 스크롤 없는 한 화면(그래프 + 오른쪽 도크·시트 + 아래 9단계 타임라인), 단계 수식의 숫자가 그래프 점으로 날아가는 연출, 단계별 자동 카메라(2026-11-17 주영님 결정).
 
-할 일 목록과 완료 기준은 docs/할일.md에 있다. 작업을 시작할 때 그 파일의 맨 위 항목부터 진행한다.
+할 일 목록과 완료 기준은 `v2/docs/할일.md`에 있다(1차 버전 할 일은 `docs/할일.md`, 보관용). 작업을 시작할 때 그 파일의 맨 위 항목부터 진행한다.

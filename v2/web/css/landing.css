@@ -1,0 +1,105 @@
+/* landing.css — 랜딩 페이지. 처음부터 끝까지 같은 어두운 공간이고, 이 공간이 학습 화면까지 이어진다.
+   부드러움을 위한 원칙
+   - 스크롤에 묶인 움직임은 transform·opacity·clip-path만 바꾼다 (브라우저가 다시 배치 계산을 하지 않는 속성)
+   - 높이는 svh/lvh 단위: 휴대폰 주소창이 접히고 펴질 때 화면이 덜컹거리지 않게 한다
+   - 속도 곡선은 --ease 하나로 통일 */
+body.landing { --ease: cubic-bezier(.16, 1, .3, 1); background: var(--obsidian); color: var(--porcelain); overflow-x: clip; }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-stopped { overflow: clip; }
+
+/* 오브젝트 캔버스: 화면 뒤에 고정. 글자 선택·클릭을 막지 않도록 pointer-events 없음 */
+
+.glow { position: fixed; left: 0; top: 0; width: 110vmax; height: 110vmax; margin: -55vmax 0 0 -55vmax; z-index: 0; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(177, 203, 230, .085), rgba(177, 203, 230, 0)); will-change: transform; }
+.lnav { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center;
+  padding: 22px clamp(20px, 4vw, 48px); color: var(--porcelain); }
+.lbrand { font-weight: 650; letter-spacing: -.02em; }
+.lstart { text-decoration: none; font-size: 14px; border: 1px solid rgba(255, 255, 255, .5); padding: 8px 16px; border-radius: 99px;
+  transition: background .4s var(--ease), color .4s var(--ease); }
+.lstart:hover { background: var(--porcelain); color: var(--obsidian); }
+
+.scene { position: relative; z-index: 1; }
+.eyebrow { font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: var(--ice); margin: 0 0 22px; opacity: .85; }
+.eyebrow.dark { color: var(--ice-deep); }
+/* 줄 가림막: 안쪽 글자를 아래로 내려 두었다가 올리면 '줄이 떠오르는' 느낌이 난다 */
+.ln { display: block; overflow: hidden; padding-bottom: .12em; margin-bottom: -.12em; }
+.ln > span { display: block; will-change: transform; }
+
+/* Scene 1 */
+.hero { min-height: 100svh; display: grid; align-items: end; padding: 0 clamp(20px, 6vw, 96px) 14svh; }
+.hero h1 { word-break: keep-all; font-size: clamp(33px, 7.2vw, 104px); line-height: 1.04; letter-spacing: -.045em; font-weight: 600; margin: 0 0 22px; }
+.hero .sub { max-width: 520px; font-size: clamp(15px, 1.4vw, 18px); color: rgba(245, 244, 240, .68); margin: 0; }
+.scroll-cue { position: absolute; right: clamp(20px, 6vw, 96px); bottom: 14svh; width: 1px; height: 64px; background: rgba(245, 244, 240, .18); overflow: hidden; }
+.scroll-cue span { position: absolute; left: 0; top: 0; width: 1px; height: 40%; background: var(--ice); transform: translateY(-100%); animation: cue 2.4s cubic-bezier(.6, 0, .2, 1) infinite; }
+@keyframes cue { to { transform: translateY(260%); } }
+
+/* Scene 2: 낱말이 스크롤을 따라 하나씩 밝아진다 */
+/* 문장은 변신이 진행되는 동안 화면에 붙어 있다가(sticky) 다음 장면 앞에서 사라진다 */
+.morph { min-height: 190svh; padding: 60svh clamp(20px, 6vw, 96px) 0; }
+.morph-line { position: sticky; top: 40svh; word-break: keep-all; font-size: clamp(28px, 4.2vw, 60px); line-height: 1.15; letter-spacing: -.03em; font-weight: 500; margin: 0; max-width: 12em; }
+.morph-line .wd { display: inline-block; opacity: .12; will-change: opacity; }
+.morph-line em { font-style: normal; color: var(--ice); }
+
+/* Scene 3: 스크롤 4화면 길이의 구간 안에서, 안쪽 상자가 화면 위에 붙어(sticky) 머문다.
+   붙이는 일을 브라우저가 스크롤과 같은 단계에서 처리하므로, 스크립트로 고정할 때 터치 기기에서 생기던 미세한 떨림이 없다.
+   낱말의 밝기·위치는 스크롤 진행률에 묶여 있다 */
+.story { height: 400svh; }
+.story-pin { position: sticky; top: 0; height: 100svh; display: grid; align-content: center; padding: 0 clamp(20px, 6vw, 96px); }
+.story-words { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(4px, 1vh, 12px); }
+/* 낱말(.w)의 줄 높이를 글자 아래 꼬리(g, y)까지 담을 만큼 두고, 설명 글(.k)과 사이를 띄웁니다.
+   (줄 높이를 너무 줄이면 Recognize의 g, Verify의 y가 설명 글을 가립니다) */
+.story-words li { display: grid; gap: clamp(8px, 1.2vh, 14px); opacity: .14; will-change: opacity, transform; transform-origin: 0 50%; }
+.story-words .w { font-size: clamp(44px, 8.5vw, 132px); line-height: 1.12; letter-spacing: -.05em; font-weight: 600; }
+.story-words .k { font-size: clamp(14px, 1.3vw, 17px); color: rgba(245, 244, 240, .72); opacity: 0; }
+.story-meter { margin-top: 5vh; width: min(320px, 60vw); height: 1px; background: rgba(245, 244, 240, .2); }
+.story-meter i { display: block; height: 100%; width: 100%; background: var(--ice); transform: scaleX(0); transform-origin: 0 50%; }
+
+/* Scene 4: 실제 화면 카드 — 학습 화면과 같은 '어두운 유리' 재질 */
+.reveal { min-height: 100svh; display: grid; align-items: center; padding: 18svh clamp(16px, 4vw, 64px); }
+.reveal-inner { width: min(1180px, 100%); margin: 0 auto; perspective: 1600px; }
+.reveal h2 { font-size: clamp(34px, 5vw, 72px); letter-spacing: -.04em; margin: 0 0 6vh; font-weight: 600; }
+.device { display: grid; grid-template-columns: 220px minmax(0, 1fr) 260px; gap: 18px; padding: 18px; border-radius: 26px;
+  /* 뒤 흐름선이 비쳐 설명을 읽는 데 방해되지 않도록 거의 불투명하게 둡니다 */
+  background: rgba(20, 25, 36, .96); border: 1px solid rgba(245, 244, 240, .09);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, .45); transform-origin: 50% 100%; will-change: transform, opacity; }
+.dev-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(245, 244, 240, .45); margin-bottom: 10px; font-weight: 600; }
+.dev-tf { font-size: 14px; margin-bottom: 14px; word-break: break-word; }
+.dev-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 13px; color: rgba(245, 244, 240, .6); counter-reset: st; }
+.dev-steps li { padding: 7px 10px; border-radius: 10px; counter-increment: st; display: flex; gap: 8px; transition: background .5s var(--ease), color .5s var(--ease); }
+.dev-steps li::before { content: counter(st); width: 18px; opacity: .6; font-family: var(--mono); }
+.dev-steps li.on { background: rgba(245, 244, 240, .1); color: var(--porcelain); }
+.dev-center canvas { width: 100%; aspect-ratio: 4 / 3; display: block; border-radius: 16px;
+  background: radial-gradient(90% 70% at 78% 0%, #1D2536 0%, rgba(29, 37, 54, 0) 60%), var(--obsidian); border: 1px solid rgba(245, 244, 240, .06); }
+.dev-caption { font-size: 12px; color: rgba(245, 244, 240, .45); margin-top: 8px; }
+.dev-verdict { font-size: 13.5px; display: grid; gap: 8px; }
+.dev-verdict .row { padding: 10px 12px; border-radius: 12px; background: rgba(245, 244, 240, .05); border-left: 3px solid rgba(245, 244, 240, .2); }
+.dev-verdict .row.bad { border-color: #E8A493; }
+.dev-verdict .row.good { border-color: var(--ice); }
+.dev-verdict .mono { font-size: 13px; }
+.dev-verdict small { color: rgba(245, 244, 240, .5); display: block; }
+
+/* Scene 5 */
+.cta { min-height: 100svh; display: grid; place-content: center; justify-items: center; text-align: center; padding: 0 20px; gap: 36px; }
+.cta-line { font-size: clamp(34px, 5.4vw, 76px); line-height: 1.1; letter-spacing: -.04em; margin: 0; font-weight: 600; }
+.cta-btn { text-decoration: none; padding: 17px 30px; border-radius: 99px; background: var(--porcelain); color: var(--obsidian); font-weight: 600;
+  display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 10px 40px rgba(177, 203, 230, .18); will-change: transform;
+  transition: box-shadow .4s var(--ease), background .4s var(--ease); }
+.cta-btn:hover { background: #fff; box-shadow: 0 16px 50px rgba(177, 203, 230, .3); }
+.cta-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; transition: transform .4s var(--ease); }
+.cta-btn:hover svg { transform: translateX(4px); }
+.cta-foot { font-size: 12.5px; opacity: .55; margin: 0; }
+
+@media (max-width: 900px) {
+  .device { grid-template-columns: 1fr; border-radius: 22px; padding: 14px; }
+  .dev-left { display: none; }
+  .dev-center canvas { aspect-ratio: 1 / 1; }
+  .hero { padding-bottom: 10svh; }
+  .morph-line { top: 62svh; }
+  .story-pin { align-content: end; padding-bottom: 9svh; }
+  .story-words .w { font-size: clamp(40px, 12vw, 72px); }
+  .scroll-cue { display: none; }
+  .glow { display: none; }
+}
+/* 움직임을 쓰지 않을 때(움직임 줄이기 설정, GSAP 없음): landing.js가 body에 .static을 붙인다. 모든 내용을 정지 상태로 보여 준다 */
+.landing.static .morph-line .wd, .landing.static .story-words li, .landing.static .story-words .k { opacity: 1; }
+.landing.static .story { height: auto; }

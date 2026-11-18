@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>근궤적 튜터 · 학습</title>
+<!-- 글꼴: 인터넷이 없으면 시스템 글꼴로 대신 표시된다 (계산 기능과 무관) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/learn.css">
+</head>
+<body class="learn">
+<!-- 배경 오브젝트: 랜딩과 같은 캔버스·같은 모듈(flow.js). 랜딩에서 넘어오면 같은 자세에서 이어집니다 -->
+<canvas id="flowCanvas" aria-hidden="true"></canvas>
+
+<!-- 상단 막대: 로고, AI 상태, 시연 모드 스위치. 아래 가는 선은 9단계 중 어디까지 왔는지 보여 줍니다 -->
+<header class="topbar">
+  <a class="brand" href="/">근궤적 튜터</a>
+  <div class="topbar-right">
+    <label class="switch" title="인터넷·API 키 없이 정해 둔 예시 응답으로 AI 흐름을 보여 줍니다">
+      <input type="checkbox" id="demoMode"> <i class="sw" aria-hidden="true"></i><span>시연 모드</span>
+    </label>
+    <span class="pill" id="aiStatus">AI 확인 중</span>
+  </div>
+  <i class="top-progress" id="topProgress" aria-hidden="true"></i>
+</header>
+
+<!-- ① 문제 입력: 처음 화면. 직접 입력 / 문제 사진 / 블록선도(G·H) -->
+<section class="entry" id="entry">
+  <div class="entry-inner">
+    <p class="eyebrow in">Root Locus Studio</p>
+    <h1 class="in">어떤 시스템의<br>근궤적을 그려 볼까요?</h1>
+    <p class="lead in">개루프 전달함수 K·G(s)H(s)를 입력하거나 문제 사진을 올리세요. 계산은 모두 Python 엔진이 합니다.</p>
+
+    <div class="tabs in" role="tablist">
+      <button role="tab" class="tab on" data-tab="text">전달함수 입력</button>
+      <button role="tab" class="tab" data-tab="gh">G(s) · H(s)</button>
+      <button role="tab" class="tab" data-tab="photo">문제 · 블록선도 사진</button>
+    </div>
+
+    <div class="tabpane on" data-pane="text">
+      <div class="field-row">
+        <label class="big-field"><span class="sr-only">전달함수</span>
+          <input id="tfInput" class="big-input mono" placeholder="K(s+2)/(s(s+1))" autocomplete="off" spellcheck="false"><i></i></label>
+        <button class="btn primary go" id="tfGo"><span>풀이 시작</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5l5 5-5 5"/></svg></button>
+      </div>
+      <div class="examples" id="examples"></div>
+    </div>
+
+    <div class="tabpane" data-pane="gh">
+      <div class="gh-grid">
+        <label>앞먹임 G(s)<input id="gInput" class="mono" placeholder="K/(s(s+1))"></label>
+        <label>되먹임 H(s)<input id="hInput" class="mono" placeholder="1" value="1"></label>
+      </div>
+      <button class="btn primary go" id="ghGo"><span>구조 확인</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5l5 5-5 5"/></svg></button>
+      <p class="hint-line">음의 피드백 기준입니다. 루프 전달함수 L(s) = G(s)H(s)로 근궤적을 그립니다.</p>
+    </div>
+
+    <div class="tabpane" data-pane="photo">
+      <label class="drop" id="drop">
+        <input type="file" id="photoInput" accept="image/*" hidden>
+        <span class="drop-title">사진을 끌어 놓거나 눌러서 고르기</span>
+        <span class="drop-sub">문제 식이나 블록선도 · JPG/PNG · 6MB 이하 · 이름·학번이 찍히지 않게</span>
+      </label>
+      <!-- 개인정보: 사진은 동의한 경우에만 외부 AI로 보낸다 -->
+      <label class="consent"><input type="checkbox" id="consent">
+        <span>사진을 <b id="aiVendor">외부 AI</b>로 보내 인식하는 데 동의합니다. <span id="aiPolicy"></span> 사진은 서버에 저장하지 않습니다.</span></label>
+      <!-- 지금 사진을 누가 읽는지(모의 AI·실제 AI) 알려 주는 한 줄 -->
+      <p class="photo-mode" id="photoMode" hidden></p>
+      <button class="btn primary go" id="photoGo" disabled>사진 인식</button>
+    </div>
+
+    <!-- AI 인식 결과 확인: 확정 전에는 계산하지 않는다 -->
+    <div class="confirm" id="confirm" hidden>
+      <h2>AI가 읽은 내용을 확인해 주세요</h2>
+      <p class="muted" id="confirmMsg"></p>
+      <!-- 올린 사진을 옆에 두고 AI가 읽은 식과 비교합니다 -->
+      <img class="confirm-photo" id="confirmPhoto" alt="올린 문제 사진" hidden>
+      <div class="confirm-grid">
+        <label>개루프 전달함수 K·G(s)H(s)<input id="cTf" class="mono"></label>
+        <label>G(s)<input id="cG" class="mono"></label>
+        <label>H(s)<input id="cH" class="mono"></label>
+      </div>
+      <div class="confirm-info" id="confirmInfo"></div>
+      <div class="field-row">
+        <button class="btn primary" id="confirmGo">확정하고 풀이 시작</button>
+        <button class="btn ghost" id="confirmCancel">취소</button>
+      </div>
+    </div>
+    <p class="error" id="entryError" hidden></p>
+  </div>
+</section>
+
+<!-- ② 학습 화면: 스크롤 없는 한 화면.
+     그래프 무대가 화면 전체를 차지하고, 정보는 오른쪽 도크의 아이콘 안에 접혀 있다가 누르면 시트로 펼쳐집니다(최대 2장).
+     아래 타임라인은 9단계 이동(누르기·스와이프·휠)과 8·9단계의 K 조절을 맡습니다. -->
+<main class="studio" id="studio" hidden>
+  <section class="stage" id="stage">
+    <canvas id="plane" aria-label="s평면 근궤적 그래프. 극점·영점 같은 표시된 점을 누르면 정확한 값이 나옵니다"></canvas>
+
+    <!-- 무대 조명: 지금 단계의 주인공 자리만 밝고 바깥은 어둡게 (graph.js가 위치만 옮김) -->
+    <div class="spot" id="spot" aria-hidden="true"></div>
+
+    <!-- 왼쪽 위: 문제 식과 지금 단계 -->
+    <div class="hud hud-head" id="hudHead">
+      <div class="problem-line">
+        <span class="label">문제</span>
+        <span class="tf mono" id="pTf"></span>
+        <button class="btn ghost small" id="newProblem">다른 문제</button>
+      </div>
+      <div class="notes" id="pNotes"></div>
+      <div class="stage-head">
+        <div class="step-no mono"><span id="stepNo">1</span><small>/9</small></div>
+        <div class="step-text">
+          <h2 id="stepTitle"></h2>
+          <p class="concept" id="stepConcept"></p>
+        </div>
+      </div>
+      <!-- 이 단계의 핵심 수식. 밝게 빛나는 숫자는 그래프의 점·선이 되어 날아갑니다 (값은 모두 엔진 결과) -->
+      <div class="big-formula mono" id="bigFormula" aria-live="polite"></div>
+    </div>
+
+    <!-- 수식의 숫자와 그래프의 점을 잇는 가는 선, 날아가는 숫자가 지나가는 층 -->
+    <svg class="links" id="links" aria-hidden="true"></svg>
+    <div class="fly-layer" id="flyLayer" aria-hidden="true"></div>
+
+    <!-- 왼쪽 아래: 범례와 안내 -->
+    <div class="hud hud-foot" id="hudFoot">
+      <div class="graph-legend" id="legend"></div>
+      <div class="graph-readout" id="readout">표시된 점(극점·영점·교차점 등)을 누르면 그 점의 정확한 값이 나옵니다.</div>
+    </div>
+
+    <!-- 누른 점의 값: 점 바로 위에 뜹니다 -->
+    <div class="tip" id="pointTip" role="status" hidden></div>
+
+    <!-- K 조절: 8·9단계에서만, 타임라인 바로 위에 떠 있습니다. 막대 색은 안정(푸른색)·불안정(붉은색) 구간 -->
+    <div class="k-control" id="kControl" hidden>
+      <label for="kSlider" class="mono">K</label>
+      <input type="range" id="kSlider" min="0" max="1000" value="0">
+      <input type="number" id="kValue" class="mono" min="0" step="any" value="0">
+      <div class="k-poles mono" id="kPoles"></div>
+    </div>
+
+    <!-- 오른쪽 도크: 정보 종류별 아이콘. 누르면 아이콘이 그대로 커지며 시트가 됩니다 -->
+    <nav class="dock" id="dock" aria-label="정보 패널">
+      <button class="dock-btn" data-sheet="answer" title="내 답 검사">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span>답 검사</span></button>
+      <button class="dock-btn" data-sheet="hint" title="힌트">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg><span>힌트</span></button>
+      <button class="dock-btn" data-sheet="work" title="엔진 풀이">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14M5 10h10M5 15h14M5 20h7"/></svg><span>풀이</span></button>
+      <button class="dock-btn" data-sheet="hand" title="손글씨 풀이 검사">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4zM14 6l3 3"/></svg><span>손글씨</span></button>
+      <button class="dock-btn" data-sheet="check" title="엔진 검산">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg><span>검산</span></button>
+    </nav>
+
+    <!-- 시트: 도크에서 펼쳐지는 패널들. 내용이 길면 시트 안에서만 스크롤됩니다 -->
+    <div class="sheets" id="sheets">
+      <section class="sheet" data-sheet="answer" hidden>
+        <header class="sheet-head"><span class="label">내 답 검사</span><button class="sheet-x" aria-label="닫기"></button></header>
+        <div class="sheet-body">
+          <form id="answerForm" class="answers"></form>
+          <div id="verdicts"></div>
+        </div>
+      </section>
+      <section class="sheet" data-sheet="hint" hidden>
+        <header class="sheet-head"><span class="label">힌트</span><button class="sheet-x" aria-label="닫기"></button></header>
+        <div class="sheet-body">
+          <div class="ladder" id="ladder"></div>
+          <div class="hint-box" id="hintBox"></div>
+        </div>
+      </section>
+      <section class="sheet" data-sheet="work" hidden>
+        <header class="sheet-head"><span class="label">엔진 풀이 <span class="muted">(전체 풀이 = 4번째 힌트)</span></span><button class="sheet-x" aria-label="닫기"></button></header>
+        <div class="sheet-body">
+          <div class="formula mono" id="stepFormula"></div>
+          <ol class="work mono" id="stepWork"></ol>
+        </div>
+      </section>
+      <section class="sheet" data-sheet="hand" hidden>
+        <header class="sheet-head"><span class="label">손글씨 풀이 검사</span><button class="sheet-x" aria-label="닫기"></button></header>
+        <div class="sheet-body">
+          <p class="muted small">종이에 푼 전체 풀이를 찍어 올리면, AI가 읽고 Python 엔진이 단계마다 다시 계산해 비교합니다. 근궤적 그림은 엔진이 담당합니다. 이름·학번은 가리고 찍어 주세요.</p>
+          <input type="file" id="hwInput" accept="image/*" class="file">
+          <label class="consent small"><input type="checkbox" id="hwConsent"> <span>사진을 외부 AI로 보내는 데 동의 (무료 등급은 Google이 제품 개선에 쓰고 사람이 검토할 수 있음)</span></label>
+          <button class="btn ghost small" id="hwGo" disabled>풀이 사진 검사</button>
+          <div id="hwReport"></div>
+        </div>
+      </section>
+      <section class="sheet" data-sheet="check" hidden>
+        <header class="sheet-head"><span class="label">엔진 검산</span><button class="sheet-x" aria-label="닫기"></button></header>
+        <div class="sheet-body">
+          <div class="engine-check" id="engineCheck"></div>
+          <div class="verify-summary" id="verifySummary"></div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- 하단 타임라인: 9단계. 누르거나, 좌우로 밀거나, 휠을 한 번 굴리면 한 단계씩 이동합니다 -->
+  <footer class="timeline" id="timeline">
+    <button class="tl-arrow" id="prevStep" aria-label="이전 단계"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg></button>
+    <div class="tl-track">
+      <i class="tl-line" aria-hidden="true"><i class="tl-fill" id="tlFill"></i></i>
+      <nav class="steps" id="stepNav" aria-label="9단계"></nav>
+    </div>
+    <button class="tl-arrow next" id="nextStep" aria-label="다음 단계"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 4l6 6-6 6"/></svg></button>
+  </footer>
+</main>
+
+<!-- GSAP: 화면 전환 움직임에 씁니다 (web/vendor에 함께 둠, 인터넷 없이 동작) -->
+<script src="/static/vendor/gsap/gsap.min.js"></script>
+<script src="/static/js/api.js"></script>
+<script src="/static/js/graph.js"></script>
+<script src="/static/js/flow.js"></script>
+<script src="/static/js/learn.js"></script>
+</body>
+</html>

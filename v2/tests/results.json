@@ -1,0 +1,3314 @@
+{
+ "when": "2026-11-17 14:23:16",
+ "problems": 36,
+ "problemsPassed": 36,
+ "items": 420,
+ "itemsPassed": 420,
+ "skipped": 0,
+ "seconds": 6.43,
+ "control": "0.10.2",
+ "sympy": "1.14.0",
+ "numpy": "2.5.3",
+ "reports": [
+  {
+   "id": "T01",
+   "group": "A 기존 17문제",
+   "title": "K/(s(s+2))",
+   "input": "K/(s(s+2))",
+   "ok": true,
+   "ms": 65.8,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-2+0j), 0j]",
+     "actual": "[0j, (-2+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': 0.0, 'lo': -2.0}]",
+     "actual": "[(-2.0, 0.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -1.0, 'centroidExact': '-1', 'angles': [90.0, 270.0]}",
+     "actual": "(-1.0, [90.0, 270.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-1.0, 0.0], 'breakaway')]",
+     "actual": "[([-1.0, 0.0], 'breakaway')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'exact': ['0', 'oo']}]",
+     "actual": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'loText': '0', 'hiText': None}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.186%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T02",
+   "group": "A 기존 17문제",
+   "title": "K/(s(s+1)(s+2))",
+   "input": "K/(s(s+1)(s+2))",
+   "ok": true,
+   "ms": 141.1,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-2+0j), (-1+0j), 0j]",
+     "actual": "[0j, (-1+0j), (-2+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': 0.0, 'lo': -1.0}, {'hi': -2.0, 'lo': None}]",
+     "actual": "[(-1.0, 0.0), (None, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -1.0, 'centroidExact': '-1', 'angles': [60.0, 180.0, 300.0]}",
+     "actual": "(-1.0, [60.0, 180.0, 300.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-0.4226497308103742, 0.0], 'breakaway'), ([-1.5773502691896257, 0.0], 'negativeK')]",
+     "actual": "[([-0.4226497308103742, 0.0], 'breakaway'), ([-1.5773502691896257, 0.0], 'negativeK')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[(1.4142135623730951, 6.0)]",
+     "actual": "[(1.4142135623730951, 6.0)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': 6.0, 'loIncl': False, 'hiIncl': False, 'exact': ['0', '6']}]",
+     "actual": "[{'lo': 0.0, 'hi': 6.0, 'loIncl': False, 'hiIncl': False, 'loText': '0', 'hiText': '6'}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.199%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T03",
+   "group": "A 기존 17문제",
+   "title": "K(s+2)/(s(s+1))",
+   "input": "K(s+2)/(s(s+1))",
+   "ok": true,
+   "ms": 139.2,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-1+0j), 0j]",
+     "actual": "[0j, (-1+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[(-2+0j)]",
+     "actual": "[(-2+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': 0.0, 'lo': -1.0}, {'hi': -2.0, 'lo': None}]",
+     "actual": "[(-1.0, 0.0), (None, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': 1.0, 'centroidExact': '1', 'angles': [180.0]}",
+     "actual": "(1.0, [180.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-0.585786437626905, 0.0], 'breakaway'), ([-3.414213562373095, 0.0], 'breakin')]",
+     "actual": "[([-0.585786437626905, 0.0], 'breakaway'), ([-3.414213562373095, 0.0], 'breakin')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'exact': ['0', 'oo']}]",
+     "actual": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'loText': '0', 'hiText': None}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.214%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T04",
+   "group": "A 기존 17문제",
+   "title": "K(s+2)/((s+3)(s^2+2s+2))",
+   "input": "K(s+2)/((s+3)(s^2+2s+2))",
+   "ok": true,
+   "ms": 149.5,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-3+0j), (-1-1j), (-1+1j)]",
+     "actual": "[(-1+1j), (-1-1j), (-3+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[(-2+0j)]",
+     "actual": "[(-2+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': -2.0, 'lo': -3.0}]",
+     "actual": "[(-3.0, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -1.5, 'centroidExact': '-3/2', 'angles': [90.0, 270.0]}",
+     "actual": "(-1.5, [90.0, 270.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-0.802570663066967, 0.0], 'negativeK'), ([-2.3487146684665166, 0.8447013842048882], 'complexK')]",
+     "actual": "[([-0.802570663066967, 0.0], 'negativeK'), ([-2.3487146684665166, 0.8447013842048882], 'complexK')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[('departure', [108.43494882292202])]",
+     "actual": "[('departure', [108.43494882292202])]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': None, 'loIncl': True, 'hiIncl': False, 'exact': ['0', 'oo']}]",
+     "actual": "[{'lo': 0.0, 'hi': None, 'loIncl': True, 'hiIncl': False, 'loText': '0', 'hiText': None}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.234%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T05",
+   "group": "A 기존 17문제",
+   "title": "K/(s(s^2+4s+8))",
+   "input": "K/(s(s^2+4s+8))",
+   "ok": true,
+   "ms": 351.0,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[0j, (-2-2j), (-2+2j)]",
+     "actual": "[0j, (-2+2j), (-2-2j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': 0.0, 'lo': None}]",
+     "actual": "[(None, 0.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -1.3333333333333333, 'centroidExact': '-4/3', 'angles': [60.0, 180.0, 300.0]}",
+     "actual": "(-1.3333333333333333, [60.0, 180.0, 300.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-1.3333333333333333, 0.9428090415820634], 'complexK')]",
+     "actual": "[([-1.3333333333333333, 0.9428090415820634], 'complexK')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[('departure', [-45.0])]",
+     "actual": "[('departure', [-45.0])]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[(2.8284271247461903, 32.0)]",
+     "actual": "[(2.8284271247461903, 32.0)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': 32.0, 'loIncl': False, 'hiIncl': False, 'exact': ['0', '32']}]",
+     "actual": "[{'lo': 0.0, 'hi': 32.0, 'loIncl': False, 'hiIncl': False, 'loText': '0', 'hiText': '32'}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.198%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T06",
+   "group": "A 기존 17문제",
+   "title": "K/(s(s+4)(s^2+4s+20))",
+   "input": "K/(s(s+4)(s^2+4s+20))",
+   "ok": true,
+   "ms": 224.6,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-4+0j), 0j, (-2-4j), (-2+4j)]",
+     "actual": "[0j, (-2+4j), (-2-4j), (-4+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': 0.0, 'lo': -4.0}]",
+     "actual": "[(-4.0, 0.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -2.0, 'centroidExact': '-2', 'angles': [45.0, 135.0, 225.0, 315.0]}",
+     "actual": "(-2.0, [45.0, 135.0, 225.0, 315.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-2.0, 0.0], 'breakaway'), ([-2.0, 2.449489742783178], 'complexBreak')]",
+     "actual": "[([-2.0, 2.449489742783178], 'complexBreak'), ([-2.0, 0.0], 'breakaway')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[('departure', [-90.0])]",
+     "actual": "[('departure', [-90.0])]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[(3.1622776601683795, 260.0)]",
+     "actual": "[(3.1622776601683795, 260.0)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': 260.0, 'loIncl': False, 'hiIncl': False, 'exact': ['0', '260']}]",
+     "actual": "[{'lo': 0.0, 'hi': 260.0, 'loIncl': False, 'hiIncl': False, 'loText': '0', 'hiText': '260'}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "4",
+     "actual": "4",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.189%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T07",
+   "group": "A 기존 17문제",
+   "title": "K(s+1)/(s^2(s+9))",
+   "input": "K(s+1)/(s^2(s+9))",
+   "ok": true,
+   "ms": 82.5,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-9+0j), 0j, 0j]",
+     "actual": "[0j, 0j, (-9+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[(-1+0j)]",
+     "actual": "[(-1+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': -1.0, 'lo': -9.0}]",
+     "actual": "[(-9.0, -1.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -4.0, 'centroidExact': '-4', 'angles': [90.0, 270.0]}",
+     "actual": "(-4.0, [90.0, 270.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([0.0, 0.0], 'start'), ([-3.0, 0.0], 'multiple')]",
+     "actual": "[([0.0, 0.0], 'start'), ([-3.0, 0.0], 'multiple')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[('departure', [90.0, -90.0])]",
+     "actual": "[('departure', [90.0, -90.0])]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'exact': ['0', 'oo']}]",
+     "actual": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'loText': '0', 'hiText': None}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.187%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T08",
+   "group": "A 기존 17문제",
+   "title": "K(s-3)(s-5)/((s+1)(s+2))",
+   "input": "K(s-3)(s-5)/((s+1)(s+2))",
+   "ok": true,
+   "ms": 277.1,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-2+0j), (-1+0j)]",
+     "actual": "[(-1+0j), (-2+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[(3+0j), (5+0j)]",
+     "actual": "[(5+0j), (3+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': 5.0, 'lo': 3.0}, {'hi': -1.0, 'lo': -2.0}]",
+     "actual": "[(3.0, 5.0), (-2.0, -1.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 없음",
+     "ok": true,
+     "expected": "없음",
+     "actual": "0",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([3.816613953852625, 0.0], 'breakin'), ([-1.4529775902162616, 0.0], 'breakaway')]",
+     "actual": "[([3.816613953852625, 0.0], 'breakin'), ([-1.4529775902162616, 0.0], 'breakaway')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[(2.354878881270658, 0.375)]",
+     "actual": "[(2.354878881270658, 0.375)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': 0.375, 'loIncl': True, 'hiIncl': False, 'exact': ['0', '3/8']}]",
+     "actual": "[{'lo': 0.0, 'hi': 0.375, 'loIncl': True, 'hiIncl': False, 'loText': '0', 'hiText': '3/8'}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.229%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T09",
+   "group": "A 기존 17문제",
+   "title": "K/(s(s+1)(s^2+2))",
+   "input": "K/(s(s+1)(s^2+2))",
+   "ok": true,
+   "ms": 132.2,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-1+0j), 0j, -1.4142135623730951j, 1.4142135623730951j]",
+     "actual": "[1.4142135623730951j, 0j, -1.4142135623730951j, (-1+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': 0.0, 'lo': -1.0}]",
+     "actual": "[(-1.0, 0.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -0.25, 'centroidExact': '-1/4', 'angles': [45.0, 135.0, 225.0, 315.0]}",
+     "actual": "(-0.25, [45.0, 135.0, 225.0, 315.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-0.09518901382973544, 0.9404250763973862], 'complexK'), ([-0.5596219723405291, 0.0], 'breakaway')]",
+     "actual": "[([-0.09518901382973544, 0.9404250763973862], 'complexK'), ([-0.5596219723405291, 0.0], 'breakaway')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[('departure', [-54.735610317245346])]",
+     "actual": "[('departure', [-54.735610317245346])]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "firstColZero",
+     "actual": "['firstColZero']",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "4",
+     "actual": "4",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.224%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T10",
+   "group": "A 기존 17문제",
+   "title": "K(s^2+2s+2)/(s(s+1)(s+3))",
+   "input": "K(s^2+2s+2)/(s(s+1)(s+3))",
+   "ok": true,
+   "ms": 207.7,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-3+0j), (-1+0j), 0j]",
+     "actual": "[0j, (-1+0j), (-3+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[(-1-1j), (-1+1j)]",
+     "actual": "[(-1+1j), (-1-1j)]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': 0.0, 'lo': -1.0}, {'hi': -3.0, 'lo': None}]",
+     "actual": "[(-1.0, 0.0), (None, -3.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -2.0, 'centroidExact': '-2', 'angles': [180.0]}",
+     "actual": "(-2.0, [180.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-0.5432680399986425, 0.0], 'breakaway'), ([-0.8289631846361634, 2.335080473932991], 'complexK'), ([-1.7988055907290308, 0.0], 'negativeK')]",
+     "actual": "[([-0.5432680399986425, 0.0], 'breakaway'), ([-0.8289631846361634, 2.335080473932991], 'complexK'), ([-1.7988055907290308, 0.0], 'negativeK')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[('arrival', [-18.434948822922024])]",
+     "actual": "[('arrival', [-18.434948822922024])]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'exact': ['0', 'oo']}]",
+     "actual": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'loText': '0', 'hiText': None}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.206%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T11",
+   "group": "A 기존 17문제",
+   "title": "K(s+6)(s+8)/((s+2)(s+4))",
+   "input": "K(s+6)(s+8)/((s+2)(s+4))",
+   "ok": true,
+   "ms": 202.3,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-4+0j), (-2+0j)]",
+     "actual": "[(-2+0j), (-4+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[(-8+0j), (-6+0j)]",
+     "actual": "[(-6+0j), (-8+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': -2.0, 'lo': -4.0}, {'hi': -6.0, 'lo': -8.0}]",
+     "actual": "[(-4.0, -2.0), (-8.0, -6.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 없음",
+     "ok": true,
+     "expected": "없음",
+     "actual": "0",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-3.267949192431123, 0.0], 'breakaway'), ([-6.732050807568878, 0.0], 'breakin')]",
+     "actual": "[([-3.267949192431123, 0.0], 'breakaway'), ([-6.732050807568878, 0.0], 'breakin')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': None, 'loIncl': True, 'hiIncl': False, 'exact': ['0', 'oo']}]",
+     "actual": "[{'lo': 0.0, 'hi': None, 'loIncl': True, 'hiIncl': False, 'loText': '0', 'hiText': None}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.139%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T12",
+   "group": "A 기존 17문제",
+   "title": "K(s+1)/(s^2(s+10))",
+   "input": "K(s+1)/(s^2(s+10))",
+   "ok": true,
+   "ms": 107.0,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-10+0j), 0j, 0j]",
+     "actual": "[0j, 0j, (-10+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[(-1+0j)]",
+     "actual": "[(-1+0j)]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[{'hi': -1.0, 'lo': -10.0}]",
+     "actual": "[(-10.0, -1.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -4.5, 'centroidExact': '-9/2', 'angles': [90.0, 270.0]}",
+     "actual": "(-4.5, [90.0, 270.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([0.0, 0.0], 'start'), ([-2.5, 0.0], 'breakin'), ([-4.0, 0.0], 'breakaway')]",
+     "actual": "[([0.0, 0.0], 'start'), ([-2.5, 0.0], 'breakin'), ([-4.0, 0.0], 'breakaway')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[('departure', [90.0, -90.0])]",
+     "actual": "[('departure', [90.0, -90.0])]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'exact': ['0', 'oo']}]",
+     "actual": "[{'lo': 0.0, 'hi': None, 'loIncl': False, 'hiIncl': False, 'loText': '0', 'hiText': None}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.213%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T15",
+   "group": "A 기존 17문제",
+   "title": "K/(s^2+2s+2)",
+   "input": "K/(s^2+2s+2)",
+   "ok": true,
+   "ms": 75.1,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "[(-1-1j), (-1+1j)]",
+     "actual": "[(-1+1j), (-1-1j)]",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심·각도",
+     "ok": true,
+     "expected": "{'centroid': -1.0, 'centroidExact': '-1', 'angles': [90.0, 270.0]}",
+     "actual": "(-1.0, [90.0, 270.0])",
+     "cause": ""
+    },
+    {
+     "name": "이탈점·진입점 판정",
+     "ok": true,
+     "expected": "[([-1.0, 0.0], 'negativeK')]",
+     "actual": "[([-1.0, 0.0], 'negativeK')]",
+     "cause": ""
+    },
+    {
+     "name": "출발각·도착각",
+     "ok": true,
+     "expected": "[('departure', [90.0])]",
+     "actual": "[('departure', [90.0])]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위",
+     "ok": true,
+     "expected": "[{'lo': 0.0, 'hi': None, 'loIncl': True, 'hiIncl': False, 'exact': ['0', 'oo']}]",
+     "actual": "[{'lo': 0.0, 'hi': None, 'loIncl': True, 'hiIncl': False, 'loText': '0', 'hiText': None}]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우 감지",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "K별 폐루프 극점 (8개 K)",
+     "ok": true,
+     "expected": "기준 numpy 값",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.218%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T13",
+   "group": "A 기존 17문제",
+   "title": "K(s+1)/((s+1)(s+2)(s+3))",
+   "input": "K(s+1)/((s+1)(s+2)(s+3))",
+   "ok": true,
+   "ms": 1.3,
+   "items": [
+    {
+     "name": "지원 밖 입력 안내",
+     "ok": true,
+     "expected": "cancel",
+     "actual": "cancel",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T14a",
+   "group": "A 기존 17문제",
+   "title": "K(s+1)(s+2)/(s+3)",
+   "input": "K(s+1)(s+2)/(s+3)",
+   "ok": true,
+   "ms": 0.3,
+   "items": [
+    {
+     "name": "지원 밖 입력 안내",
+     "ok": true,
+     "expected": "improper",
+     "actual": "improper",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T14b",
+   "group": "A 기존 17문제",
+   "title": "K/(s(s+1)(s+2)(s+3)(s+4))",
+   "input": "K/(s(s+1)(s+2)(s+3)(s+4))",
+   "ok": true,
+   "ms": 0.9,
+   "items": [
+    {
+     "name": "지원 밖 입력 안내",
+     "ok": true,
+     "expected": "order",
+     "actual": "order",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T14c",
+   "group": "A 기존 17문제",
+   "title": "K(1-s)/(s(s+2))",
+   "input": "K(1-s)/(s(s+2))",
+   "ok": true,
+   "ms": 0.9,
+   "items": [
+    {
+     "name": "지원 밖 입력 안내",
+     "ok": true,
+     "expected": "negativeGain",
+     "actual": "negativeGain",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T16",
+   "group": "B 새 문제",
+   "title": "K/((s+1)(s+2)(s+3))",
+   "input": "{\"text\": \"K/((s+1)(s+2)(s+3))\"}",
+   "ok": true,
+   "ms": 174.8,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['-1', '-2', '-3']",
+     "actual": "['−1', '−2', '−3']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-2', '-1'], [None, '-3']]",
+     "actual": "[(-2.0, -1.0), (None, -3.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-2",
+     "actual": "−2",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[60, 180, 300]",
+     "actual": "[60.0, 180.0, 300.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2+sqrt(3)/3",
+     "ok": true,
+     "expected": "('breakaway', '2*sqrt(3)/9')",
+     "actual": "('breakaway', 0.3849001794597505)",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2-sqrt(3)/3",
+     "ok": true,
+     "expected": "('negativeK', None)",
+     "actual": "('negativeK', -0.3849001794597505)",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[(3.3166247903554, 60.0)]",
+     "actual": "[(3.3166247903554, 60.0)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': '60', 'loIncl': True, 'hiIncl': False}]",
+     "actual": "[(0.0, 60.0, True, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.186%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T17",
+   "group": "B 새 문제",
+   "title": "K(s+3)/(s(s+2)(s+4)(s+6))",
+   "input": "{\"text\": \"K(s+3)/(s(s+2)(s+4)(s+6))\"}",
+   "ok": true,
+   "ms": 227.7,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-2', '-4', '-6']",
+     "actual": "['0', '−2', '−4', '−6']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['-3']",
+     "actual": "['−3']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-2', '0'], ['-4', '-3'], [None, '-6']]",
+     "actual": "[(-2.0, 0.0), (-4.0, -3.0), (None, -6.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-3",
+     "actual": "−3",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[60, 180, 300]",
+     "actual": "[60.0, 180.0, 300.0]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[(4.080332172835138, 151.7893276880822)]",
+     "actual": "[(4.080332172835138, 151.7893276880822)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': '48*sqrt(10)', 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, 151.7893276880822, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "4",
+     "actual": "4",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.231%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T18",
+   "group": "B 새 문제",
+   "title": "K/(s(s+3)(s^2+2s+2))",
+   "input": "{\"text\": \"K/(s(s+3)(s^2+2s+2))\"}",
+   "ok": true,
+   "ms": 204.9,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-3', '-1+I', '-1-I']",
+     "actual": "['0', '−1 + j', '−1 − j', '−3']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-3', '0']]",
+     "actual": "[(-3.0, 0.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-5/4",
+     "actual": "−5/4",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[45, 135, 225, 315]",
+     "actual": "[45.0, 135.0, 225.0, 315.0]",
+     "cause": ""
+    },
+    {
+     "name": "출발각 -1+I",
+     "ok": true,
+     "expected": "[-71.5651]",
+     "actual": "[-71.56505117707798]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[(1.0954451150103321, 8.16)]",
+     "actual": "[(1.0954451150103321, 8.16)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': '204/25', 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, 8.16, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "4",
+     "actual": "4",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.229%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T19",
+   "group": "B 새 문제",
+   "title": "K(s+1)/(s(s-1))",
+   "input": "{\"text\": \"K(s+1)/(s(s-1))\"}",
+   "ok": true,
+   "ms": 147.2,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['1', '0']",
+     "actual": "['1', '0']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['-1']",
+     "actual": "['−1']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['0', '1'], [None, '-1']]",
+     "actual": "[(0.0, 1.0), (None, -1.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[180]",
+     "actual": "[180.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -1+sqrt(2)",
+     "ok": true,
+     "expected": "('breakaway', '3-2*sqrt(2)')",
+     "actual": "('breakaway', 0.1715728752538099)",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -1-sqrt(2)",
+     "ok": true,
+     "expected": "('breakin', '3+2*sqrt(2)')",
+     "actual": "('breakin', 5.82842712474619)",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[(1.0, 1.0)]",
+     "actual": "[(1.0, 1.0)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '1', 'hi': None, 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(1.0, None, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.214%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T20",
+   "group": "B 새 문제",
+   "title": "K/(s^2+4)",
+   "input": "{\"text\": \"K/(s^2+4)\"}",
+   "ok": true,
+   "ms": 71.9,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['2*I', '-2*I']",
+     "actual": "['j2', '−j2']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "0",
+     "actual": "0",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[90, 270]",
+     "actual": "[90.0, 270.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 0",
+     "ok": true,
+     "expected": "('negativeK', None)",
+     "actual": "('negativeK', -4.0)",
+     "cause": ""
+    },
+    {
+     "name": "출발각 2*I",
+     "ok": true,
+     "expected": "[90.0]",
+     "actual": "[90.0]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "zeroRow",
+     "actual": "['zeroRow']",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.147%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T21",
+   "group": "B 새 문제",
+   "title": "K(s+2)/(s^2+2s+3)",
+   "input": "{\"text\": \"K(s+2)/(s^2+2s+3)\"}",
+   "ok": true,
+   "ms": 184.0,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['-1+sqrt(2)*I', '-1-sqrt(2)*I']",
+     "actual": "['−1 + j√2', '−1 − j√2']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['-2']",
+     "actual": "['−2']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[[None, '-2']]",
+     "actual": "[(None, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "0",
+     "actual": "0",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[180]",
+     "actual": "[180.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2-sqrt(3)",
+     "ok": true,
+     "expected": "('breakin', '2+2*sqrt(3)')",
+     "actual": "('breakin', 5.464101615137754)",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2+sqrt(3)",
+     "ok": true,
+     "expected": "('negativeK', None)",
+     "actual": "('negativeK', -1.4641016151377546)",
+     "cause": ""
+    },
+    {
+     "name": "출발각 -1+sqrt(2)*I",
+     "ok": true,
+     "expected": "[144.7356]",
+     "actual": "[144.73561031724535]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': None, 'loIncl': True, 'hiIncl': False}]",
+     "actual": "[(0.0, None, True, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.226%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T22",
+   "group": "B 새 문제",
+   "title": "K(s^2+4)/(s(s+1)(s+2))",
+   "input": "{\"text\": \"K(s^2+4)/(s(s+1)(s+2))\"}",
+   "ok": true,
+   "ms": 156.6,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-1', '-2']",
+     "actual": "['0', '−1', '−2']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['2*I', '-2*I']",
+     "actual": "['j2', '−j2']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-1', '0'], [None, '-2']]",
+     "actual": "[(-1.0, 0.0), (None, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-3",
+     "actual": "−3",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[180]",
+     "actual": "[180.0]",
+     "cause": ""
+    },
+    {
+     "name": "도착각 2*I",
+     "ok": true,
+     "expected": "[-71.5651]",
+     "actual": "[-71.56505117707798]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[(1.4142135623730951, 3.0)]",
+     "actual": "[(1.4142135623730951, 3.0)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': '3', 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, 3.0, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.216%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T23",
+   "group": "B 새 문제",
+   "title": "K/(s+2)^3",
+   "input": "{\"text\": \"K/(s+2)^3\"}",
+   "ok": true,
+   "ms": 165.1,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['-2', '-2', '-2']",
+     "actual": "['−2']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[[None, '-2']]",
+     "actual": "[(None, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-2",
+     "actual": "−2",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[60, 180, 300]",
+     "actual": "[60.0, 180.0, 300.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2",
+     "ok": true,
+     "expected": "('start', None)",
+     "actual": "('start', 0.0)",
+     "cause": ""
+    },
+    {
+     "name": "출발각 -2",
+     "ok": true,
+     "expected": "[180.0, 60.0, -60.0]",
+     "actual": "[180.0, 60.0, -60.0]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[(3.4641016151377544, 64.0)]",
+     "actual": "[(3.4641016151377544, 64.0)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': '64', 'loIncl': True, 'hiIncl': False}]",
+     "actual": "[(0.0, 64.0, True, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.236%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T24",
+   "group": "B 새 문제",
+   "title": "K(s+0.5)/(s(s+2))",
+   "input": "{\"text\": \"K(s+0.5)/(s(s+2))\"}",
+   "ok": true,
+   "ms": 161.1,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-2']",
+     "actual": "['0', '−2']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['-1/2']",
+     "actual": "['−1/2']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-1/2', '0'], [None, '-2']]",
+     "actual": "[(-0.5, 0.0), (None, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-3/2",
+     "actual": "−3/2",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[180]",
+     "actual": "[180.0]",
+     "cause": ""
+    },
+    {
+     "name": "유효 이탈·진입점 개수",
+     "ok": true,
+     "expected": "0",
+     "actual": "0",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': None, 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, None, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.201%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T25",
+   "group": "B 새 문제",
+   "title": "G=K/(s(s+1)), H=(s+2)/(s+4)",
+   "input": "{\"G\": \"K/(s(s+1))\", \"H\": \"(s+2)/(s+4)\"}",
+   "ok": true,
+   "ms": 213.3,
+   "items": [
+    {
+     "name": "루프 전달함수 L(s)",
+     "ok": true,
+     "expected": "K*(s+2)/(s*(s+1)*(s+4))",
+     "actual": "K·(s + 2)/(s·(s + 1)·(s + 4))",
+     "cause": ""
+    },
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-1', '-4']",
+     "actual": "['0', '−1', '−4']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['-2']",
+     "actual": "['−2']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-1', '0'], ['-4', '-2']]",
+     "actual": "[(-1.0, 0.0), (-4.0, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-3/2",
+     "actual": "−3/2",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[90, 270]",
+     "actual": "[90.0, 270.0]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': None, 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, None, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.194%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T26",
+   "group": "B 새 문제",
+   "title": "K(s+4)/(s(s+2))",
+   "input": "{\"text\": \"K(s+4)/(s(s+2))\"}",
+   "ok": true,
+   "ms": 208.7,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-2']",
+     "actual": "['0', '−2']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['-4']",
+     "actual": "['−4']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-2', '0'], [None, '-4']]",
+     "actual": "[(-2.0, 0.0), (None, -4.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[180]",
+     "actual": "[180.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -4+2*sqrt(2)",
+     "ok": true,
+     "expected": "('breakaway', '6-4*sqrt(2)')",
+     "actual": "('breakaway', 0.3431457505076198)",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -4-2*sqrt(2)",
+     "ok": true,
+     "expected": "('breakin', '6+4*sqrt(2)')",
+     "actual": "('breakin', 11.65685424949238)",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': None, 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, None, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.217%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T27",
+   "group": "B 새 문제",
+   "title": "K/(s(s+1)(s+5))",
+   "input": "{\"text\": \"K/(s(s+1)(s+5))\"}",
+   "ok": true,
+   "ms": 232.3,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-1', '-5']",
+     "actual": "['0', '−1', '−5']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-1', '0'], [None, '-5']]",
+     "actual": "[(-1.0, 0.0), (None, -5.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-2",
+     "actual": "−2",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[60, 180, 300]",
+     "actual": "[60.0, 180.0, 300.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2+sqrt(21)/3",
+     "ok": true,
+     "expected": "('breakaway', None)",
+     "actual": "('breakaway', 1.1284510810424178)",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2-sqrt(21)/3",
+     "ok": true,
+     "expected": "('negativeK', None)",
+     "actual": "('negativeK', -13.128451081042417)",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[(2.23606797749979, 30.0)]",
+     "actual": "[(2.23606797749979, 30.0)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': '30', 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, 30.0, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.197%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T28",
+   "group": "B 새 문제",
+   "title": "K(s+2)/(s^2-2s+5)",
+   "input": "{\"text\": \"K(s+2)/(s^2-2s+5)\"}",
+   "ok": true,
+   "ms": 210.9,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['1+2*I', '1-2*I']",
+     "actual": "['1 + j2', '1 − j2']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['-2']",
+     "actual": "['−2']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[[None, '-2']]",
+     "actual": "[(None, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "4",
+     "actual": "4",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[180]",
+     "actual": "[180.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2-sqrt(13)",
+     "ok": true,
+     "expected": "('breakin', None)",
+     "actual": "('breakin', 13.21110255092798)",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2+sqrt(13)",
+     "ok": true,
+     "expected": "('negativeK', None)",
+     "actual": "('negativeK', -1.2111025509279787)",
+     "cause": ""
+    },
+    {
+     "name": "출발각 1+2*I",
+     "ok": true,
+     "expected": "[123.6901]",
+     "actual": "[123.69006752597977]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[(3.0, 2.0)]",
+     "actual": "[(3.0, 2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '2', 'hi': None, 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(2.0, None, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.222%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T29",
+   "group": "B 새 문제",
+   "title": "K/(s(s+2)(s^2+2s+5))",
+   "input": "{\"text\": \"K/(s(s+2)(s^2+2s+5))\"}",
+   "ok": true,
+   "ms": 249.9,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-2', '-1+2*I', '-1-2*I']",
+     "actual": "['0', '−1 + j2', '−1 − j2', '−2']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-2', '0']]",
+     "actual": "[(-2.0, 0.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-1",
+     "actual": "−1",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[45, 135, 225, 315]",
+     "actual": "[45.0, 135.0, 225.0, 315.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -1",
+     "ok": true,
+     "expected": "('breakaway', '4')",
+     "actual": "('breakaway', 4.0)",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -1+sqrt(6)/2*I",
+     "ok": true,
+     "expected": "('complexBreak', '25/4')",
+     "actual": "('complexBreak', 6.25)",
+     "cause": ""
+    },
+    {
+     "name": "출발각 -1+2*I",
+     "ok": true,
+     "expected": "[-90.0]",
+     "actual": "[-90.0]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[(1.5811388300841898, 16.25)]",
+     "actual": "[(1.5811388300841898, 16.25)]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': '65/4', 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, 16.25, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "4",
+     "actual": "4",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.242%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T30",
+   "group": "B 새 문제",
+   "title": "K(s+1)/(s(s+2)(s+3))",
+   "input": "{\"text\": \"K(s+1)/(s(s+2)(s+3))\"}",
+   "ok": true,
+   "ms": 176.5,
+   "items": [
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-2', '-3']",
+     "actual": "['0', '−2', '−3']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['-1']",
+     "actual": "['−1']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-1', '0'], ['-3', '-2']]",
+     "actual": "[(-1.0, 0.0), (-3.0, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-2",
+     "actual": "−2",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[90, 270]",
+     "actual": "[90.0, 270.0]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': None, 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, None, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "3",
+     "actual": "3",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.214%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T31",
+   "group": "B 새 문제",
+   "title": "K e^(-s)/(s+1)",
+   "input": "{\"text\": \"K e^(-s)/(s+1)\"}",
+   "ok": true,
+   "ms": 0.7,
+   "items": [
+    {
+     "name": "지원 밖 입력 안내",
+     "ok": true,
+     "expected": "delay",
+     "actual": "delay",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T32",
+   "group": "B 새 문제",
+   "title": "1/(s+K)",
+   "input": "{\"text\": \"1/(s+K)\"}",
+   "ok": true,
+   "ms": 0.7,
+   "items": [
+    {
+     "name": "지원 밖 입력 안내",
+     "ok": true,
+     "expected": "gainForm",
+     "actual": "gainForm",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T33",
+   "group": "B 새 문제",
+   "title": "(s+2)/(s(s+1)) (K 생략)",
+   "input": "{\"text\": \"(s+2)/(s(s+1))\"}",
+   "ok": true,
+   "ms": 150.9,
+   "items": [
+    {
+     "name": "가정 안내 표시",
+     "ok": true,
+     "expected": "안내 있음",
+     "actual": "['K가 없어서 입력한 식 전체에 K를 곱한 것으로 보았습니다.']",
+     "cause": ""
+    },
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['0', '-1']",
+     "actual": "['0', '−1']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "['-2']",
+     "actual": "['−2']",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[['-1', '0'], [None, '-2']]",
+     "actual": "[(-1.0, 0.0), (None, -2.0)]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2+sqrt(2)",
+     "ok": true,
+     "expected": "('breakaway', '3-2*sqrt(2)')",
+     "actual": "('breakaway', 0.1715728752538099)",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -2-sqrt(2)",
+     "ok": true,
+     "expected": "('breakin', '3+2*sqrt(2)')",
+     "actual": "('breakin', 5.82842712474619)",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': None, 'loIncl': False, 'hiIncl': False}]",
+     "actual": "[(0.0, None, False, False)]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.214%",
+     "cause": ""
+    }
+   ]
+  },
+  {
+   "id": "T34",
+   "group": "B 새 문제",
+   "title": "블록선도: 안쪽 루프 + 바깥 루프",
+   "input": "{\"diagram\": {\"input\": \"R\", \"outputNode\": \"G2\", \"blocks\": [{\"id\": \"G1\", \"tf\": \"K\", \"in\": \"E1\"}, {\"id\": \"G2\", \"tf\": \"1/(s(s+2))\", \"in\": \"E2\"}], \"sums\": [{\"id\": \"E1\", \"inputs\": [[\"R\", \"+\"], [\"G2\", \"-\"]]}, {\"id\": \"E2\", \"inputs\": [[\"G1\", \"+\"], [\"G2\", \"-\"]]}]}}",
+   "ok": true,
+   "ms": 88.0,
+   "items": [
+    {
+     "name": "루프 전달함수 L(s)",
+     "ok": true,
+     "expected": "K/(s+1)**2",
+     "actual": "K/(s + 1)²",
+     "cause": ""
+    },
+    {
+     "name": "극점",
+     "ok": true,
+     "expected": "['-1', '-1']",
+     "actual": "['−1']",
+     "cause": ""
+    },
+    {
+     "name": "영점",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "실수축 구간",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "점근선 중심",
+     "ok": true,
+     "expected": "-1",
+     "actual": "−1",
+     "cause": ""
+    },
+    {
+     "name": "점근선 각도",
+     "ok": true,
+     "expected": "[90, 270]",
+     "actual": "[90.0, 270.0]",
+     "cause": ""
+    },
+    {
+     "name": "이탈·진입 후보 -1",
+     "ok": true,
+     "expected": "('start', None)",
+     "actual": "('start', 0.0)",
+     "cause": ""
+    },
+    {
+     "name": "출발각 -1",
+     "ok": true,
+     "expected": "[90.0, -90.0]",
+     "actual": "[90.0, -90.0]",
+     "cause": ""
+    },
+    {
+     "name": "허수축 교차 (ω, K)",
+     "ok": true,
+     "expected": "[]",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "안정한 K 범위 (경계 포함 여부까지)",
+     "ok": true,
+     "expected": "[{'lo': '0', 'hi': None, 'loIncl': True, 'hiIncl': False}]",
+     "actual": "[(0.0, None, True, False)]",
+     "cause": ""
+    },
+    {
+     "name": "Routh 특수 경우",
+     "ok": true,
+     "expected": "None",
+     "actual": "[]",
+     "cause": ""
+    },
+    {
+     "name": "엔진 단계별 자체 검증 9/9",
+     "ok": true,
+     "expected": "9/9",
+     "actual": "9/9 (실패 단계 [])",
+     "cause": ""
+    },
+    {
+     "name": "가지 수 = 분모 차수",
+     "ok": true,
+     "expected": "2",
+     "actual": "2",
+     "cause": ""
+    },
+    {
+     "name": "python-control 폐루프 극점 (K=0.5, 2, 7)",
+     "ok": true,
+     "expected": "control.feedback 극점",
+     "actual": "일치",
+     "cause": ""
+    },
+    {
+     "name": "python-control 근궤적과 겹침 (화면 대각선 0.5% 이내)",
+     "ok": true,
+     "expected": "≤ 0.5%",
+     "actual": "0.236%",
+     "cause": ""
+    }
+   ]
+  }
+ ]
+}

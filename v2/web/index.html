@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>근궤적 튜터</title>
+<meta name="description" content="전달함수에서 근궤적까지, Python 엔진이 검증하고 AI가 설명하는 학습 도구">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/landing.css">
+</head>
+<body class="landing">
+<!-- 화면 전체에 깔리는 배경 오브젝트 캔버스 (flow.js). 스크롤 진행률에 따라 형태가 바뀌고, 학습 화면까지 이어진다 -->
+<canvas id="flowCanvas" aria-hidden="true"></canvas>
+<!-- 커서를 따라다니는 은은한 빛 (CSS로 그린 원을 transform으로만 옮겨서 가볍습니다) -->
+<div class="glow" id="glow" aria-hidden="true"></div>
+
+<header class="lnav">
+  <span class="lbrand">근궤적 튜터</span>
+  <a class="lstart" href="/learn">시작하기</a>
+</header>
+
+<!-- Scene 1 — Hero Immersion: 제목과 짧은 설명만 -->
+<section class="scene hero" id="s1">
+  <div class="hero-copy">
+    <p class="eyebrow">Root Locus Tutor</p>
+    <!-- 줄마다 가림막(.ln) 안에서 글자가 아래에서 위로 올라옵니다 -->
+    <h1><span class="ln"><span>극점이 움직이는 길을</span></span><span class="ln"><span>한 단계씩.</span></span></h1>
+    <p class="sub">사진 한 장에서 근궤적까지. 계산은 Python이 증명하고, AI는 생각을 돕습니다.</p>
+  </div>
+  <div class="scroll-cue" aria-hidden="true"><span></span></div>
+</section>
+
+<!-- Scene 2 — Morphing: 빛의 곡선이 좌표 구조로 변한다 (캔버스가 담당, 여기는 짧은 문장) -->
+<section class="scene morph" id="s2">
+  <p class="morph-line" id="morphLine">빛으로 그린 곡선이<br><em>s평면</em>이 됩니다.</p>
+</section>
+
+<!-- Scene 3 — Pinned Storytelling: 화면 고정, 세 단어가 오브젝트 변화와 함께 바뀐다 -->
+<section class="scene story" id="s3">
+  <div class="story-pin">
+    <ol class="story-words" aria-label="핵심 흐름">
+      <li data-i="0"><span class="w">Recognize</span><span class="k">문제 사진과 손글씨를 AI가 읽습니다</span></li>
+      <li data-i="1"><span class="w">Understand</span><span class="k">9단계로 근궤적의 이유를 따라갑니다</span></li>
+      <li data-i="2"><span class="w">Verify</span><span class="k">모든 숫자는 Python 엔진이 다시 계산합니다</span></li>
+    </ol>
+    <div class="story-meter"><i id="meter"></i></div>
+  </div>
+</section>
+
+<!-- Scene 4 — Product Reveal: 좌표 구조가 흐름선으로 풀리고 그 위로 실제 화면이 일어선다. 실제 엔진 데이터로 그린 그래프와 채점 -->
+<section class="scene reveal" id="s4">
+  <div class="reveal-inner">
+    <p class="eyebrow">실제 화면</p>
+    <h2>추상에서 실제로.</h2>
+    <div class="device" id="device">
+      <div class="dev-left">
+        <div class="dev-label">문제</div>
+        <div class="mono dev-tf" id="demoTf">K/(s(s+3)(s²+2s+2))</div>
+        <ol class="dev-steps" id="demoSteps"></ol>
+      </div>
+      <div class="dev-center">
+        <!-- 이 그래프는 장식이 아니라 Python 엔진이 계산한 실제 근궤적이다 -->
+        <canvas id="demoPlane"></canvas>
+        <div class="dev-caption mono" id="demoCaption">Python 엔진 계산 결과</div>
+      </div>
+      <div class="dev-right">
+        <div class="dev-label">손글씨 채점 예시</div>
+        <div class="dev-verdict" id="demoVerdict">불러오는 중…</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Scene 5 — Quiet CTA -->
+<section class="scene cta" id="s5">
+  <p class="cta-line"><span class="ln"><span>이해한 만큼,</span></span><span class="ln"><span>정확하게.</span></span></p>
+  <a class="cta-btn" href="/learn"><span>근궤적 그려 보기</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5l5 5-5 5"/></svg></a>
+  <p class="cta-foot">2026 안양대학교 AI 경진대회(AI+X) 출품작</p>
+</section>
+
+<!-- GSAP 3.12.5: 스크롤 연출 라이브러리. 대회장 인터넷이 없어도 동작하도록 web/vendor에 함께 둔다
+     (GreenSock Standard 'no charge' license) -->
+<script src="/static/vendor/gsap/gsap.min.js"></script>
+<script src="/static/vendor/gsap/ScrollTrigger.min.js"></script>
+<!-- Lenis 1.1.20 (MIT): 마우스 휠 스크롤을 부드럽게 이어 주는 라이브러리. 터치 스크롤은 기기 기본 동작 그대로 둡니다 -->
+<script src="/static/vendor/lenis/lenis.min.js"></script>
+<script src="/static/js/api.js"></script>
+<script src="/static/js/graph.js"></script>
+<script src="/static/js/flow.js"></script>
+<script src="/static/js/landing.js"></script>
+</body>
+</html>

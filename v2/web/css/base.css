@@ -1,0 +1,45 @@
+/* base.css — 두 페이지(랜딩·학습)가 함께 쓰는 색·글꼴·기본 규칙
+   색은 이름이 붙은 변수로만 쓴다. 초록 네온은 쓰지 않는다. */
+:root {
+  /* 브랜드 팔레트 (지시서 지정) */
+  --obsidian: #10141D;
+  --porcelain: #F5F4F0;
+  --ice: #B1CBE6;
+  --violet: #B4A9D5;
+
+  /* 파생 색: 밝은 학습 화면에서 글자 대비를 맞추기 위해 진하게 만든 같은 계열 */
+  --ink: #10141D;
+  --ink-2: #3B4252;          /* 보조 글자 */
+  --ink-3: #6B7180;          /* 흐린 글자 (대비 4.5:1 이상 유지) */
+  --line: #DEDCD5;           /* 구분선 */
+  --paper: #FBFAF7;          /* 카드 바탕 */
+  --ice-deep: #3F6E9E;       /* 근궤적 곡선·주요 강조 */
+  --violet-deep: #6A5BA3;    /* 점근선·이탈점 */
+  --coral: #B4614F;          /* 불안정·허수축 교차 (조용한 붉은색) */
+  --sage: #4F7A68;           /* 정답 표시 (차분한 청록, 네온 아님) */
+  --amber: #9A6B1F;          /* 확인 필요 */
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 1px 2px rgba(16, 20, 29, .05), 0 8px 28px rgba(16, 20, 29, .06);
+  --font: 'Pretendard', 'Pretendard Variable', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'D2Coding', ui-monospace, 'Consolas', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-family: var(--font); color: var(--ink); background: var(--porcelain); line-height: 1.55; }
+button, input, textarea, select { font: inherit; color: inherit; }
+a { color: inherit; }
+.mono { font-family: var(--mono); font-feature-settings: 'zero' 1; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* 배경 오브젝트 캔버스(flow.js): 화면 뒤에 고정. 글자 선택·클릭을 막지 않도록 pointer-events 없음.
+   높이는 lvh(주소창이 접힌 상태의 화면 높이)로 잡아 휴대폰에서 아래가 비지 않게 한다 */
+#flowCanvas { position: fixed; left: 0; top: 0; width: 100vw; height: 100lvh; z-index: 0; pointer-events: none; }
+
+/* 움직임 줄이기 설정을 켠 사용자에게는 전환 효과를 끈다 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
