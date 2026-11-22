@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>근궤적 AI 튜터</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="전달함수를 넣으면 근궤적이 특성방정식부터 K 변화까지 한 단계씩 그려지는 학습 홈페이지">
@@ -334,8 +339,11 @@ body.sheet-open { overflow: hidden; }
   .enter { animation: none; }
   .plane .clp, .plane .pop { transition: none; }
 }
+
 </style>
 
+</head>
+<body>
 <div class="app" id="app">
   <header class="top">
     <a class="brand" href="#" id="brand" aria-label="근궤적 AI 튜터 처음 화면"><span class="logo" aria-hidden="true"><i>×</i><i>○</i></span><span class="name">근궤적 AI 튜터</span></a>
@@ -448,6 +456,7 @@ body.sheet-open { overflow: hidden; }
 
   RL.complex = { c: c, add: add, sub: sub, mul: mul, scale: scale, div: div, abs: abs, arg: arg, conj: conj, dist: dist };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
 
 /* ===== js/poly.js ===== */
 /*
@@ -642,6 +651,7 @@ body.sheet-open { overflow: hidden; }
   };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
 
+
 /* ===== js/format.js ===== */
 /*
  * format.js — 숫자·수식을 사람이 읽기 좋은 글자로 바꿉니다.
@@ -767,6 +777,7 @@ body.sheet-open { overflow: hidden; }
 
   RL.format = { gcd: gcd, toFraction: toFraction, dec: dec, exact: exact, num: num, numShort: numShort, cnum: cnum, poly: poly, kpoly: kpoly, deg: deg, MINUS: MINUS };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
 
 /* ===== js/routh.js ===== */
 /*
@@ -1015,6 +1026,7 @@ body.sheet-open { overflow: hidden; }
   };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
 
+
 /* ===== js/locus.js ===== */
 /*
  * locus.js — 근궤적 분석의 중심
@@ -1253,6 +1265,7 @@ body.sheet-open { overflow: hidden; }
   RL.locus = { analyze: analyze, realAxis: realAxis, asymptotes: asymptotes, breakPoints: breakPoints, angleItems: angleItems, computeBranches: computeBranches, MAX_ORDER: MAX_ORDER };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
 
+
 /* ===== app/js/parser.js ===== */
 /*
  * parser.js — 사용자가 입력한 전달함수 글자를 다항식 N(s), D(s)로 바꿉니다.
@@ -1405,6 +1418,7 @@ body.sheet-open { overflow: hidden; }
   RL.parser = { parse: parse, clean: clean };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
 
+
 /* ===== app/js/mathview.js ===== */
 /*
  * mathview.js — 수식을 화면용 HTML로 만듭니다.
@@ -1536,6 +1550,7 @@ body.sheet-open { overflow: hidden; }
   RL.mv = { esc: esc, mv: mv, sup: sup, n: n, polyH: polyH, kpolyH: kpolyH, frac: frac, rkH: rkH, cnumH: cnumH, ref: ref, factorsH: factorsH, charPolyH: charPolyH, deg: deg };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
 
+
 /* ===== app/js/content.js ===== */
 /*
  * content.js — 엔진 결과로 9단계 학습 내용을 만듭니다.
@@ -1635,19 +1650,19 @@ body.sheet-open { overflow: hidden; }
     var Nh = M.polyH(res.N), Dh = M.polyH(res.D), ch = M.charPolyH(res.charCoef);
     var blocks = [
       blk('goal', '폐루프 극점이 만족해야 하는 식(특성방정식)을 세웁니다.'),
-      blk('formula', '1 + ' + M.mv('K') + '·' + M.mv('G') + '(' + M.mv('s') + ')' + M.mv('H') + '(' + M.mv('s') + ') = 0'),
-      blk('text', '개루프 전달함수를 ' + M.mv('K') + '·' + M.frac(M.mv('N') + '(' + M.mv('s') + ')', M.mv('D') + '(' + M.mv('s') + ')') + '로 나눠 씁니다.'),
+      blk('formula', '1 + ' + M.mv('G') + '(' + M.mv('s') + ')' + M.mv('H') + '(' + M.mv('s') + ') = 0'),
+      blk('text', '이 화면의 G(s)H(s)는 K를 이미 포함합니다. 개루프 전달함수를 ' + M.mv('K') + '·' + M.frac(M.mv('N') + '(' + M.mv('s') + ')', M.mv('D') + '(' + M.mv('s') + ')') + '로 나눠 씁니다.'),
       blk('calc', M.mv('N') + '(' + M.mv('s') + ') = ' + Nh + ',&ensp; ' + M.mv('D') + '(' + M.mv('s') + ') = ' + Dh),
       blk('calc', '1 + ' + M.mv('K') + '·' + M.frac(M.mv('N'), M.mv('D')) + ' = 0 &ensp;→&ensp; 양변에 ' + M.mv('D') + ' 곱하기 &ensp;→&ensp; ' + M.mv('D') + ' + ' + M.mv('K') + '·' + M.mv('N') + ' = 0'),
       blk('calc', '(' + Dh + ') + ' + M.mv('K') + '(' + Nh + ') = 0'),
       blk('result', ch + ' = 0'),
-      blk('why', '음의 피드백 폐루프 전달함수의 분모가 1 + KG(s)H(s)입니다. 분모가 0이 되는 s가 폐루프 극점이고, K를 0부터 키울 때 이 근들이 움직인 자취가 근궤적입니다.')
+      blk('why', '음의 피드백 폐루프 전달함수의 분모가 1 + G(s)H(s)입니다. 분모가 0이 되는 s가 폐루프 극점이고, K를 0부터 키울 때 이 근들이 움직인 자취가 근궤적입니다.')
     ];
     return {
       num: 1, key: 'char', title: '특성방정식', short: '특성식', blocks: blocks,
       graphNote: 's평면을 준비합니다. 가로축은 실수부 σ, 세로축은 허수부 jω입니다.',
       questions: [
-        { q: '왜 1 + KG(s)H(s) = 0을 쓰나요?', a: '음의 피드백 폐루프 전달함수는 T(s) = KG(s) / (1 + KG(s)H(s))입니다. 폐루프 극점은 분모가 0이 되는 s라서 1 + KG(s)H(s) = 0을 풉니다.' },
+        { q: '왜 1 + G(s)H(s) = 0을 쓰나요?', a: '음의 피드백 폐루프 전달함수는 T(s) = G(s) / (1 + G(s)H(s))입니다. 폐루프 극점은 분모가 0이 되는 s라서 1 + G(s)H(s) = 0을 풉니다.' },
         { q: 'K = 0이면 이 식의 근은 무엇인가요?', a: 'K = 0이면 D(s) = 0만 남습니다. 그래서 근이 개루프 극점과 같고, 근궤적은 개루프 극점에서 출발합니다.' }
       ],
       ladder: [
@@ -1770,13 +1785,13 @@ body.sheet-open { overflow: hidden; }
       blk('calc', '각도: ' + angs.join(',&ensp; ')),
       blk('calc', 'Σ극점 = ' + sp.join(' + ') + ' = ' + F.num(A.sumPoles) + '<br>Σ영점 = ' + (sz.length ? sz.join(' + ') + ' = ' + F.num(A.sumZeros) : '0 (영점 없음)')),
       blk('calc', M.mv('σ') + ' = ' + M.frac('(' + F.num(A.sumPoles) + ') ' + MI + ' (' + F.num(A.sumZeros) + ')', String(A.q)) + ' = ' + cen),
-      blk('result', '중심 ' + cen + '에서 ' + A.angles.map(function (a) { return F.deg(a > 180 ? a - 360 : a); }).join(', ') + ' 방향'),
-      blk('note', (hasComplex ? '복소 극점·영점은 켤레쌍의 허수부가 서로 지워져 실수부만 더해집니다. ' : '') + '각도 식의 소문자 ' + M.mv('k') + '는 0, 1, 2…를 차례로 넣는 정수이고, 이득 ' + M.mv('K') + '와 다릅니다.'),
+      blk('result', A.q === 1 ? '실수축 위 180° 방향 (중심 점 표시 생략). 계산상 중심은 ' + cen + '.' : '중심 ' + cen + '에서 ' + A.angles.map(function (a) { return F.deg(a > 180 ? a - 360 : a); }).join(', ') + ' 방향'),
+      blk('note', (A.q === 1 ? '점근선이 1개이면 실수축과 겹칩니다. 중심은 근궤적의 출발점이 아니며, 실제 출발점은 개루프 극점입니다. ' : '') + (hasComplex ? '복소 극점·영점은 켤레쌍의 허수부가 서로 지워져 실수부만 더해집니다. ' : '') + '각도 식의 소문자 ' + M.mv('k') + '는 0, 1, 2…를 차례로 넣는 정수이고, 이득 ' + M.mv('K') + '와 다릅니다.'),
       blk('why', '|s|가 아주 크면 G(s)H(s)가 1/(s − σ)^(n−m)처럼 보여서, 무한대로 가는 가지가 σ에서 뻗은 직선을 따라갑니다. 점근선은 먼 곳의 방향만 정하는 보조선이라, 가까운 곳에서는 가지가 점근선을 가로지를 수도 있습니다.')
     ];
     return {
       num: 4, key: 'asym', title: '점근선', short: '점근선', blocks: blocks,
-      graphNote: '중심 σ가 찍힌 뒤 각도대로 점근선이 하나씩 뻗습니다.',
+      graphNote: A.q === 1 ? '점근선 1개는 실수축과 겹칩니다. 중심 점은 표시하지 않으며 실제 출발점은 극점입니다.' : '중심 σ가 찍힌 뒤 각도대로 점근선이 하나씩 뻗습니다.',
       questions: [
         { q: '점근선 중심은 왜 극점 합에서 영점 합을 빼나요?', a: '아주 먼 곳에서 보면 극점 n개와 영점 m개가 한 점 σ에 모여 있는 것처럼 보입니다. 특성방정식의 sⁿ⁻¹ 계수를 비교하면 그 점이 (Σ극점 − Σ영점)/(n − m)으로 나옵니다.' },
         { q: '점근선은 근궤적이 반드시 지나는 선인가요?', a: '아닙니다. 아주 먼 곳에서의 방향만 정해 줍니다. 가까운 곳에서는 가지가 점근선 한쪽에 있거나 한 번 가로지를 수 있어서, 그림에서는 계산으로 구한 점을 정확히 지나게 그리는 것이 우선입니다.' },
@@ -2060,6 +2075,7 @@ body.sheet-open { overflow: hidden; }
   RL.content = { build: build, setText: setText, notableK: notableK, validBreaks: validBreaks, crossingsPos: crossingsPos, onSegments: onSegments, segText: segText, EXAMPLES: EXAMPLES, allNumbers: allNumbers, strip: strip, breakLabel: breakLabel };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
 
+
 /* ===== app/js/graph.js ===== */
 /*
  * graph.js — s평면 그래프와 단계별 움직임
@@ -2278,8 +2294,11 @@ body.sheet-open { overflow: hidden; }
           fadeIn(this.label(lx, ly, F.deg(A.angles[i] > 180 ? A.angles[i] - 360 : A.angles[i]), 'asym', 6, ly >= 0 ? -6 : 16), d0 + i * 420 + 500);
         }
       }
-      var cm = this.dot(A.centroid, 0, 'cen', 'c', 5, this.L.key);
-      if (now(4)) { pop(cm, 150); fadeIn(this.label(A.centroid, 0, 'σ = ' + F.numShort(A.centroid), 'asym', 0, -14, 'middle'), 300); }
+      // 점근선이 1개면 실수축과 겹치므로 중심을 출발점처럼 표시하지 않는다.
+      if (A.q > 1) {
+        var cm = this.dot(A.centroid, 0, 'cen', 'c', 5, this.L.key);
+        if (now(4)) { pop(cm, 150); fadeIn(this.label(A.centroid, 0, 'σ = ' + F.numShort(A.centroid), 'asym', 0, -14, 'middle'), 300); }
+      }
     }
     // 5단계부터: 이탈점·진입점
     var vb = CT.validBreaks(res);
@@ -2452,7 +2471,7 @@ body.sheet-open { overflow: hidden; }
     this.clPos = null;
   };
   // K를 바꾸면 폐루프 극점을 다시 계산해서 옮김
-  Graph.prototype.setK = function (K) {
+  Graph.prototype.setK = function (K, resetTrail) {
     if (!this.cl) return null;
     var rs = RL.routh.closedLoopPoles(this.res.N, this.res.D, K), n = rs.length, order = [], i;
     if (this.clPos && this.clPos.length === n) {
@@ -2464,6 +2483,17 @@ body.sheet-open { overflow: hidden; }
         used[best] = true; order.push(rs[best]);
       }
       rs = order;
+    }
+    // 화면 폭·높이의 4%보다 크게 건너뛴 점은 직선 잔상으로 잇지 않는다.
+    if (this.clPos && this.clPos.length === n) {
+      var jumpLimit = 0.04 * Math.hypot(this.w.xmax - this.w.xmin, this.w.ymax - this.w.ymin);
+      for (i = 0; i < n; i++) if (C.dist(this.clPos[i], rs[i]) > jumpLimit) resetTrail = true;
+    }
+    if (resetTrail) {
+      for (i = 0; i < this.trails.length; i++) {
+        this.trails[i].pts = [];
+        this.trails[i].el.setAttribute('points', '');
+      }
     }
     this.clPos = rs;
     for (i = 0; i < n; i++) {
@@ -2532,6 +2562,7 @@ body.sheet-open { overflow: hidden; }
   RL.Graph = Graph;
   RL.kChart = kChart;
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
 
 /* ===== app/js/ai.js ===== */
 /*
@@ -2646,6 +2677,7 @@ body.sheet-open { overflow: hidden; }
   RL.ai = { init: init, available: available, state: state, ask: ask, readPhoto: readPhoto, errMsg: errMsg, checkNumbers: checkNumbers, numbersIn: numbersIn, buildPrompt: buildPrompt };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
 
+
 /* ===== app/js/store.js ===== */
 /*
  * store.js — 학습 기록 (같은 기기의 브라우저에만 저장)
@@ -2686,6 +2718,7 @@ body.sheet-open { overflow: hidden; }
   RL.store = { load: load, upsert: upsert, remove: remove, getPref: getPref, setPref: setPref };
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
 
+
 /* ===== app/js/main.js ===== */
 /*
  * main.js — 화면 흐름
@@ -2698,7 +2731,7 @@ body.sheet-open { overflow: hidden; }
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
-  var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: 0, paused: false, tfText: '', thread: {} };
+  var S = { parsed: null, prev: null, res: null, steps: null, cur: 0, recId: '', K: null, paused: false, tfText: '', thread: {} };
   var graph, previewGraph, exGraph;
   var EXAMPLE_INPUTS = [
     { label: '노트 예제', input: 'K(s+2)/((s+3)(s^2+2s+2))' },
@@ -2787,6 +2820,8 @@ body.sheet-open { overflow: hidden; }
 
   // ── 학습 시작 ───────────────────────────────
   function startLesson(fromStep) {
+    // 시작 시 현재 입력을 다시 검증해 이전 식으로 시작하지 않도록 한다.
+    onInput();
     if (!S.parsed) return;
     var res = RL.locus.analyze(S.parsed.N, S.parsed.D);
     if (!res.ok) return;
@@ -2795,7 +2830,7 @@ body.sheet-open { overflow: hidden; }
     S.tfText = tfText(res);
     S.recId = recIdOf(res);
     S.thread = {};
-    S.K = 0;
+    S.K = null;
     S.allNums = CT.allNumbers(res);
     $('#screen-start').hidden = true;
     $('#screen-lesson').hidden = false;
@@ -2830,7 +2865,7 @@ body.sheet-open { overflow: hidden; }
     renderCoach(step);
     $('#stage-note').textContent = step.graphNote;
     graph.show(step.num, animate);
-    if (step.num === 9) setK(S.K || defaultK());
+    if (step.num === 9) setK(S.K === null ? defaultK() : S.K);
     ST.upsert({ id: S.recId, input: $('#tf-input').value, tf: S.tfText, date: nowText(), lastStep: i + 1, done: i === S.steps.length - 1 });
     var rail = $('#rail');
     if (rail.scrollTop) rail.scrollTop = 0;
@@ -2901,13 +2936,13 @@ body.sheet-open { overflow: hidden; }
   }
   function bindSlider() {
     var sl = $('#k-slider');
-    sl.value = tFromK(S.K || defaultK());
+    sl.value = tFromK(S.K === null ? defaultK() : S.K);
     sl.oninput = function () { setK(kFromT(+sl.value)); };
-    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K); }; });
+    $$('.kq').forEach(function (b) { b.onclick = function () { var K = +b.getAttribute('data-k'); sl.value = tFromK(K); setK(K, true); }; });
   }
-  function setK(K) {
+  function setK(K, resetTrail) {
     S.K = K;
-    var out = graph.setK(K);
+    var out = graph.setK(K, resetTrail);
     if (!out) return;
     var st = RL.routh.classify(out.poles);
     var v = $('#k-val'); if (v) v.textContent = kText(K);
@@ -3096,7 +3131,12 @@ body.sheet-open { overflow: hidden; }
     $('#examples').innerHTML = EXAMPLE_INPUTS.map(function (e) { return '<button class="chip ex" data-in="' + M.esc(e.input) + '">' + e.label + '</button>'; }).join('');
     $$('#examples .ex').forEach(function (b) { b.onclick = function () { setExample(b.getAttribute('data-in')); }; });
     var inp = $('#tf-input'), timer = 0;
-    inp.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(onInput, 140); });
+    inp.addEventListener('input', function () {
+      clearTimeout(timer);
+      S.parsed = null;
+      $('#btn-start').disabled = true;
+      timer = setTimeout(onInput, 140);
+    });
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !$('#btn-start').disabled) startLesson(0); });
     $('#btn-start').onclick = function () { startLesson(0); };
     $('#btn-prev').onclick = function () { go(S.cur - 1, true); };
@@ -3146,4 +3186,8 @@ body.sheet-open { overflow: hidden; }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })(window.RL = window.RL || {});
+
 </script>
+
+</body>
+</html>

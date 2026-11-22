@@ -17,3 +17,6 @@
 - numpy: 폐루프 극점을 독립적으로 계산
 - python-control: 근궤적을 그려 엔진 곡선과 겹쳐 비교 (tools/overlay.py)
 - matplotlib: 비교 그림 출력
+
+
+- 2026-11-11 KST | ChatGPT/Codex | 홈페이지 제작 취소 후 원본 main 기준 기능 오류 수정: K 중복 설명·K=0 보존·입력 재검증·직선 잔상·단일 점근선 중심 표시·HTML 선언. 엔진 225/225, 화면 로직 회귀 6/6, Chrome 54단계 이동 확인. 계산 엔진 수정·유료 API·배포 없음.

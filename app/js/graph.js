@@ -215,8 +215,11 @@
           fadeIn(this.label(lx, ly, F.deg(A.angles[i] > 180 ? A.angles[i] - 360 : A.angles[i]), 'asym', 6, ly >= 0 ? -6 : 16), d0 + i * 420 + 500);
         }
       }
-      var cm = this.dot(A.centroid, 0, 'cen', 'c', 5, this.L.key);
-      if (now(4)) { pop(cm, 150); fadeIn(this.label(A.centroid, 0, 'σ = ' + F.numShort(A.centroid), 'asym', 0, -14, 'middle'), 300); }
+      // 점근선이 1개면 실수축과 겹치므로 중심을 출발점처럼 표시하지 않는다.
+      if (A.q > 1) {
+        var cm = this.dot(A.centroid, 0, 'cen', 'c', 5, this.L.key);
+        if (now(4)) { pop(cm, 150); fadeIn(this.label(A.centroid, 0, 'σ = ' + F.numShort(A.centroid), 'asym', 0, -14, 'middle'), 300); }
+      }
     }
     // 5단계부터: 이탈점·진입점
     var vb = CT.validBreaks(res);
@@ -389,7 +392,7 @@
     this.clPos = null;
   };
   // K를 바꾸면 폐루프 극점을 다시 계산해서 옮김
-  Graph.prototype.setK = function (K) {
+  Graph.prototype.setK = function (K, resetTrail) {
     if (!this.cl) return null;
     var rs = RL.routh.closedLoopPoles(this.res.N, this.res.D, K), n = rs.length, order = [], i;
     if (this.clPos && this.clPos.length === n) {
@@ -401,6 +404,17 @@
         used[best] = true; order.push(rs[best]);
       }
       rs = order;
+    }
+    // 화면 폭·높이의 4%보다 크게 건너뛴 점은 직선 잔상으로 잇지 않는다.
+    if (this.clPos && this.clPos.length === n) {
+      var jumpLimit = 0.04 * Math.hypot(this.w.xmax - this.w.xmin, this.w.ymax - this.w.ymin);
+      for (i = 0; i < n; i++) if (C.dist(this.clPos[i], rs[i]) > jumpLimit) resetTrail = true;
+    }
+    if (resetTrail) {
+      for (i = 0; i < this.trails.length; i++) {
+        this.trails[i].pts = [];
+        this.trails[i].el.setAttribute('points', '');
+      }
     }
     this.clPos = rs;
     for (i = 0; i < n; i++) {
@@ -469,3 +483,4 @@
   RL.Graph = Graph;
   RL.kChart = kChart;
 })(typeof window !== 'undefined' ? (window.RL = window.RL || {}) : (globalThis.RL = globalThis.RL || {}));
+
